@@ -1,0 +1,53 @@
+# 10x toolkit — never commit generated skill artifacts
+.claude/**/10x-*
+.github/**/10x-*
+.agents/**/10x-*
+**/.10x-cli-manifest.json
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+.output/
+.vercel/
+.netlify/
+
+# Astro
+.astro/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Cloudflare
+.wrangler/
