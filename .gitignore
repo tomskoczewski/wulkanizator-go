@@ -51,3 +51,6 @@ coverage/
 
 # Cloudflare
 .wrangler/
+
+# from 10x-astro-starter
+.dev.vars
