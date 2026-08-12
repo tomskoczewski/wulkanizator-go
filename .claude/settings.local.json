@@ -15,7 +15,9 @@
       "Read",
       "Edit",
       "Write",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Skill(10x-rule-review)",
+      "Skill(10x-lesson)"
     ],
     "deny": [],
     "ask": [
