@@ -17,7 +17,13 @@
       "Write",
       "Bash(git *)",
       "Skill(10x-rule-review)",
-      "Skill(10x-lesson)"
+      "Skill(10x-lesson)",
+      "Skill(10x-infra-research)",
+      "Bash(pbcopy)",
+      "Bash(set +e)",
+      "Bash(python3 -m json.tool)",
+      "Bash(mkdir -p context/deployment)",
+      "Bash(mv context/changes/deployment/deployment-plan.md context/deployment/deploy-plan.md)"
     ],
     "deny": [],
     "ask": [
