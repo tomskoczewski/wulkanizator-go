@@ -161,18 +161,16 @@ Practice this **once, on purpose, on the live deploy** — the first time you ne
 
 This is a **one-time dashboard step** and cannot be scripted via `wrangler` — see infrastructure.md unknown-unknowns.
 
-- [ ] Cloudflare dashboard → **Workers & Pages** → **Create** → **Import a repository**.
-- [ ] Connect the GitHub account, select `wulkanizator-go` repo.
-- [ ] Configure build:
+- [x] Cloudflare dashboard → Worker `wulkanizator-go` → Settings → Build → **Connect Git** (existing-Worker flow; the plan's original "Create → Import a repository" instruction creates a NEW Worker, wrong path for us since Phase 3 already created one).
+- [x] Connected GitHub account, selected `tomskoczewski/wulkanizator-go` repo.
+- [x] Configured build:
   - Build command: `npm run build`
   - Deploy command: `npx wrangler deploy`
-  - Root directory: (leave default)
+  - Root directory: default
   - Production branch: `main`
-- [ ] Add **build-time env vars** (needed for `npm run build`; these are not the runtime secrets from Phase 3):
-  - `SUPABASE_URL` = your cloud Supabase URL
-  - `SUPABASE_KEY` = your cloud Supabase anon key
-- [ ] Enable **Preview deployments** for non-production branches (auto-generates `https://<hash>.wulkanizator-go.workers.dev` per PR).
-- [ ] Push a trivial commit to `main`, watch the build run in the Cloudflare dashboard, confirm the live URL updates.
+- [x] Added **build-time env vars** (separate from runtime secrets — needed at `npm run build` time for Astro's `envField` schema): `SUPABASE_URL`, `SUPABASE_KEY`.
+- [x] Enabled **Preview deployments** for non-production branches.
+- [ ] Push a trivial commit to `main`, watch the build run in the Cloudflare dashboard, confirm the live URL updates. **← this commit is that trivial push.**
 
 **Edge cases:**
 - **Branch mismatch — RESOLVED (2026-08-13)**: local, GitHub default, and CI now all use `main`. Fixes applied: `.github/workflows/ci.yml` (`branches: [master]` → `[main]`), `AGENTS.md`, `README.md`, and this plan file. Must be committed + pushed BEFORE wiring Cloudflare Git integration so Cloudflare's first build finds a working ci.yml on the right branch.
