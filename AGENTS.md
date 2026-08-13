@@ -27,7 +27,7 @@ TypeScript strict (extends `astro/tsconfigs/strict`). ESLint flat config: `@type
 
 ## Commit & Pull Request Guidelines
 
-Use Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`. Gate: lint + build (`@.github/workflows/ci.yml`) on every push and PR to `master`.
+Use Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`. Gate: lint + build (`@.github/workflows/ci.yml`) on every push and PR to `main`.
 
 ## Security & Configuration
 
