@@ -3,7 +3,7 @@ project: "Wulkanizator GO"
 version: 1
 status: draft
 created: 2026-08-14
-updated: 2026-08-14
+updated: 2026-08-15
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -29,7 +29,7 @@ Tire workshops today run their day on Excel and paper — no clear day plan, no 
 
 | ID    | Change ID                    | Outcome (user can …)                                                                             | Prerequisites | PRD refs                                | Status   |
 | ----- | ---------------------------- | ------------------------------------------------------------------------------------------------ | ------------- | --------------------------------------- | -------- |
-| F-01  | role-and-workshop-scope      | (foundation) user role (owner/worker) and workshop scope wired into RLS + route-guard            | —             | Access Control, NFR (GDPR)              | ready    |
+| F-01  | role-and-workshop-scope      | (foundation) user role (owner/worker) and workshop scope wired into RLS + route-guard            | —             | Access Control, NFR (GDPR)              | planning |
 | S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | proposed |
 | S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | proposed |
 | S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | proposed |
@@ -72,7 +72,7 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Blockers:** —
 - **Unknowns:** —
 - **Risk:** Done too late — every subsequent table needs a follow-up migration that re-adds `workshop_id` and policies. Done too much — we start building full user management (invites, role editor, audit) which is out of MVP scope. The minimum bar: `profiles` table + one `requireRole()` helper in the middleware.
-- **Status:** ready
+- **Status:** planning
 
 ## Slices
 
