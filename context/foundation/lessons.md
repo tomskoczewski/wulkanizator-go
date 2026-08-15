@@ -16,3 +16,10 @@
 - **Rule**: Before a phase deletes or renames a symbol, `grep -rn` its name across `README.md`, `AGENTS.md`, `CLAUDE.md`, and `context/`, and add every hit to that phase's file contract. The symbol is not removed until the docs that name it stop naming it.
 - **Applies to**: plan, plan-review, impl-review
 
+## Sync Linear/GitHub status automatically on implementation completion
+
+- **Context**: When a change/plan whose tasks are linked to a Linear issue and/or GitHub issue reaches completion (e.g. /10x-implement finishing a phase, or all plan phases done)
+- **Problem**: Linear/GitHub status is updated manually and gets skipped, so the tracker silently drifts out of sync with the actual state of the code — issues sit "In Progress" long after merge, with no record of what shipped.
+- **Rule**: When implementation tasks tied to a Linear/GH issue are completed, automatically post a status comment summarizing what was done and transition the issue status (e.g. In Review / Done); keep GitHub linked to Linear for continuous bidirectional follow-through.
+- **Applies to**: implement, impl-review
+
