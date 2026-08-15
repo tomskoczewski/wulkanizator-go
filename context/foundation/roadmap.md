@@ -49,6 +49,8 @@ Navigation aid — groups slices that share a prerequisites chain. The canonical
 | C      | Customer directory        | `S-05`                                           | Branches off Stream A at `S-02` (basic walk-in customer already exists); parallel with B.  |
 | D      | Tire storage (nice-to-have) | `S-06`                                          | Extension of Stream C; timeline risk — see Open Q and Unknowns.                             |
 
+`F-02` (design-system-foundation) is intentionally absent from this table — it has no prerequisites and isn't a hard blocker for any single stream (unlike `F-01`, which gates Stream A). It's cross-cutting: a reference every stream's UI-touching slices can draw on, not a link in one chain.
+
 ## Baseline
 
 What's already wired in the codebase as of `2026-08-14` (auto-researched + user-confirmed). Foundations below do NOT re-scaffold these layers.
