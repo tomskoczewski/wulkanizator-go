@@ -369,8 +369,8 @@ Not applicable — no data migration. Existing changes (e.g. `role-and-workshop-
 
 #### Automated
 
-- [x] 2.1 Formatting is clean: `npx prettier --check .claude/skills/10x-implement/SKILL.md`
-- [x] 2.2 New tool names present in `10x-implement/SKILL.md`
+- [x] 2.1 Formatting is clean: `npx prettier --check .claude/skills/10x-implement/SKILL.md` — f0b379f
+- [x] 2.2 New tool names present in `10x-implement/SKILL.md` — f0b379f
 
 #### Manual
 
@@ -381,8 +381,8 @@ Not applicable — no data migration. Existing changes (e.g. `role-and-workshop-
 
 #### Automated
 
-- [ ] 3.1 Formatting is clean: `npx prettier --check .claude/skills/10x-archive/SKILL.md`
-- [ ] 3.2 New tool names present in `10x-archive/SKILL.md`
+- [x] 3.1 Formatting is clean: `npx prettier --check .claude/skills/10x-archive/SKILL.md`
+- [x] 3.2 New tool names present in `10x-archive/SKILL.md`
 
 #### Manual
 
