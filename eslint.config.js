@@ -10,6 +10,7 @@ import path from "node:path";
 import tseslint from "typescript-eslint";
 
 const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
+const supabaseGitignorePath = path.resolve(import.meta.dirname, "supabase/.gitignore");
 
 const baseConfig = tseslint.config({
   extends: [eslint.configs.recommended, tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
@@ -70,6 +71,7 @@ const astroConfig = tseslint.config({
 
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
+  includeIgnoreFile(supabaseGitignorePath),
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],

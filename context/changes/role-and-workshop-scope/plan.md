@@ -715,14 +715,14 @@ trigger once the function is fixed.
 
 #### Automated
 
-- [ ] 1.1 Local stack starts: `npm run db:start`
-- [ ] 1.2 Migration applies from scratch: `npm run db:reset`
-- [ ] 1.3 Linting passes: `npm run lint`
+- [x] 1.1 Local stack starts: `npm run db:start`
+- [x] 1.2 Migration applies from scratch: `npm run db:reset`
+- [x] 1.3 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 1.4 Studio shows RLS enabled on `workshops` and `profiles`
-- [ ] 1.5 `select public.current_workshop_id();` as anon is rejected with permission denied
+- [x] 1.4 Studio shows RLS enabled on `workshops` and `profiles`
+- [x] 1.5 `select public.current_workshop_id();` as anon is rejected with permission denied
 
 ### Phase 2: Provisioning trigger + isolation tests
 
