@@ -381,8 +381,8 @@ Not applicable — no data migration. Existing changes (e.g. `role-and-workshop-
 
 #### Automated
 
-- [x] 3.1 Formatting is clean: `npx prettier --check .claude/skills/10x-archive/SKILL.md`
-- [x] 3.2 New tool names present in `10x-archive/SKILL.md`
+- [x] 3.1 Formatting is clean: `npx prettier --check .claude/skills/10x-archive/SKILL.md` — 8785792
+- [x] 3.2 New tool names present in `10x-archive/SKILL.md` — 8785792
 
 #### Manual
 
