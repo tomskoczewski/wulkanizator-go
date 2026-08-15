@@ -166,11 +166,11 @@ Not applicable — no data, no existing UI consumers.
 
 #### Automated
 
-- [x] 2.1 F-02 entry present in roadmap.md
-- [x] 2.2 All 6 `Brochure reference` lines present in roadmap.md
+- [x] 2.1 F-02 entry present in roadmap.md — 452ddb4
+- [x] 2.2 All 6 `Brochure reference` lines present in roadmap.md — 452ddb4
 
 #### Manual
 
-- [x] 2.3 S-03 Unknown line confirmed resolved
-- [x] 2.4 New lessons.md entry format-consistent with existing entries
-- [x] 2.5 design-system.md re-read standalone and confirmed usable
+- [x] 2.3 S-03 Unknown line confirmed resolved — 452ddb4
+- [x] 2.4 New lessons.md entry format-consistent with existing entries — 452ddb4
+- [x] 2.5 design-system.md re-read standalone and confirmed usable — 452ddb4
