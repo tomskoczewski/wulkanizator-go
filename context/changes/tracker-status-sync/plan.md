@@ -374,7 +374,7 @@ Not applicable — no data migration. Existing changes (e.g. `role-and-workshop-
 
 #### Manual
 
-- [ ] 2.3 `/10x-implement tracker-status-sync` epilogue prints the no-roadmap-item skip line; rest of epilogue unchanged
+- [x] 2.3 `/10x-implement tracker-status-sync` epilogue prints the no-roadmap-item skip line; rest of epilogue unchanged
 - [ ] 2.4 Real happy-path check deferred to the next roadmap-linked change's epilogue
 
 ### Phase 3: Wire into `/10x-archive`
