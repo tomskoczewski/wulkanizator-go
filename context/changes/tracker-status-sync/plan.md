@@ -358,19 +358,19 @@ Not applicable — no data migration. Existing changes (e.g. `role-and-workshop-
 
 #### Automated
 
-- [x] 1.1 File exists: `test -f .claude/skills/10x-implement/references/tracker-sync.md`
-- [x] 1.2 Formatting is clean: `npx prettier --check .claude/skills/10x-implement/references/tracker-sync.md`
+- [x] 1.1 File exists: `test -f .claude/skills/10x-implement/references/tracker-sync.md` — 9f4c884
+- [x] 1.2 Formatting is clean: `npx prettier --check .claude/skills/10x-implement/references/tracker-sync.md` — 9f4c884
 
 #### Manual
 
-- [x] 1.3 Every contract step names an explicit skip condition and info line
+- [x] 1.3 Every contract step names an explicit skip condition and info line — 9f4c884
 
 ### Phase 2: Wire into `/10x-implement` epilogue
 
 #### Automated
 
-- [ ] 2.1 Formatting is clean: `npx prettier --check .claude/skills/10x-implement/SKILL.md`
-- [ ] 2.2 New tool names present in `10x-implement/SKILL.md`
+- [x] 2.1 Formatting is clean: `npx prettier --check .claude/skills/10x-implement/SKILL.md`
+- [x] 2.2 New tool names present in `10x-implement/SKILL.md`
 
 #### Manual
 
