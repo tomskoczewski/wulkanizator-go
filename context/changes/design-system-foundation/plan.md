@@ -154,23 +154,23 @@ Not applicable — no data, no existing UI consumers.
 
 #### Automated
 
-- [x] 1.1 File exists: `context/foundation/design-system.md`
-- [x] 1.2 Prettier check passes on the new file
+- [x] 1.1 File exists: `context/foundation/design-system.md` — 6f59a72
+- [x] 1.2 Prettier check passes on the new file — 6f59a72
 
 #### Manual
 
-- [x] 1.3 Screen-mapping table gives an unambiguous answer for every slice S-01–S-06
-- [x] 1.4 "How to use this doc" section reads as a clear instruction
+- [x] 1.3 Screen-mapping table gives an unambiguous answer for every slice S-01–S-06 — 6f59a72
+- [x] 1.4 "How to use this doc" section reads as a clear instruction — 6f59a72
 
 ### Phase 2: Lock the decision into the toolkit's read path
 
 #### Automated
 
-- [ ] 2.1 F-02 entry present in roadmap.md
-- [ ] 2.2 All 6 `Brochure reference` lines present in roadmap.md
+- [x] 2.1 F-02 entry present in roadmap.md
+- [x] 2.2 All 6 `Brochure reference` lines present in roadmap.md
 
 #### Manual
 
-- [ ] 2.3 S-03 Unknown line confirmed resolved
-- [ ] 2.4 New lessons.md entry format-consistent with existing entries
-- [ ] 2.5 design-system.md re-read standalone and confirmed usable
+- [x] 2.3 S-03 Unknown line confirmed resolved
+- [x] 2.4 New lessons.md entry format-consistent with existing entries
+- [x] 2.5 design-system.md re-read standalone and confirmed usable

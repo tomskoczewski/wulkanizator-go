@@ -23,3 +23,10 @@
 - **Rule**: When implementation tasks tied to a Linear/GH issue are completed, automatically post a status comment summarizing what was done and transition the issue status (e.g. In Review / Done); keep GitHub linked to Linear for continuous bidirectional follow-through.
 - **Applies to**: implement, impl-review
 
+## UI-touching work replicates the brochure, not a token summary
+
+- **Context**: Any change that adds or restyles a UI screen (S-01 through S-06 and beyond).
+- **Problem**: Without a direct pointer, a future slice would work from a lossy token summary or its own judgment, drifting from the actual look the user built and validated in the private `wulkanizator-go-brochure` mockup — the opposite of the "near-1:1 reference" intent behind `context/foundation/design-system.md`.
+- **Rule**: Before planning or implementing any UI-touching phase, read `context/foundation/design-system.md`'s screen-mapping table, then open the exact corresponding screen(s) in the brochure repo (`tomskoczewski/wulkanizator-go-brochure`, private — clone via `gh repo clone` if not already local) and use them as the near-1:1 reference for layout, structure, and visual treatment. The token summary in `design-system.md` is a quick cross-check, not a substitute for looking at the actual screen.
+- **Applies to**: plan, plan-review, implement
+
