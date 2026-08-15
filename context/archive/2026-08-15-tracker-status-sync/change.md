@@ -1,10 +1,10 @@
 ---
 change_id: tracker-status-sync
 title: Tracker status sync
-status: implemented
+status: archived
 created: 2026-08-15
 updated: 2026-08-15
-archived_at: null
+archived_at: 2026-08-15T13:27:26Z
 ---
 
 ## Notes
