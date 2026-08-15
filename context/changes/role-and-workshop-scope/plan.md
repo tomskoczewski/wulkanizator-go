@@ -772,10 +772,10 @@ trigger once the function is fixed.
 
 - [x] 5.1 Full local gate passes: `npm run typecheck && npm run lint && npm run build`
 - [x] 5.2 RLS suite passes: `npm run db:test`
-- [ ] 5.3 CI is green on the pull request
+- [x] 5.3 CI is green on the pull request — verified 2026-08-15: `gh pr view 17` shows `state: MERGED`, `ci` check run `SUCCESS` (completed 00:44:10Z), plus a green `Workers Builds: wulkanizator-go` check.
 
 #### Manual
 
-- [ ] 5.4 `npx supabase db push` applies both migrations pre-merge; production Studio shows RLS enabled
-- [ ] 5.5 PR merged after the push; new Worker version deployed; fresh signup shows workshop and `owner` role
-- [ ] 5.6 README worker snippet produces a working worker login in production
+- [x] 5.4 `npx supabase db push` applies both migrations pre-merge; production Studio shows RLS enabled — verified 2026-08-15: `supabase_migrations.schema_migrations` on the linked production project lists both `20260814235519_role_and_workshop_scope` and `20260815000433_handle_new_user`; `pg_class.relrowsecurity` is `true` for both `public.workshops` and `public.profiles`. Exact push-vs-merge ordering wasn't independently re-derivable from Postgres system catalogs (no applied-at timestamp is recorded), but the end state matches the plan's contract and is consistent with the mandated ship sequence.
+- [x] 5.5 PR merged after the push; new Worker version deployed; fresh signup shows workshop and `owner` role — verified 2026-08-15: merge commit `90c7d2b` landed at `00:51:03Z`; a new Worker deployment (`e5656142-a935-4dfd-b20f-f5528f92c282`) fired at `00:52:32Z`, ~89s later, matching the ~90s push-to-deployed figure in `deploy-plan.md`. No deploy since then has reverted this code (subsequent commits are docs/chore only). Owner-provisioning was confirmed via the 5.6 run: the throwaway "owner" signup on the currently-live Worker produced exactly one `workshops` row and one `profiles` row with `role = 'owner'` (checked via SQL). A second live signup to confirm the `/dashboard` render directly hit Supabase's default SMTP rate limit (documented, expected — see `README.md`/`deploy-plan.md:130`); the render itself is already proven by the 5.6 worker-account dashboard check, which exercises the same middleware/dashboard code path. No account was created by the rate-limited attempt, so nothing needed cleanup.
+- [x] 5.6 README worker snippet produces a working worker login in production — verified 2026-08-15: signed up two throwaway accounts against the live Worker, ran the exact `README.md` snippet via `supabase db query --linked` to reassign one into the other's workshop as `worker`, signed in, confirmed `/dashboard` renders `worker` role + the target workshop name. Test accounts and workshops deleted afterward; no residue left in production.
