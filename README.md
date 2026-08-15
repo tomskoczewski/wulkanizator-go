@@ -55,6 +55,8 @@ npm run dev
 - `npm run lint` - Run ESLint with type-checked rules
 - `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Run Prettier
+- `npm run typecheck` - Type-check with `astro check`
+- `npm run db:start` / `db:stop` / `db:reset` / `db:test` / `db:types` - Local Supabase workflow, see [Local database workflow](#local-database-workflow)
 
 ## Project Structure
 
@@ -146,7 +148,47 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
 | `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
 
-Route protection is handled in `src/middleware.ts`. Add paths to the `PROTECTED_ROUTES` array there to require authentication.
+Route protection is handled in `src/middleware.ts`, which delegates to the route table in `src/lib/auth-guard.ts`. Add a `[pathPrefix, accessLevel]` entry there to require authentication (`"any"`) or a specific role (`"owner"` / `"worker"`) — longest matching prefix wins.
+
+## Roles and workshops
+
+Every account signs up as the **owner** of their own workshop — a database trigger (`on_auth_user_created`) creates the workshop and the owner `profiles` row atomically, so there is never an authenticated user without one. There is no self-service invite flow yet; **worker** accounts are created by moving an existing account into another workshop.
+
+### Local database workflow
+
+```bash
+npm run db:start   # start the local Supabase stack (Docker)
+npm run db:reset    # (re)apply migrations + supabase/seed.sql from scratch
+npm run db:test     # run the pgTAP RLS isolation suite
+npm run db:types    # regenerate src/db/database.types.ts from the local schema
+npm run db:stop     # stop the local stack
+```
+
+Run `npm run db:types` after every migration and commit the result — `npm run typecheck` checks application code against the *committed* types, not the live database, so a stale file is a silent gap. The pre-push hook (`.husky/pre-push`) regenerates and diffs the file before every push, and skips cleanly if the local stack isn't running.
+
+### Creating a worker account
+
+1. Have the person sign up normally at `/auth/signup` — this makes them the **owner** of a brand-new workshop of their own.
+2. In Supabase Studio (`http://localhost:54323` locally, or the project dashboard in production) → SQL Editor, run:
+
+   ```sql
+   update public.profiles
+   set workshop_id = '<owner-a-workshop-id>', -- the workshop they should join
+       role = 'worker'
+   where user_id = '<the-new-account-user-id>';
+   ```
+
+   Find both ids under **Table Editor → profiles**. The account can sign in immediately after — no re-confirmation needed.
+
+### Trigger kill-switch
+
+`public.handle_new_user()` runs inside every `auth.users` insert, for every Worker version deployed — `wrangler rollback` does **not** undo a failing trigger. If a bad migration makes it break signups in production ("Database error saving new user"), disable it immediately:
+
+```sql
+drop trigger if exists on_auth_user_created on auth.users;
+```
+
+This restores signup immediately and leaves existing workshops and profiles intact. Re-create the trigger (rerun its migration) once the underlying function is fixed.
 
 ## Deployment
 

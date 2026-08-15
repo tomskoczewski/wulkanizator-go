@@ -754,24 +754,24 @@ trigger once the function is fixed.
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run typecheck`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Build passes: `npm run build`
-- [x] 4.4 RLS suite still passes: `npm run db:test`
+- [x] 4.1 Type checking passes: `npm run typecheck` — 98d773e
+- [x] 4.2 Linting passes: `npm run lint` — 98d773e
+- [x] 4.3 Build passes: `npm run build` — 98d773e
+- [x] 4.4 RLS suite still passes: `npm run db:test` — 98d773e
 
 #### Manual
 
-- [x] 4.5 Fresh signup against `wrangler dev` shows workshop name and `owner` on `/dashboard`
-- [x] 4.6 Seeded worker signs in and `/dashboard` renders with role `worker`
-- [x] 4.7 Temporary owner-only route redirects the worker but not the owner
-- [x] 4.8 Deleting a profile row redirects that user to sign-in with an error message and a signed-out Topbar
+- [x] 4.5 Fresh signup against `wrangler dev` shows workshop name and `owner` on `/dashboard` — 98d773e
+- [x] 4.6 Seeded worker signs in and `/dashboard` renders with role `worker` — 98d773e
+- [x] 4.7 Temporary owner-only route redirects the worker but not the owner — 98d773e
+- [x] 4.8 Deleting a profile row redirects that user to sign-in with an error message and a signed-out Topbar — 98d773e
 
 ### Phase 5: Ship it
 
 #### Automated
 
-- [ ] 5.1 Full local gate passes: `npm run typecheck && npm run lint && npm run build`
-- [ ] 5.2 RLS suite passes: `npm run db:test`
+- [x] 5.1 Full local gate passes: `npm run typecheck && npm run lint && npm run build`
+- [x] 5.2 RLS suite passes: `npm run db:test`
 - [ ] 5.3 CI is green on the pull request
 
 #### Manual
