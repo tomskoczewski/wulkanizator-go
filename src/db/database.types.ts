@@ -35,6 +35,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      bays: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          vehicle_type: string | null
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          vehicle_type?: string | null
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          vehicle_type?: string | null
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bays_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -64,21 +99,100 @@ export type Database = {
           },
         ]
       }
-      workshops: {
+      services: {
         Row: {
           created_at: string
+          duration_min: number
           id: string
+          is_active: boolean
           name: string
+          workshop_id: string
         }
         Insert: {
           created_at?: string
+          duration_min: number
           id?: string
+          is_active?: boolean
           name: string
+          workshop_id: string
         }
         Update: {
           created_at?: string
+          duration_min?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      working_hours: {
+        Row: {
+          closes_at: string | null
+          created_at: string
+          id: string
+          is_closed: boolean
+          opens_at: string | null
+          weekday: number
+          workshop_id: string
+        }
+        Insert: {
+          closes_at?: string | null
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          opens_at?: string | null
+          weekday: number
+          workshop_id: string
+        }
+        Update: {
+          closes_at?: string | null
+          created_at?: string
+          id?: string
+          is_closed?: boolean
+          opens_at?: string | null
+          weekday?: number
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "working_hours_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshops: {
+        Row: {
+          address: string | null
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
           id?: string
           name?: string
+          phone?: string | null
         }
         Relationships: []
       }
@@ -92,6 +206,10 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       current_workshop_id: { Args: never; Returns: string }
+      seed_workshop_defaults: {
+        Args: { p_workshop_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       user_role: "owner" | "worker"

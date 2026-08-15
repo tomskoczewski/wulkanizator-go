@@ -8,7 +8,7 @@
 
 begin;
 
-select plan(14);
+select plan(26);
 
 -- Switches the session to `authenticated` acting as the given user, for the rest of the
 -- transaction. Declared in pg_temp so it never survives past this test file's rollback.
@@ -47,6 +47,50 @@ declare
 begin
   update public.workshops set name = 'Hacked'
   where id = public.current_workshop_id();
+  get diagnostics affected = row_count;
+  return affected;
+end;
+$$;
+
+-- S-01: the same GET DIAGNOSTICS pattern, extended to the three configuration tables. UPDATE's
+-- USING clause filters the target set before the statement runs, so a denied UPDATE simply
+-- affects zero rows (no exception) — unlike INSERT, where a failing WITH CHECK aborts the
+-- statement, so those denials below use throws_ok instead.
+
+create function pg_temp.try_worker_update_bay() returns int
+language plpgsql
+as $$
+declare
+  affected int;
+begin
+  update public.bays set name = 'Hacked'
+  where workshop_id = public.current_workshop_id();
+  get diagnostics affected = row_count;
+  return affected;
+end;
+$$;
+
+create function pg_temp.try_worker_update_service() returns int
+language plpgsql
+as $$
+declare
+  affected int;
+begin
+  update public.services set name = 'Hacked'
+  where workshop_id = public.current_workshop_id();
+  get diagnostics affected = row_count;
+  return affected;
+end;
+$$;
+
+create function pg_temp.try_worker_update_working_hours() returns int
+language plpgsql
+as $$
+declare
+  affected int;
+begin
+  update public.working_hours set is_closed = true
+  where workshop_id = public.current_workshop_id();
   get diagnostics affected = row_count;
   return affected;
 end;
@@ -98,6 +142,28 @@ select is(
   'current_user_role() resolves owner A as owner'
 );
 
+-- Seeded-shape assertions (S-01): pins the signup trigger's default catalogue against silent
+-- regression. Also proves cross-workshop isolation for the new tables — workshop B is seeded
+-- identically, so a leak would inflate these counts.
+
+select is(
+  (select count(*)::int from public.bays),
+  1,
+  'owner A sees exactly one seeded bay'
+);
+
+select is(
+  (select count(*)::int from public.services),
+  6,
+  'owner A sees exactly six seeded services'
+);
+
+select is(
+  (select count(*)::int from public.working_hours),
+  7,
+  'owner A sees exactly seven seeded working-hours rows'
+);
+
 -- Owner B: symmetric cross-workshop check.
 
 select pg_temp.authenticate_as('22222222-2222-2222-2222-222222222222');
@@ -142,6 +208,65 @@ select throws_ok(
   '42501',
   'permission denied for table profiles',
   'direct INSERT into profiles is rejected for any authenticated user (no INSERT grant)'
+);
+
+-- S-01: worker A sees the same seeded configuration as their owner, but cannot write to it.
+
+select is(
+  (select count(*)::int from public.bays),
+  1,
+  'worker A sees the same seeded bay as their owner'
+);
+
+select is(
+  (select count(*)::int from public.services),
+  6,
+  'worker A sees the same seeded services as their owner'
+);
+
+select is(
+  (select count(*)::int from public.working_hours),
+  7,
+  'worker A sees the same seeded working-hours rows as their owner'
+);
+
+select is(
+  pg_temp.try_worker_update_bay(),
+  0,
+  'worker A cannot update a bay (owner-only UPDATE policy)'
+);
+
+select is(
+  pg_temp.try_worker_update_service(),
+  0,
+  'worker A cannot update a service (owner-only UPDATE policy)'
+);
+
+select is(
+  pg_temp.try_worker_update_working_hours(),
+  0,
+  'worker A cannot update working hours (owner-only UPDATE policy)'
+);
+
+select throws_ok(
+  $$ insert into public.bays (workshop_id, name) values (public.current_workshop_id(), 'Extra stanowisko') $$,
+  '42501',
+  null,
+  'worker A cannot insert a bay directly (owner-only INSERT policy)'
+);
+
+select throws_ok(
+  $$ insert into public.services (workshop_id, name, duration_min) values (public.current_workshop_id(), 'Extra usługa', 15) $$,
+  '42501',
+  null,
+  'worker A cannot insert a service directly (owner-only INSERT policy)'
+);
+
+select throws_ok(
+  $$ delete from public.bays where workshop_id = public.current_workshop_id() $$,
+  '42501',
+  'permission denied for table bays',
+  'direct DELETE from bays is rejected for any authenticated user (no DELETE grant)'
 );
 
 -- Anonymous: execute is revoked on the scoping helpers (Phase 1), not merely scoped by RLS.
