@@ -741,30 +741,30 @@ trigger once the function is fixed.
 
 #### Automated
 
-- [x] 3.1 Types regenerate with no diff: `npm run db:types` then `git add -N` + `git diff --exit-code src/db/database.types.ts`
-- [x] 3.2 Type checking passes: `npm run typecheck`
-- [x] 3.3 Linting passes: `npm run lint`
-- [x] 3.4 Build passes: `npm run build`
+- [x] 3.1 Types regenerate with no diff: `npm run db:types` then `git add -N` + `git diff --exit-code src/db/database.types.ts` — b3238b0
+- [x] 3.2 Type checking passes: `npm run typecheck` — b3238b0
+- [x] 3.3 Linting passes: `npm run lint` — b3238b0
+- [x] 3.4 Build passes: `npm run build` — b3238b0
 
 #### Manual
 
-- [x] 3.5 A wrong column name in a scratch query is flagged by `npm run typecheck`
+- [x] 3.5 A wrong column name in a scratch query is flagged by `npm run typecheck` — b3238b0
 
 ### Phase 4: Role-aware guard
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npm run typecheck`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Build passes: `npm run build`
-- [ ] 4.4 RLS suite still passes: `npm run db:test`
+- [x] 4.1 Type checking passes: `npm run typecheck`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Build passes: `npm run build`
+- [x] 4.4 RLS suite still passes: `npm run db:test`
 
 #### Manual
 
-- [ ] 4.5 Fresh signup against `wrangler dev` shows workshop name and `owner` on `/dashboard`
-- [ ] 4.6 Seeded worker signs in and `/dashboard` renders with role `worker`
-- [ ] 4.7 Temporary owner-only route redirects the worker but not the owner
-- [ ] 4.8 Deleting a profile row redirects that user to sign-in with an error message and a signed-out Topbar
+- [x] 4.5 Fresh signup against `wrangler dev` shows workshop name and `owner` on `/dashboard`
+- [x] 4.6 Seeded worker signs in and `/dashboard` renders with role `worker`
+- [x] 4.7 Temporary owner-only route redirects the worker but not the owner
+- [x] 4.8 Deleting a profile row redirects that user to sign-in with an error message and a signed-out Topbar
 
 ### Phase 5: Ship it
 
