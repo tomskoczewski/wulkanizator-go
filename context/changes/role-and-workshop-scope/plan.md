@@ -728,27 +728,27 @@ trigger once the function is fixed.
 
 #### Automated
 
-- [x] 2.1 Reset applies migrations and seed together: `npm run db:reset`
-- [x] 2.2 Isolation suite passes: `npm run db:test`
-- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.1 Reset applies migrations and seed together: `npm run db:reset` — 166b8de
+- [x] 2.2 Isolation suite passes: `npm run db:test` — 166b8de
+- [x] 2.3 Linting passes: `npm run lint` — 166b8de
 
 #### Manual
 
-- [x] 2.4 Real signup produces exactly one workshop and one owner profile
-- [x] 2.5 Deliberately loosening a policy makes the suite fail
+- [x] 2.4 Real signup produces exactly one workshop and one owner profile — 166b8de
+- [x] 2.5 Deliberately loosening a policy makes the suite fail — 166b8de
 
 ### Phase 3: Typed data access
 
 #### Automated
 
-- [ ] 3.1 Types regenerate with no diff: `npm run db:types` then `git add -N` + `git diff --exit-code src/db/database.types.ts`
-- [ ] 3.2 Type checking passes: `npm run typecheck`
-- [ ] 3.3 Linting passes: `npm run lint`
-- [ ] 3.4 Build passes: `npm run build`
+- [x] 3.1 Types regenerate with no diff: `npm run db:types` then `git add -N` + `git diff --exit-code src/db/database.types.ts`
+- [x] 3.2 Type checking passes: `npm run typecheck`
+- [x] 3.3 Linting passes: `npm run lint`
+- [x] 3.4 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.5 A wrong column name in a scratch query is flagged by `npm run typecheck`
+- [x] 3.5 A wrong column name in a scratch query is flagged by `npm run typecheck`
 
 ### Phase 4: Role-aware guard
 
