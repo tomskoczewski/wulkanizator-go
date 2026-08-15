@@ -715,27 +715,27 @@ trigger once the function is fixed.
 
 #### Automated
 
-- [x] 1.1 Local stack starts: `npm run db:start`
-- [x] 1.2 Migration applies from scratch: `npm run db:reset`
-- [x] 1.3 Linting passes: `npm run lint`
+- [x] 1.1 Local stack starts: `npm run db:start` — 3fe65ba
+- [x] 1.2 Migration applies from scratch: `npm run db:reset` — 3fe65ba
+- [x] 1.3 Linting passes: `npm run lint` — 3fe65ba
 
 #### Manual
 
-- [x] 1.4 Studio shows RLS enabled on `workshops` and `profiles`
-- [x] 1.5 `select public.current_workshop_id();` as anon is rejected with permission denied
+- [x] 1.4 Studio shows RLS enabled on `workshops` and `profiles` — 3fe65ba
+- [x] 1.5 `select public.current_workshop_id();` as anon is rejected with permission denied — 3fe65ba
 
 ### Phase 2: Provisioning trigger + isolation tests
 
 #### Automated
 
-- [ ] 2.1 Reset applies migrations and seed together: `npm run db:reset`
-- [ ] 2.2 Isolation suite passes: `npm run db:test`
-- [ ] 2.3 Linting passes: `npm run lint`
+- [x] 2.1 Reset applies migrations and seed together: `npm run db:reset`
+- [x] 2.2 Isolation suite passes: `npm run db:test`
+- [x] 2.3 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 2.4 Real signup produces exactly one workshop and one owner profile
-- [ ] 2.5 Deliberately loosening a policy makes the suite fail
+- [x] 2.4 Real signup produces exactly one workshop and one owner profile
+- [x] 2.5 Deliberately loosening a policy makes the suite fail
 
 ### Phase 3: Typed data access
 

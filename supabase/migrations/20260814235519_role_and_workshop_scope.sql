@@ -73,6 +73,12 @@ grant execute on function public.current_user_role() to authenticated;
 alter table public.workshops enable row level security;
 alter table public.profiles enable row level security;
 
+-- Table-level grants mirror exactly the operations that have a policy below: Postgres checks
+-- table privileges before RLS, so an operation with no grant is denied before RLS is even
+-- consulted. No INSERT or DELETE grant, for the same reason there is no INSERT or DELETE policy.
+grant select, update on public.workshops to authenticated;
+grant select, update on public.profiles to authenticated;
+
 create policy workshops_select_own on public.workshops
   for select
   to authenticated
