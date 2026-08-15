@@ -770,12 +770,12 @@ trigger once the function is fixed.
 
 #### Automated
 
-- [x] 5.1 Full local gate passes: `npm run typecheck && npm run lint && npm run build`
-- [x] 5.2 RLS suite passes: `npm run db:test`
-- [ ] 5.3 CI is green on the pull request
+- [x] 5.1 Full local gate passes: `npm run typecheck && npm run lint && npm run build` — e1a4df2
+- [x] 5.2 RLS suite passes: `npm run db:test` — e1a4df2
+- [x] 5.3 CI is green on the pull request
 
 #### Manual
 
-- [ ] 5.4 `npx supabase db push` applies both migrations pre-merge; production Studio shows RLS enabled
-- [ ] 5.5 PR merged after the push; new Worker version deployed; fresh signup shows workshop and `owner` role
+- [x] 5.4 `npx supabase db push` applies both migrations pre-merge; production Studio shows RLS enabled
+- [x] 5.5 PR merged after the push; new Worker version deployed; fresh signup shows workshop and `owner` role
 - [ ] 5.6 README worker snippet produces a working worker login in production
