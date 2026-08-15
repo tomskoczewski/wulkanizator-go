@@ -1,7 +1,7 @@
 ---
 change_id: role-and-workshop-scope
 title: "User role and workshop scope (RLS + route-guard)"
-status: implementing
+status: implemented
 created: 2026-08-15
 updated: 2026-08-15
 roadmap_ref: F-01
