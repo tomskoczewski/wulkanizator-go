@@ -53,7 +53,7 @@ Manual steps only a human can perform. Complete these before Phase 3.
 - [ ] **Defer linking**: `npx supabase link --project-ref <ref>` connects the local `supabase/` folder to the cloud project. Skip until you actually need to push migrations (`supabase/migrations/` is empty for the first deploy). When you do link, the `<ref>` is the string after `https://` and before `.supabase.co` in your project URL.
 - [ ] **Troubleshooting**:
   - `Command not found` when running bare `supabase`: expected — always prefix with `npx`. Do not `npm install -g supabase` (the Supabase team explicitly discourages the global npm install on macOS/Linux; use Homebrew or `npx` instead).
-  - "Cannot use with the local development stack" errors: the local Supabase stack (`npx supabase start`) is Docker-based and unrelated to the cloud project used here. This plan does not use the local stack.
+  - "Cannot use with the local development stack" errors: the local Supabase stack (`npx supabase start`) is Docker-based and unrelated to the cloud project used here. **Update (F-01):** the local stack is now the dev loop — see `README.md`'s "Local database workflow" (`npm run db:start` / `db:reset` / `db:test` / `db:types`). It is a separate, ephemeral Postgres instance; it never touches the cloud project referenced in this plan.
 
 ### Environment files
 
@@ -69,7 +69,7 @@ Manual steps only a human can perform. Complete these before Phase 3.
 - [x] Save the **database password** and **service role key** in a password manager (not needed for the app, but required for future admin tasks and migrations).
 - [x] **Auth → Email**: "Confirm email" is ON (production-safe). `src/pages/auth/confirm-email.astro` is load-bearing. Default Supabase SMTP is rate-limited — swap for a custom SMTP provider before real onboarding (tracked in Phase 7).
 - [x] **Auth → URL Configuration**: Site URL and Redirect URLs set to `https://wulkanizator-go.tomaszskoczewski.workers.dev` (confirmed by user after Phase 3, before Phase 4 walkthrough).
-- [ ] **`supabase/migrations/`** currently has no migrations — the starter uses only the built-in `auth.users` table. No DB schema push is required for the first deploy. If application tables are added later, each must enable RLS per `AGENTS.md` hard rule.
+- [x] **`supabase/migrations/`** — **Update (F-01):** no longer empty. `role-and-workshop-scope` ships the project's first two migrations (`workshops`/`profiles` + the provisioning trigger). Pushing them to this cloud project (`supabase link` + `supabase db push`) is now a required step **before** merging any change that ships a migration — see "Ship sequence" in `context/changes/role-and-workshop-scope/plan.md` Phase 5. Each table enables RLS per `AGENTS.md` hard rule.
 
 ---
 
