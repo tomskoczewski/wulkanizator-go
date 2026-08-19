@@ -1,0 +1,95 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Logo from "@/components/Logo.astro";
+import {
+  Banknote,
+  CalendarRange,
+  LayoutDashboard,
+  Plus,
+  SlidersHorizontal,
+  UserRound,
+  Users,
+  Warehouse,
+} from "lucide-react";
+
+export type NavKey = "Dzisiaj" | "Kalendarz" | "Klienci" | "Opony" | "Cennik" | "Ustawienia";
+
+interface Props {
+  title: string;
+  active: NavKey;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+const { title, active, ctaLabel, ctaHref } = Astro.props;
+
+const navItems: { icon: typeof LayoutDashboard; label: NavKey; href?: string }[] = [
+  { icon: LayoutDashboard, label: "Dzisiaj", href: "/dashboard" },
+  { icon: CalendarRange, label: "Kalendarz" },
+  { icon: Users, label: "Klienci" },
+  { icon: Warehouse, label: "Opony" },
+  { icon: Banknote, label: "Cennik" },
+  { icon: SlidersHorizontal, label: "Ustawienia", href: "/ustawienia" },
+];
+---
+
+<Layout title={title}>
+  <div class="flex min-h-screen flex-col bg-slate-50">
+    <header class="flex items-center gap-3 bg-gradient-to-r from-slate-900 to-orange-700 px-5 py-3 text-white">
+      <div class="flex flex-shrink-0 items-center gap-1 text-lg font-black tracking-tight whitespace-nowrap">
+        <Logo size={26} />
+        <span class="text-white">wulkanizator</span><span class="text-orange-400">go</span>
+      </div>
+      <div class="mx-3 h-5 w-px flex-shrink-0 bg-white/20"></div>
+      <span class="min-w-0 flex-1 truncate text-sm font-semibold text-orange-100">{title}</span>
+      {
+        ctaHref && (
+          <a
+            href={ctaHref}
+            class="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-white/20 bg-white/15 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/25"
+          >
+            <Plus size={13} />
+            {ctaLabel ?? "Dodaj"}
+          </a>
+        )
+      }
+      <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
+        <UserRound size={16} className="text-white" />
+      </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+      <nav class="hidden w-14 flex-col items-center gap-1 bg-slate-950 py-4 md:flex">
+        {
+          navItems.map(({ icon: Icon, label, href }) =>
+            href ? (
+              <a
+                href={href}
+                title={label}
+                class:list={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
+                  active === label ? "bg-orange-500 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                <Icon size={17} />
+              </a>
+            ) : (
+              <button
+                type="button"
+                title={label}
+                disabled
+                aria-disabled="true"
+                tabindex={-1}
+                class="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-xl text-slate-600"
+              >
+                <Icon size={17} />
+              </button>
+            ),
+          )
+        }
+      </nav>
+      <main class="flex-1 overflow-y-auto bg-slate-50 p-4">
+        <slot />
+      </main>
+    </div>
+  </div>
+</Layout>

@@ -465,30 +465,30 @@ Rollback: `wrangler rollback` reverts the app; the schema stays (additive, harml
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `npm run typecheck`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Production build succeeds: `npm run build`
-- [x] 2.4 pgTAP suite still passes: `npm run db:test`
+- [x] 2.1 Type checking passes: `npm run typecheck` — aadf32f
+- [x] 2.2 Linting passes: `npm run lint` — aadf32f
+- [x] 2.3 Production build succeeds: `npm run build` — aadf32f
+- [x] 2.4 pgTAP suite still passes: `npm run db:test` — aadf32f
 
 #### Manual
 
-- [x] 2.5 `PATCH /api/workshop` returns the updated row on valid input and 400 + field errors on empty name
-- [x] 2.6 The same request as the seeded worker returns 403 JSON, not a redirect
-- [x] 2.7 `/auth/signin` and `/api/auth/signin` still work while signed out
+- [x] 2.5 `PATCH /api/workshop` returns the updated row on valid input and 400 + field errors on empty name — aadf32f
+- [x] 2.6 The same request as the seeded worker returns 403 JSON, not a redirect — aadf32f
+- [x] 2.7 `/auth/signin` and `/api/auth/signin` still work while signed out — aadf32f
 
 ### Phase 3: App shell
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npm run typecheck`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 `/dashboard` renders inside the shell with the correct lockup and active nav item
-- [ ] 3.5 At 360px the nav rail is hidden and content has no horizontal scroll
-- [ ] 3.6 Disabled nav items are visibly inert and not focusable
+- [x] 3.4 `/dashboard` renders inside the shell with the correct lockup and active nav item
+- [x] 3.5 At 360px the nav rail is hidden and content has no horizontal scroll
+- [x] 3.6 Disabled nav items are visibly inert and not focusable
 
 ### Phase 4: Settings screen
 

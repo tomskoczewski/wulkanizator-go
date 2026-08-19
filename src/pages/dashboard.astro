@@ -1,5 +1,5 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import AppShell from "@/layouts/AppShell.astro";
 import type { UserRole } from "@/types";
 
 const { user, profile } = Astro.locals;
@@ -10,32 +10,28 @@ const roleLabel: Record<UserRole, string> = {
 };
 ---
 
-<Layout title="Dashboard">
-  <div class="bg-cosmic flex min-h-screen items-center justify-center p-4">
-    <div class="rounded-2xl border border-white/10 bg-white/10 p-8 text-center text-white backdrop-blur-xl">
-      <h1 class="mb-4 bg-gradient-to-r from-blue-200 to-purple-200 bg-clip-text text-3xl font-bold text-transparent">
-        Dashboard
-      </h1>
-      <p class="text-blue-100/80">
-        Witaj, <span class="font-semibold text-white">{user?.email}</span>
-      </p>
-      {
-        profile && (
-          <p class="mt-1 text-blue-100/80">
-            Warsztat: <span class="font-semibold text-white">{profile.workshopName}</span> · Rola:{" "}
-            <span class="font-semibold text-white">{roleLabel[profile.role]}</span>
-          </p>
-        )
-      }
-      <p class="mt-2 text-sm text-blue-100/50">Ta strona jest widoczna tylko dla zalogowanych użytkowników.</p>
-      <form method="POST" action="/api/auth/signout" class="mt-6">
-        <button
-          type="submit"
-          class="rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm transition-colors hover:bg-white/20"
-        >
-          Sign out
-        </button>
-      </form>
-    </div>
+<AppShell title="Dzień dobry — plan dnia" active="Dzisiaj">
+  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+    <h1 class="text-xl font-black text-slate-900">Dashboard</h1>
+    <p class="mt-2 text-sm font-medium text-slate-600">
+      Witaj, <span class="font-black text-slate-900">{user?.email}</span>
+    </p>
+    {
+      profile && (
+        <p class="mt-1 text-sm font-medium text-slate-600">
+          Warsztat: <span class="font-black text-slate-900">{profile.workshopName}</span> · Rola:{" "}
+          <span class="font-black text-slate-900">{roleLabel[profile.role]}</span>
+        </p>
+      )
+    }
+    <p class="mt-2 text-xs font-medium text-slate-400">Plan dnia pojawi się tutaj (S-03).</p>
+    <form method="POST" action="/api/auth/signout" class="mt-4">
+      <button
+        type="submit"
+        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+      >
+        Wyloguj
+      </button>
+    </form>
   </div>
-</Layout>
+</AppShell>

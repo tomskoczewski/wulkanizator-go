@@ -1,0 +1,31 @@
+---
+interface Props {
+  size?: number;
+  class?: string;
+}
+
+const { size = 60, class: className = "" } = Astro.props;
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="#f97316"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class:list={className}
+>
+  <defs>
+    <clipPath id="lg-clip">
+      <circle cx="12" cy="12" r="9.5"></circle>
+    </clipPath>
+  </defs>
+  <circle cx="12" cy="12" r="11" stroke-width="2.2"></circle>
+  <g clip-path="url(#lg-clip)" stroke-width="1.8">
+    <polyline points="2,11 12,7 22,11"></polyline>
+    <polyline points="2,15 12,11 22,15"></polyline>
+    <polyline points="2,19 12,15 22,19"></polyline>
+  </g>
+</svg>
