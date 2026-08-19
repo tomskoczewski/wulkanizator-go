@@ -113,7 +113,7 @@ npx supabase stop
 
 The local Studio UI is available at `http://localhost:54323`.
 
-No database tables or migrations are required — this project uses Supabase Auth's built-in `auth.users` table only.
+This project now ships application tables and migrations alongside Supabase Auth's built-in `auth.users` table — see [Local database workflow](#local-database-workflow) below to apply them.
 
 ### Using a cloud Supabase project instead
 
@@ -147,6 +147,7 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/signup`        | Email/password sign-up form                                             |
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
 | `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
+| `/ustawienia`         | Owner-only workshop configuration (bays, services, working hours)       |
 
 Route protection is handled in `src/middleware.ts`, which delegates to the route table in `src/lib/auth-guard.ts`. Add a `[pathPrefix, accessLevel]` entry there to require authentication (`"any"`) or a specific role (`"owner"` / `"worker"`) — longest matching prefix wins.
 
@@ -189,6 +190,8 @@ drop trigger if exists on_auth_user_created on auth.users;
 ```
 
 This restores signup immediately and leaves existing workshops and profiles intact. Re-create the trigger (rerun its migration) once the underlying function is fixed.
+
+While the trigger is dropped, new signups get no `profiles` row **and** no default services/bays/working-hours — `handle_new_user()` also owns default seeding (`public.seed_workshop_defaults()`). Workshops created during the outage need manual provisioning once the trigger is restored.
 
 ## Deployment
 

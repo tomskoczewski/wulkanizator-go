@@ -494,24 +494,24 @@ Rollback: `wrangler rollback` reverts the app; the schema stays (additive, harml
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run typecheck`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Production build succeeds: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck` — 16849cd
+- [x] 4.2 Linting passes: `npm run lint` — 16849cd
+- [x] 4.3 Production build succeeds: `npm run build` — 16849cd
 
 #### Manual
 
-- [x] 4.4 Fresh-signup defaults appear on `/ustawienia` and are editable
-- [x] 4.5 Seeded worker is redirected away from `/ustawienia`
-- [x] 4.6 Screen matches the brochure `SettingsScreen` at 360px and desktop
-- [x] 4.7 Save-failure path shows an inline field error and rolls back
+- [x] 4.4 Fresh-signup defaults appear on `/ustawienia` and are editable — 16849cd
+- [x] 4.5 Seeded worker is redirected away from `/ustawienia` — 16849cd
+- [x] 4.6 Screen matches the brochure `SettingsScreen` at 360px and desktop — 16849cd
+- [x] 4.7 Save-failure path shows an inline field error and rolls back — 16849cd
 
 ### Phase 5: Ship
 
 #### Automated
 
-- [ ] 5.1 No stale references remain: `grep -rn "No database tables or migrations" README.md` returns nothing
-- [ ] 5.2 Full local suite from scratch: `npm run db:reset && npm run db:test`
-- [ ] 5.3 Lint, typecheck, and build pass: `npm run lint && npm run typecheck && npm run build`
+- [x] 5.1 No stale references remain: `grep -rn "No database tables or migrations" README.md` returns nothing
+- [x] 5.2 Full local suite from scratch: `npm run db:reset && npm run db:test`
+- [x] 5.3 Lint, typecheck, and build pass: `npm run lint && npm run typecheck && npm run build`
 
 #### Manual
 

@@ -10,11 +10,11 @@ wulkanizator-go is an Astro 6 SSR app with React 19 islands, Tailwind 4, Supabas
 - Never add Next.js directives (`"use client"`, etc.) to React components.
 - Every new Supabase table must enable RLS with per-operation, per-role policies. Tables that belong to a workshop carry a `workshop_id` column and scope every policy with `public.current_workshop_id()`; role checks use `public.current_user_role()`. Regenerate `src/db/database.types.ts` with `npm run db:types` after every migration — the pre-push hook (`.husky/pre-push`) catches drift when it does.
 - API route handlers must use uppercase exports (`GET`, `POST`) — Astro silently ignores lowercase-named exports.
-- Route access rules live in `src/lib/auth-guard.ts`'s route table — never gate a route ad hoc inside a page or API route.
+- Route access rules live in `src/lib/auth-guard.ts`'s route table — never gate a route ad hoc inside a page or API route. Protected `/api/` paths are declared in the same table like any other route; the middleware answers a failed guard on `/api/*` with `401`/`403` JSON (never a redirect), so a `fetch()` caller gets a parseable error instead of followed HTML.
 
 ## Project Structure
 
-Source lives in `src/`: pages and API routes in `src/pages/`, React hooks in `src/components/hooks/`, shadcn/ui components (new-york variant) in `src/components/ui/`, shared entity and DTO types in `src/types.ts`, services and helpers in `src/lib/` (extracted business logic in `src/lib/services/`). Auth middleware at `src/middleware.ts` resolves the current user and workshop-scoped profile on every request and guards routes via the table in `src/lib/auth-guard.ts`. DB migrations in `supabase/migrations/` with `YYYYMMDDHHmmss_*.sql` naming. Path alias: `@/*` → `src/*`.
+Source lives in `src/`: pages and API routes in `src/pages/`, React hooks in `src/components/hooks/`, shadcn/ui components (new-york variant) in `src/components/ui/`, shared entity and DTO types in `src/types.ts`, services and helpers in `src/lib/` (extracted business logic in `src/lib/services/`, zod validation schemas in `src/lib/schemas/`). Auth middleware at `src/middleware.ts` resolves the current user and workshop-scoped profile on every request and guards routes via the table in `src/lib/auth-guard.ts`. DB migrations in `supabase/migrations/` with `YYYYMMDDHHmmss_*.sql` naming. Path alias: `@/*` → `src/*`.
 
 ## Build, Test, and Development Commands
 
