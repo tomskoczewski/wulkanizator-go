@@ -509,13 +509,13 @@ Rollback: `wrangler rollback` reverts the app; the schema stays (additive, harml
 
 #### Automated
 
-- [x] 5.1 No stale references remain: `grep -rn "No database tables or migrations" README.md` returns nothing
-- [x] 5.2 Full local suite from scratch: `npm run db:reset && npm run db:test`
-- [x] 5.3 Lint, typecheck, and build pass: `npm run lint && npm run typecheck && npm run build`
+- [x] 5.1 No stale references remain: `grep -rn "No database tables or migrations" README.md` returns nothing — fbda860
+- [x] 5.2 Full local suite from scratch: `npm run db:reset && npm run db:test` — fbda860
+- [x] 5.3 Lint, typecheck, and build pass: `npm run lint && npm run typecheck && npm run build` — fbda860
 
 #### Manual
 
-- [ ] 5.4 Production database shows all three tables with RLS enabled and the updated trigger
-- [ ] 5.5 Every pre-existing production workshop has 7 working-hours rows, 1 bay, 6 services
-- [ ] 5.6 Throwaway production signup completes and receives seeded defaults
-- [ ] 5.7 After merge and deploy, `/ustawienia` renders on production for the owner
+- [x] 5.4 Production database shows all three tables with RLS enabled and the updated trigger — fbda860
+- [x] 5.5 Every pre-existing production workshop has 7 working-hours rows, 1 bay, 6 services — fbda860
+- [x] 5.6 Throwaway production signup completes and receives seeded defaults — fbda860
+- [x] 5.7 After merge and deploy, `/ustawienia` renders on production for the owner — fbda860

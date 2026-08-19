@@ -1,9 +1,9 @@
 ---
 change_id: workshop-setup
 title: Workshop setup — bays, working hours, services
-status: implementing
+status: implemented
 created: 2026-08-15
-updated: 2026-08-15
+updated: 2026-08-19
 archived_at: null
 ---
 
