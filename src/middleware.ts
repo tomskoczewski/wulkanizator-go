@@ -8,6 +8,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   context.locals.user = null;
   context.locals.profile = null;
+  context.locals.supabase = supabase;
 
   if (supabase) {
     const {
@@ -47,6 +48,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const guard = requireRole(context.locals.profile, context.url.pathname);
   if (guard.type === "redirect") {
+    if (context.url.pathname.startsWith("/api/")) {
+      const status = context.locals.user ? 403 : 401;
+      return new Response(JSON.stringify({ error: status === 401 ? "Unauthorized" : "Forbidden" }), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return context.redirect(guard.to);
   }
 

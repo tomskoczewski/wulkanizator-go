@@ -1,4 +1,12 @@
 import type { Database } from "@/db/database.types";
+import type {
+  BayCreateInput,
+  BayUpdateInput,
+  ServiceCreateInput,
+  ServiceUpdateInput,
+  WorkingHoursUpdateInput,
+  WorkshopDetailsInput,
+} from "@/lib/schemas/workshop-setup";
 
 export type UserRole = Database["public"]["Enums"]["user_role"];
 export type Workshop = Database["public"]["Tables"]["workshops"]["Row"];
@@ -12,3 +20,19 @@ export interface UserProfile {
   workshopName: string;
   role: UserRole;
 }
+
+export interface WorkshopConfiguration {
+  workshop: Workshop;
+  bays: Bay[];
+  services: Service[];
+  workingHours: WorkingHours[];
+}
+
+export type {
+  BayCreateInput,
+  BayUpdateInput,
+  ServiceCreateInput,
+  ServiceUpdateInput,
+  WorkingHoursUpdateInput,
+  WorkshopDetailsInput,
+};

@@ -7,7 +7,14 @@ type AccessLevel = "any" | UserRole;
  * here — never gate a route ad hoc inside a page or API route. Longest-prefix wins, so a more
  * specific rule nested under a broader one resolves predictably.
  */
-const ROUTE_ACCESS: readonly [prefix: string, access: AccessLevel][] = [["/dashboard", "any"]];
+const ROUTE_ACCESS: readonly [prefix: string, access: AccessLevel][] = [
+  ["/dashboard", "any"],
+  ["/ustawienia", "owner"],
+  ["/api/workshop", "owner"],
+  ["/api/bays", "owner"],
+  ["/api/services", "owner"],
+  ["/api/working-hours", "owner"],
+];
 
 export type GuardResult = { readonly type: "allow" } | { readonly type: "redirect"; readonly to: string };
 

@@ -451,30 +451,30 @@ Rollback: `wrangler rollback` reverts the app; the schema stays (additive, harml
 
 #### Automated
 
-- [x] 1.1 Migrations apply cleanly from scratch: `npm run db:reset`
-- [x] 1.2 pgTAP suite passes with the new assertions: `npm run db:test`
-- [x] 1.3 Regenerated types are committed and drift-free: `npm run db:types && git diff --exit-code src/db/database.types.ts`
-- [x] 1.4 Type checking passes: `npm run typecheck`
-- [x] 1.5 Linting passes: `npm run lint`
+- [x] 1.1 Migrations apply cleanly from scratch: `npm run db:reset` — e627fb9
+- [x] 1.2 pgTAP suite passes with the new assertions: `npm run db:test` — e627fb9
+- [x] 1.3 Regenerated types are committed and drift-free: `npm run db:types && git diff --exit-code src/db/database.types.ts` — e627fb9
+- [x] 1.4 Type checking passes: `npm run typecheck` — e627fb9
+- [x] 1.5 Linting passes: `npm run lint` — e627fb9
 
 #### Manual
 
-- [x] 1.6 Fresh signup succeeds and Studio shows 6 services, 1 bay, 7 working-hours rows
+- [x] 1.6 Fresh signup succeeds and Studio shows 6 services, 1 bay, 7 working-hours rows — e627fb9
 
 ### Phase 2: Service layer, zod validation & API routes
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npm run typecheck`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Production build succeeds: `npm run build`
-- [ ] 2.4 pgTAP suite still passes: `npm run db:test`
+- [x] 2.1 Type checking passes: `npm run typecheck`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Production build succeeds: `npm run build`
+- [x] 2.4 pgTAP suite still passes: `npm run db:test`
 
 #### Manual
 
-- [ ] 2.5 `PATCH /api/workshop` returns the updated row on valid input and 400 + field errors on empty name
-- [ ] 2.6 The same request as the seeded worker returns 403 JSON, not a redirect
-- [ ] 2.7 `/auth/signin` and `/api/auth/signin` still work while signed out
+- [x] 2.5 `PATCH /api/workshop` returns the updated row on valid input and 400 + field errors on empty name
+- [x] 2.6 The same request as the seeded worker returns 403 JSON, not a redirect
+- [x] 2.7 `/auth/signin` and `/api/auth/signin` still work while signed out
 
 ### Phase 3: App shell
 
