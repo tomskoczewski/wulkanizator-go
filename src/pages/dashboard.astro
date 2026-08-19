@@ -34,4 +34,21 @@ const roleLabel: Record<UserRole, string> = {
       </button>
     </form>
   </div>
+
+  {
+    profile?.role === "owner" && (
+      <a
+        href="/ustawienia"
+        class="mt-4 flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 hover:ring-orange-200"
+      >
+        <div>
+          <div class="text-sm font-black text-slate-900">Skonfiguruj warsztat</div>
+          <div class="text-xs font-medium text-slate-500">
+            Usługi, stanowiska i godziny pracy — sprawdź lub zmień ustawienia.
+          </div>
+        </div>
+        <span class="text-xs font-black text-orange-600">Ustawienia →</span>
+      </a>
+    )
+  }
 </AppShell>

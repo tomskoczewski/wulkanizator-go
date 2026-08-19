@@ -480,30 +480,30 @@ Rollback: `wrangler rollback` reverts the app; the schema stays (additive, harml
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run typecheck`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck` — d1ff824
+- [x] 3.2 Linting passes: `npm run lint` — d1ff824
+- [x] 3.3 Production build succeeds: `npm run build` — d1ff824
 
 #### Manual
 
-- [x] 3.4 `/dashboard` renders inside the shell with the correct lockup and active nav item
-- [x] 3.5 At 360px the nav rail is hidden and content has no horizontal scroll
-- [x] 3.6 Disabled nav items are visibly inert and not focusable
+- [x] 3.4 `/dashboard` renders inside the shell with the correct lockup and active nav item — d1ff824
+- [x] 3.5 At 360px the nav rail is hidden and content has no horizontal scroll — d1ff824
+- [x] 3.6 Disabled nav items are visibly inert and not focusable — d1ff824
 
 ### Phase 4: Settings screen
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npm run typecheck`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Production build succeeds: `npm run build`
+- [x] 4.1 Type checking passes: `npm run typecheck`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 4.4 Fresh-signup defaults appear on `/ustawienia` and are editable
-- [ ] 4.5 Seeded worker is redirected away from `/ustawienia`
-- [ ] 4.6 Screen matches the brochure `SettingsScreen` at 360px and desktop
-- [ ] 4.7 Save-failure path shows an inline field error and rolls back
+- [x] 4.4 Fresh-signup defaults appear on `/ustawienia` and are editable
+- [x] 4.5 Seeded worker is redirected away from `/ustawienia`
+- [x] 4.6 Screen matches the brochure `SettingsScreen` at 360px and desktop
+- [x] 4.7 Save-failure path shows an inline field error and rolls back
 
 ### Phase 5: Ship
 

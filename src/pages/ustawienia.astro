@@ -1,0 +1,21 @@
+---
+import AppShell from "@/layouts/AppShell.astro";
+import WorkshopSettings from "@/components/settings/WorkshopSettings";
+import { getWorkshopConfiguration } from "@/lib/services/workshop-setup";
+
+const { supabase } = Astro.locals;
+
+const config = supabase ? await getWorkshopConfiguration(supabase) : null;
+---
+
+<AppShell title="Ustawienia warsztatu" active="Ustawienia">
+  {
+    config ? (
+      <WorkshopSettings client:load config={config} />
+    ) : (
+      <div class="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100">
+        Supabase nie jest skonfigurowany.
+      </div>
+    )
+  }
+</AppShell>
