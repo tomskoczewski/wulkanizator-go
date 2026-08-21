@@ -51,7 +51,7 @@
   - Tradeoff: Leaves a wider-than-strictly-necessary write surface live in production for the entire S-02→S-04 gap.
   - Confidence: HIGH that this matches the plan's literal words.
   - Blind spot: None significant.
-- **Decision**: FIXED — Fix A applied
+- **Decision**: FIXED — Fix A applied, commit `329390b` (local; production push batched with remaining findings)
 
 ### F3 — `NewAppointmentForm.tsx`'s booking submit bypasses the `useJsonMutation` pattern
 
@@ -61,7 +61,7 @@
 - **Location**: src/components/appointments/NewAppointmentForm.tsx:97-137
 - **Detail**: The plan's Phase 4 Intent names `useJsonMutation` explicitly ("so a network rejection can never escape as an unhandled promise"), and the slots-fetch call in the same component (line 92) does use it. The booking `handleSubmit`, however, hand-rolls `fetch()` + manual JSON parsing + status branching. This is a deliberate, justified deviation — `useJsonMutation`'s `MutationResult` shape only carries `ok`/`fieldErrors`/`message` on failure, with no room for the 409 response's `slots`/`emptyReason` payload the booking flow needs to swap in fresh chips — and the raw version still satisfies the underlying guarantee (try/catch, no unhandled rejection). It just isn't visually obvious from the code that this is intentional rather than an oversight.
 - **Fix**: Add a one-line comment above `handleSubmit` noting why `useJsonMutation` isn't used here (needs the 409 body's `slots`/`emptyReason`, which the hook's generic result shape can't carry).
-- **Decision**: PENDING
+- **Decision**: FIXED — comment added
 
 ### F4 — `STARTS_AT_PATTERN` validates digit shape, not value ranges
 
@@ -71,7 +71,7 @@
 - **Location**: src/lib/schemas/appointment.ts:6
 - **Detail**: `/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?$/` accepts a value like `2026-01-01T99:99`; `timestampStringToNaiveDate` → `Date.UTC(...)` silently normalizes it into a different (wrong) date rather than rejecting it. In practice this is caught downstream — an out-of-range time will essentially never match a real offered slot in `bookAppointment()`'s `stillOffered` check, so it degrades to a 409 rather than corrupting data — but the schema doesn't do the range-validation job its name implies, unlike the existing `TIME_HH_MM` precedent in `workshop-setup.ts`.
 - **Fix**: Constrain hour/minute/second ranges in the regex, e.g. `^\d{4}-\d{2}-\d{2}[T ](?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$`, matching `TIME_HH_MM`'s existing convention.
-- **Decision**: PENDING
+- **Decision**: FIXED — also constrained month (01-12) and day (01-31) ranges
 
 ### F5 — Redundant `services` round-trip in `bookAppointment()`
 
@@ -81,7 +81,7 @@
 - **Location**: src/lib/services/appointments.ts:176, 185-189
 - **Detail**: The preflight call (`suggestSlotsForService`) already fetches `duration_min` from `services`. `bookAppointment()` re-queries `services` again immediately after for the same value — not a correctness issue, just an avoidable extra round trip on every booking.
 - **Fix**: Thread the `durationMin` already fetched during preflight through to the insert path instead of re-querying.
-- **Decision**: PENDING
+- **Decision**: FIXED — `SuggestionResult` now carries `durationMin`; `bookAppointment()` reuses `preflight.durationMin`
 
 ### F6 — `suggestSlots()`'s per-bay loop isn't limit-bounded within a single day
 

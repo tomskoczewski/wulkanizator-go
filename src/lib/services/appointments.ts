@@ -24,6 +24,7 @@ export type EmptyReason = "no_active_bays" | "closed_all_week" | "no_slots" | nu
 export interface SuggestionResult {
   slots: SuggestedSlot[];
   emptyReason: EmptyReason;
+  durationMin: number;
 }
 
 export interface WireSlot {
@@ -137,11 +138,11 @@ export async function suggestSlotsForService(
   const inputs = await fetchSuggestionInputs(supabase, serviceId);
 
   if (inputs.bays.length === 0) {
-    return { slots: [], emptyReason: "no_active_bays" };
+    return { slots: [], emptyReason: "no_active_bays", durationMin: inputs.durationMin };
   }
 
   if (inputs.dayWindows.length === 0) {
-    return { slots: [], emptyReason: "closed_all_week" };
+    return { slots: [], emptyReason: "closed_all_week", durationMin: inputs.durationMin };
   }
 
   const slots = suggestSlots({
@@ -152,7 +153,7 @@ export async function suggestSlotsForService(
     earliest: earliest ?? inputs.workshopNow,
   });
 
-  return { slots, emptyReason: slots.length === 0 ? "no_slots" : null };
+  return { slots, emptyReason: slots.length === 0 ? "no_slots" : null, durationMin: inputs.durationMin };
 }
 
 /**
@@ -182,15 +183,8 @@ export async function bookAppointment(
     return { status: "conflict", slots: preflight.slots, emptyReason: preflight.emptyReason };
   }
 
-  const { data: serviceRow, error: serviceError } = await supabase
-    .from("services")
-    .select("duration_min")
-    .eq("id", input.service_id)
-    .single();
-  if (serviceError) throw serviceError;
-
   const startsAt = timestampStringToNaiveDate(input.starts_at);
-  const endsAt = new Date(startsAt.getTime() + serviceRow.duration_min * 60_000);
+  const endsAt = new Date(startsAt.getTime() + preflight.durationMin * 60_000);
 
   const { data, error } = await supabase.rpc("book_appointment", {
     p_first_name: input.first_name,

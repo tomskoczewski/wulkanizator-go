@@ -94,6 +94,8 @@ export default function NewAppointmentForm({ services }: Props) {
     setEmptyReason(result?.emptyReason ?? null);
   }
 
+  // Hand-rolled instead of useJsonMutation: a 409 here carries slots/emptyReason alongside the
+  // error, which useJsonMutation's MutationResult (ok/fieldErrors/message only) can't carry.
   async function handleSubmit() {
     if (!selectedServiceId || !selectedSlot) return;
 

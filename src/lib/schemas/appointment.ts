@@ -3,7 +3,7 @@ import { z } from "zod";
 // Naive workshop-local wall-clock, matching `naiveDateToTimestampString()` in workshop-clock.ts.
 // Validated with a regex rather than `z.coerce.date()`, which would apply UTC parsing semantics to
 // a value that carries no timezone.
-const STARTS_AT_PATTERN = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?$/;
+const STARTS_AT_PATTERN = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])[T ]([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/;
 
 export const slotSuggestionRequestSchema = z.object({
   service_id: z.string().trim().pipe(z.uuid("Nieprawidłowy identyfikator usługi")),
