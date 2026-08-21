@@ -31,7 +31,7 @@ Tire workshops today run their day on Excel and paper — no clear day plan, no 
 | ----- | ---------------------------- | ------------------------------------------------------------------------------------------------ | ------------- | --------------------------------------- | -------- |
 | F-01  | role-and-workshop-scope      | (foundation) user role (owner/worker) and workshop scope wired into RLS + route-guard            | —             | Access Control, NFR (GDPR)              | done |
 | F-02  | design-system-foundation     | (foundation) brand palette, typography, and component conventions locked in `context/foundation/design-system.md`, with a screen-by-screen mapping directing each slice to its exact brochure screen for near-1:1 reference | —             | NFR (readable in 2 seconds)             | done |
-| S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | proposed |
+| S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | in-progress |
 | S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | proposed |
 | S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | proposed |
 | S-04  | worker-status-changes        | (worker) change an appointment's status on the day plan: waiting → in progress → done / no-show  | S-03, F-01    | FR-007, FR-005 (slot release)           | proposed |
@@ -104,7 +104,7 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Unknowns:**
   - Does the day plan get a per-bay filter for workers by default (from Socratic on FR-006)? — Owner: user. Block: no.
 - **Risk:** "Setup in 30 minutes" is a marketing promise in the PRD; if the setup UI also forces pricing, integrations, etc., we break the promise. Keep the bar absolute: price can be `null`, only `duration_min` is required.
-- **Status:** proposed
+- **Status:** in-progress
 
 ### S-02: Owner adds an appointment with free-slot suggestions
 

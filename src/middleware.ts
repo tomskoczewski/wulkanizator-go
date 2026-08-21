@@ -30,6 +30,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
         // user this middleware now treats as anonymous.
         console.error(`No profile found for authenticated user ${user.id}; signing out.`);
         await supabase.auth.signOut();
+        if (context.url.pathname.startsWith("/api/")) {
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
         return context.redirect(
           `/auth/signin?error=${encodeURIComponent(
             "Twoje konto nie ma przypisanego warsztatu. Zaloguj się ponownie lub skontaktuj się z administratorem.",

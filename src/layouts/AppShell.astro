@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Logo from "@/components/Logo.astro";
+import { cn } from "@/lib/utils";
 import {
   Banknote,
   CalendarRange,
@@ -66,9 +67,10 @@ const navItems: { icon: typeof LayoutDashboard; label: NavKey; href?: string }[]
               <a
                 href={href}
                 title={label}
-                class:list={`flex h-9 w-9 items-center justify-center rounded-xl transition-colors ${
-                  active === label ? "bg-orange-500 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                }`}
+                class:list={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-xl transition-colors",
+                  active === label ? "bg-orange-500 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white",
+                )}
               >
                 <Icon size={17} />
               </a>

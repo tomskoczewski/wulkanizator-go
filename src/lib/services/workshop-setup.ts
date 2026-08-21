@@ -68,7 +68,7 @@ export async function createBay(supabase: TypedSupabaseClient, input: BayCreateI
 }
 
 export async function updateBay(supabase: TypedSupabaseClient, id: string, input: BayUpdateInput) {
-  const { data, error } = await supabase.from("bays").update(input).eq("id", id).select().single();
+  const { data, error } = await supabase.from("bays").update(input).eq("id", id).select().maybeSingle();
 
   if (error) throw error;
   return data;
@@ -87,7 +87,7 @@ export async function createService(supabase: TypedSupabaseClient, input: Servic
 }
 
 export async function updateService(supabase: TypedSupabaseClient, id: string, input: ServiceUpdateInput) {
-  const { data, error } = await supabase.from("services").update(input).eq("id", id).select().single();
+  const { data, error } = await supabase.from("services").update(input).eq("id", id).select().maybeSingle();
 
   if (error) throw error;
   return data;
@@ -107,7 +107,7 @@ export async function updateWorkingHours(
     })
     .eq("weekday", weekday)
     .select()
-    .single();
+    .maybeSingle();
 
   if (error) throw error;
   return data;

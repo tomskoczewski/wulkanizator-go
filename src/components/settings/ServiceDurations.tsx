@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { AlertCircle, CircleDot, Plus, Settings, Timer, Trash2, Wrench, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useJsonMutation } from "@/components/hooks/useJsonMutation";
+import { useJsonMutation, useRowMutation } from "@/components/hooks/useJsonMutation";
 import type { Service } from "@/types";
 
 interface Props {
@@ -23,9 +23,8 @@ const DURATION_FLOOR = 5;
 
 export function ServiceDurations({ initialServices }: Props) {
   const [services, setServices] = useState(initialServices);
-  const [pendingId, setPendingId] = useState<string | null>(null);
-  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
   const [showAddForm, setShowAddForm] = useState(false);
+  const { run, isPending, rowErrors } = useRowMutation();
 
   return (
     <div className="rounded-[24px] bg-white p-4 shadow-sm ring-1 ring-slate-100">
@@ -35,10 +34,10 @@ export function ServiceDurations({ initialServices }: Props) {
           <ServiceRow
             key={service.id}
             service={service}
-            isPending={pendingId === service.id}
+            isPending={isPending(service.id)}
             error={rowErrors[service.id]}
-            onAdjust={(delta) => adjustDuration(service, delta)}
-            onDeactivate={() => deactivate(service)}
+            onAdjust={(delta) => void adjustDuration(service, delta)}
+            onDeactivate={() => void deactivate(service)}
           />
         ))}
       </div>
@@ -70,41 +69,41 @@ export function ServiceDurations({ initialServices }: Props) {
     const nextDuration = Math.max(DURATION_FLOOR, service.duration_min + delta);
     if (nextDuration === service.duration_min) return;
 
-    const previous = service;
+    const previousDuration = service.duration_min;
     setServices((prev) => prev.map((s) => (s.id === service.id ? { ...s, duration_min: nextDuration } : s)));
-    setPendingId(service.id);
-    setRowErrors((prev) => ({ ...prev, [service.id]: "" }));
 
-    const res = await fetch(`/api/services/${service.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ duration_min: nextDuration }),
-    });
-
-    setPendingId(null);
-    if (!res.ok) {
-      const body = (await res.json().catch(() => null)) as { errors?: Record<string, string[]> } | null;
-      setServices((prev) => prev.map((s) => (s.id === service.id ? previous : s)));
-      setRowErrors((prev) => ({
-        ...prev,
-        [service.id]: body?.errors?.duration_min[0] ?? "Nie udało się zapisać czasu usługi.",
-      }));
-    }
+    await run(
+      service.id,
+      { url: `/api/services/${service.id}`, method: "PATCH", body: { duration_min: nextDuration } },
+      {
+        rollback: () => {
+          setServices((prev) => prev.map((s) => (s.id === service.id ? { ...s, duration_min: previousDuration } : s)));
+        },
+        fallbackMessage: "Nie udało się zapisać czasu usługi.",
+      },
+    );
   }
 
   async function deactivate(service: Service) {
-    const previous = services;
+    // Position, not a whole-list snapshot — see the same note in Bays.tsx.
+    const index = services.findIndex((s) => s.id === service.id);
     setServices((prev) => prev.filter((s) => s.id !== service.id));
 
-    const res = await fetch(`/api/services/${service.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_active: false }),
-    });
-
-    if (!res.ok) {
-      setServices(previous);
-    }
+    await run(
+      service.id,
+      { url: `/api/services/${service.id}`, method: "PATCH", body: { is_active: false } },
+      {
+        rollback: () => {
+          setServices((prev) => {
+            if (prev.some((s) => s.id === service.id)) return prev;
+            const next = [...prev];
+            next.splice(Math.min(index, next.length), 0, service);
+            return next;
+          });
+        },
+        fallbackMessage: "Nie udało się usunąć usługi.",
+      },
+    );
   }
 }
 
@@ -162,8 +161,9 @@ function ServiceRow({
           <button
             type="button"
             onClick={onDeactivate}
+            disabled={isPending}
             title="Usuń usługę"
-            className="rounded-xl px-2 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-100"
+            className="rounded-xl px-2 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-100 disabled:opacity-50"
           >
             ✕
           </button>

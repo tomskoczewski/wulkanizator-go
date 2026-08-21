@@ -1,13 +1,64 @@
 import { useCallback, useState } from "react";
 
 export interface MutationFailure {
-  fieldErrors?: Record<string, string[]>;
+  fieldErrors?: Record<string, string[] | undefined>;
   message?: string;
 }
 
 interface ErrorResponseBody {
-  errors?: Record<string, string[]>;
+  errors?: Record<string, string[] | undefined>;
   error?: string;
+}
+
+export type MutationResult<TResponse> = { ok: true; data: TResponse } | { ok: false; failure: MutationFailure };
+
+/**
+ * First message from a zod `flattenError().fieldErrors` payload, whichever field failed.
+ * The server only returns keys that actually failed, so indexing a hard-coded key is unsafe:
+ * a request carrying several fields can be rejected on one the caller wasn't expecting.
+ */
+export function firstFieldError(fieldErrors?: Record<string, string[] | undefined>): string | undefined {
+  if (!fieldErrors) return undefined;
+  for (const messages of Object.values(fieldErrors)) {
+    if (messages?.[0]) return messages[0];
+  }
+  return undefined;
+}
+
+/**
+ * Stateless PATCH/POST/PUT + JSON parsing. Every settings mutation goes through this so a network
+ * rejection can never escape as an unhandled promise — it comes back as `{ ok: false }` like any
+ * other failure. Stateful callers wrap it: `useJsonMutation` for a single form, `useRowMutation`
+ * for a list where each row needs its own pending/error state.
+ */
+export async function requestJson<TResponse>(
+  url: string,
+  method: string,
+  body: unknown,
+): Promise<MutationResult<TResponse>> {
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const json = (await res.json().catch(() => null)) as ErrorResponseBody | TResponse | null;
+
+    if (!res.ok) {
+      const failure = json as ErrorResponseBody | null;
+      return {
+        ok: false,
+        failure: {
+          fieldErrors: failure?.errors,
+          message: failure?.error ?? "Coś poszło nie tak. Spróbuj ponownie.",
+        },
+      };
+    }
+
+    return { ok: true, data: json as TResponse };
+  } catch {
+    return { ok: false, failure: { message: "Nie udało się połączyć z serwerem." } };
+  }
 }
 
 /**
@@ -23,26 +74,12 @@ export function useJsonMutation<TResponse>() {
     setIsPending(true);
     setError(null);
     try {
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const json = (await res.json().catch(() => null)) as ErrorResponseBody | TResponse | null;
-
-      if (!res.ok) {
-        const failure = json as ErrorResponseBody | null;
-        setError({
-          fieldErrors: failure?.errors,
-          message: failure?.error ?? "Coś poszło nie tak. Spróbuj ponownie.",
-        });
+      const result = await requestJson<TResponse>(url, method, body);
+      if (!result.ok) {
+        setError(result.failure);
         return null;
       }
-
-      return json as TResponse;
-    } catch {
-      setError({ message: "Nie udało się połączyć z serwerem." });
-      return null;
+      return result.data;
     } finally {
       setIsPending(false);
     }
@@ -55,5 +92,57 @@ export function useJsonMutation<TResponse>() {
     clearError: () => {
       setError(null);
     },
+  };
+}
+
+/**
+ * Per-row variant for lists (services, bays, weekday hours). Pending and error state are keyed, so
+ * one row's response can never re-enable or clear another row's — the bug a single shared
+ * `isPending` flag produces when two rows are edited in quick succession.
+ *
+ * `rollback` runs on failure and must be a functional state update that touches only this row;
+ * reverting to a whole-list snapshot would undo a concurrent mutation that actually succeeded.
+ */
+export function useRowMutation() {
+  const [pendingKeys, setPendingKeys] = useState<ReadonlySet<string>>(() => new Set());
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
+
+  const run = useCallback(
+    async (
+      key: string,
+      request: { url: string; method: string; body: unknown },
+      handlers: { rollback: () => void; fallbackMessage: string },
+    ): Promise<boolean> => {
+      setPendingKeys((prev) => new Set(prev).add(key));
+      setRowErrors((prev) => ({ ...prev, [key]: "" }));
+
+      try {
+        const result = await requestJson<unknown>(request.url, request.method, request.body);
+
+        if (!result.ok) {
+          handlers.rollback();
+          setRowErrors((prev) => ({
+            ...prev,
+            [key]: firstFieldError(result.failure.fieldErrors) ?? result.failure.message ?? handlers.fallbackMessage,
+          }));
+          return false;
+        }
+
+        return true;
+      } finally {
+        setPendingKeys((prev) => {
+          const next = new Set(prev);
+          next.delete(key);
+          return next;
+        });
+      }
+    },
+    [],
+  );
+
+  return {
+    run,
+    isPending: (key: string) => pendingKeys.has(key),
+    rowErrors,
   };
 }

@@ -36,7 +36,7 @@ export function WorkshopDetailsForm({ workshop, onSaved }: Props) {
     }
   }
 
-  const nameError = error?.fieldErrors?.name[0];
+  const nameError = error?.fieldErrors?.name?.[0];
 
   return (
     <form onSubmit={handleSubmit} className="rounded-[24px] bg-white p-4 shadow-sm ring-1 ring-slate-100">

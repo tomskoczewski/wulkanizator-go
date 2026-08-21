@@ -1,7 +1,7 @@
 import { useState, type SubmitEvent } from "react";
 import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useJsonMutation } from "@/components/hooks/useJsonMutation";
+import { useJsonMutation, useRowMutation } from "@/components/hooks/useJsonMutation";
 import type { Bay } from "@/types";
 
 interface Props {
@@ -11,20 +11,29 @@ interface Props {
 export function Bays({ initialBays }: Props) {
   const [bays, setBays] = useState(initialBays);
   const [showAddForm, setShowAddForm] = useState(false);
+  const { run, isPending, rowErrors } = useRowMutation();
 
   async function deactivate(bay: Bay) {
-    const previous = bays;
+    // Capture the position, not the list: rolling back to a whole-list snapshot would resurrect a
+    // different bay that was deactivated successfully while this request was in flight.
+    const index = bays.findIndex((b) => b.id === bay.id);
     setBays((prev) => prev.filter((b) => b.id !== bay.id));
 
-    const res = await fetch(`/api/bays/${bay.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ is_active: false }),
-    });
-
-    if (!res.ok) {
-      setBays(previous);
-    }
+    await run(
+      bay.id,
+      { url: `/api/bays/${bay.id}`, method: "PATCH", body: { is_active: false } },
+      {
+        rollback: () => {
+          setBays((prev) => {
+            if (prev.some((b) => b.id === bay.id)) return prev;
+            const next = [...prev];
+            next.splice(Math.min(index, next.length), 0, bay);
+            return next;
+          });
+        },
+        fallbackMessage: "Nie udało się usunąć stanowiska.",
+      },
+    );
   }
 
   return (
@@ -34,22 +43,25 @@ export function Bays({ initialBays }: Props) {
         Stanowiska
       </div>
       {bays.map((bay) => (
-        <div
-          key={bay.id}
-          className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-slate-50 p-2.5 text-xs font-bold text-slate-600"
-        >
-          <span>
-            {bay.name}
-            {bay.vehicle_type ? ` · ${bay.vehicle_type}` : ""}
-          </span>
-          <button
-            type="button"
-            onClick={() => deactivate(bay)}
-            title="Usuń stanowisko"
-            className="rounded-lg px-2 py-1 text-rose-600 hover:bg-rose-100"
-          >
-            ✕
-          </button>
+        <div key={bay.id} className="mb-2 rounded-xl bg-slate-50 p-2.5">
+          <div className="flex items-center justify-between gap-2 text-xs font-bold text-slate-600">
+            <span>
+              {bay.name}
+              {bay.vehicle_type ? ` · ${bay.vehicle_type}` : ""}
+            </span>
+            <button
+              type="button"
+              onClick={() => void deactivate(bay)}
+              disabled={isPending(bay.id)}
+              title="Usuń stanowisko"
+              className="rounded-lg px-2 py-1 text-rose-600 hover:bg-rose-100 disabled:opacity-50"
+            >
+              ✕
+            </button>
+          </div>
+          {rowErrors[bay.id] && (
+            <span className="mt-1 block text-xs font-semibold text-rose-600">{rowErrors[bay.id]}</span>
+          )}
         </div>
       ))}
       {showAddForm ? (

@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRowMutation } from "@/components/hooks/useJsonMutation";
 import type { WorkingHours as WorkingHoursRow } from "@/types";
 
 interface Props {
   initialHours: WorkingHoursRow[];
+}
+
+interface HoursDraft {
+  opensAt: string;
+  closesAt: string;
+  isClosed: boolean;
 }
 
 const WEEKDAY_LABELS: Record<number, string> = {
@@ -23,37 +30,58 @@ function toTimeInputValue(value: string | null) {
   return value ? value.slice(0, 5) : "";
 }
 
+function toDraft(row: WorkingHoursRow): HoursDraft {
+  return {
+    opensAt: toTimeInputValue(row.opens_at),
+    closesAt: toTimeInputValue(row.closes_at),
+    isClosed: row.is_closed,
+  };
+}
+
+function toDraftMap(rows: WorkingHoursRow[]): Record<number, HoursDraft | undefined> {
+  return Object.fromEntries(rows.map((row) => [row.weekday, toDraft(row)]));
+}
+
 export function WorkingHours({ initialHours }: Props) {
   const [hours, setHours] = useState(initialHours);
-  const [pendingWeekday, setPendingWeekday] = useState<number | null>(null);
-  const [rowErrors, setRowErrors] = useState<Record<number, string>>({});
+  // The edit draft lives here, next to the server truth it is derived from. Holding it inside the
+  // row component instead would leave the inputs showing rejected values after a failed save: the
+  // row never re-mounts, so a parent revert would never reach it.
+  const [drafts, setDrafts] = useState<Record<number, HoursDraft | undefined>>(() => toDraftMap(initialHours));
+  const { run, isPending, rowErrors } = useRowMutation();
 
-  async function save(
-    weekday: number,
-    draft: { opens_at: string | null; closes_at: string | null; is_closed: boolean },
-  ) {
-    const previous = hours.find((h) => h.weekday === weekday);
-    setHours((prev) => prev.map((h) => (h.weekday === weekday ? { ...h, ...draft } : h)));
-    setPendingWeekday(weekday);
-    setRowErrors((prev) => ({ ...prev, [weekday]: "" }));
-
-    const res = await fetch(`/api/working-hours/${weekday}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(draft),
+  function updateDraft(weekday: number, patch: Partial<HoursDraft>) {
+    setDrafts((prev) => {
+      const current = prev[weekday];
+      if (!current) return prev;
+      return { ...prev, [weekday]: { ...current, ...patch } };
     });
+  }
 
-    setPendingWeekday(null);
-    if (!res.ok) {
-      const body = (await res.json().catch(() => null)) as { errors?: Record<string, string[]> } | null;
-      if (previous) {
-        setHours((prev) => prev.map((h) => (h.weekday === weekday ? previous : h)));
-      }
-      setRowErrors((prev) => ({
-        ...prev,
-        [weekday]: body?.errors?.opens_at[0] ?? "Nie udało się zapisać godzin pracy.",
-      }));
-    }
+  async function save(weekday: number) {
+    const draft = drafts[weekday];
+    if (!draft) return;
+    const previous = hours.find((h) => h.weekday === weekday);
+    const body = {
+      opens_at: draft.isClosed ? null : draft.opensAt,
+      closes_at: draft.isClosed ? null : draft.closesAt,
+      is_closed: draft.isClosed,
+    };
+
+    setHours((prev) => prev.map((h) => (h.weekday === weekday ? { ...h, ...body } : h)));
+
+    await run(
+      String(weekday),
+      { url: `/api/working-hours/${weekday}`, method: "PUT", body },
+      {
+        rollback: () => {
+          if (!previous) return;
+          setHours((prev) => prev.map((h) => (h.weekday === weekday ? previous : h)));
+          setDrafts((prev) => ({ ...prev, [weekday]: toDraft(previous) }));
+        },
+        fallbackMessage: "Nie udało się zapisać godzin pracy.",
+      },
+    );
   }
 
   return (
@@ -64,16 +92,19 @@ export function WorkingHours({ initialHours }: Props) {
       </div>
       <div className="space-y-2">
         {DISPLAY_ORDER.map((weekday) => {
-          const row = hours.find((h) => h.weekday === weekday);
-          if (!row) return null;
+          const draft = drafts[weekday];
+          if (!draft) return null;
           return (
             <WorkingHoursRowItem
               key={weekday}
               label={WEEKDAY_LABELS[weekday]}
-              row={row}
-              isPending={pendingWeekday === weekday}
-              error={rowErrors[weekday]}
-              onSave={(draft) => save(weekday, draft)}
+              draft={draft}
+              isPending={isPending(String(weekday))}
+              error={rowErrors[String(weekday)]}
+              onChange={(patch) => {
+                updateDraft(weekday, patch);
+              }}
+              onSave={() => void save(weekday)}
             />
           );
         })}
@@ -84,21 +115,19 @@ export function WorkingHours({ initialHours }: Props) {
 
 function WorkingHoursRowItem({
   label,
-  row,
+  draft,
   isPending,
   error,
+  onChange,
   onSave,
 }: {
   label: string;
-  row: WorkingHoursRow;
+  draft: HoursDraft;
   isPending: boolean;
   error?: string;
-  onSave: (draft: { opens_at: string | null; closes_at: string | null; is_closed: boolean }) => void;
+  onChange: (patch: Partial<HoursDraft>) => void;
+  onSave: () => void;
 }) {
-  const [isClosed, setIsClosed] = useState(row.is_closed);
-  const [opensAt, setOpensAt] = useState(toTimeInputValue(row.opens_at));
-  const [closesAt, setClosesAt] = useState(toTimeInputValue(row.closes_at));
-
   return (
     <div className="rounded-xl bg-slate-50 p-2.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -106,30 +135,30 @@ function WorkingHoursRowItem({
         <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
           <input
             type="checkbox"
-            checked={isClosed}
+            checked={draft.isClosed}
             onChange={(e) => {
-              setIsClosed(e.target.checked);
+              onChange({ isClosed: e.target.checked });
             }}
           />
           Zamknięte
         </label>
       </div>
-      {!isClosed && (
+      {!draft.isClosed && (
         <div className="mt-2 flex items-center gap-2">
           <input
             type="time"
-            value={opensAt}
+            value={draft.opensAt}
             onChange={(e) => {
-              setOpensAt(e.target.value);
+              onChange({ opensAt: e.target.value });
             }}
             className="rounded-xl border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-900"
           />
           <span className="text-xs font-semibold text-slate-400">–</span>
           <input
             type="time"
-            value={closesAt}
+            value={draft.closesAt}
             onChange={(e) => {
-              setClosesAt(e.target.value);
+              onChange({ closesAt: e.target.value });
             }}
             className="rounded-xl border border-slate-200 px-2 py-1 text-xs font-semibold text-slate-900"
           />
@@ -139,9 +168,7 @@ function WorkingHoursRowItem({
         <button
           type="button"
           disabled={isPending}
-          onClick={() => {
-            onSave({ opens_at: isClosed ? null : opensAt, closes_at: isClosed ? null : closesAt, is_closed: isClosed });
-          }}
+          onClick={onSave}
           className={cn(
             "rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-slate-900 disabled:opacity-50",
           )}
