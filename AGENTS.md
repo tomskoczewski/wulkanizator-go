@@ -11,6 +11,7 @@ wulkanizator-go is an Astro 6 SSR app with React 19 islands, Tailwind 4, Supabas
 - Every new Supabase table must enable RLS with per-operation, per-role policies. Tables that belong to a workshop carry a `workshop_id` column and scope every policy with `public.current_workshop_id()`; role checks use `public.current_user_role()`. Regenerate `src/db/database.types.ts` with `npm run db:types` after every migration — the pre-push hook (`.husky/pre-push`) catches drift when it does.
 - API route handlers must use uppercase exports (`GET`, `POST`) — Astro silently ignores lowercase-named exports.
 - Route access rules live in `src/lib/auth-guard.ts`'s route table — never gate a route ad hoc inside a page or API route. Protected `/api/` paths are declared in the same table like any other route; the middleware answers a failed guard on `/api/*` with `401`/`403` JSON (never a redirect), so a `fetch()` caller gets a parseable error instead of followed HTML.
+- Appointment and other domain times are naive workshop-local wall-clock (`timestamp`, not `timestamptz`) — `src/lib/workshop-clock.ts` is the only module permitted to convert between an instant and workshop-local parts. Reach for it (or extend it) rather than calling `Intl.DateTimeFormat`/`new Date()` local-field accessors elsewhere; on any naive `Date`, use the `getUTC*` accessors, never `getDate()`/`getHours()`/etc.
 
 ## Project Structure
 
@@ -19,6 +20,8 @@ Source lives in `src/`: pages and API routes in `src/pages/`, React hooks in `sr
 ## Build, Test, and Development Commands
 
 See @README.md for all available scripts.
+
+Unit tests use Vitest (`npm test` / `npm run test:watch`), colocated as `*.test.ts` next to the module under test. Pure business logic in `src/lib/services/` is expected to carry them — see `src/lib/services/slot-suggestions.ts` / `.test.ts` for the pattern.
 
 Pre-commit: lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
 

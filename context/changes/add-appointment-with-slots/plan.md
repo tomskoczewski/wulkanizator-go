@@ -849,10 +849,10 @@ is the reason the table exists in this slice rather than denormalized columns on
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run typecheck`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Build succeeds: `npm run build`
-- [x] 4.4 Unit tests still pass: `npm test`
+- [x] 4.1 Type checking passes: `npm run typecheck` — 55e4e27
+- [x] 4.2 Linting passes: `npm run lint` — 55e4e27
+- [x] 4.3 Build succeeds: `npm run build` — 55e4e27
+- [x] 4.4 Unit tests still pass: `npm test` — 55e4e27
 
 #### Manual
 
@@ -867,10 +867,10 @@ is the reason the table exists in this slice rather than denormalized columns on
 
 #### Automated
 
-- [ ] 5.1 Full local suite from scratch: `npm run db:reset && npm run db:test && npm test`
-- [ ] 5.2 Lint, typecheck, and build pass
-- [ ] 5.3 Docs name the new script: `grep -n "npm test" README.md`
-- [ ] 5.4 Docs name the timezone contract: `grep -rn "workshop-clock" AGENTS.md`
+- [x] 5.1 Full local suite from scratch: `npm run db:reset && npm run db:test && npm test`
+- [x] 5.2 Lint, typecheck, and build pass
+- [x] 5.3 Docs name the new script: `grep -n "npm test" README.md`
+- [x] 5.4 Docs name the timezone contract: `grep -rn "workshop-clock" AGENTS.md`
 
 #### Manual
 

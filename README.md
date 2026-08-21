@@ -56,6 +56,7 @@ npm run dev
 - `npm run lint:fix` - Auto-fix ESLint issues
 - `npm run format` - Run Prettier
 - `npm run typecheck` - Type-check with `astro check`
+- `npm test` / `npm run test:watch` - Run unit tests with Vitest (colocated `*.test.ts` files)
 - `npm run db:start` / `db:stop` / `db:reset` / `db:test` / `db:types` - Local Supabase workflow, see [Local database workflow](#local-database-workflow)
 
 ## Project Structure
@@ -148,6 +149,7 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
 | `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
 | `/ustawienia`         | Owner-only workshop configuration (bays, services, working hours)       |
+| `/wizyty/nowa`        | Owner-only: book an appointment with free-slot suggestions             |
 
 Route protection is handled in `src/middleware.ts`, which delegates to the route table in `src/lib/auth-guard.ts`. Add a `[pathPrefix, accessLevel]` entry there to require authentication (`"any"`) or a specific role (`"owner"` / `"worker"`) — longest matching prefix wins.
 

@@ -3,7 +3,7 @@ project: "Wulkanizator GO"
 version: 1
 status: draft
 created: 2026-08-14
-updated: 2026-08-21
+updated: 2026-08-21 # S-02 → in-progress
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -32,7 +32,7 @@ Tire workshops today run their day on Excel and paper — no clear day plan, no 
 | F-01  | role-and-workshop-scope      | (foundation) user role (owner/worker) and workshop scope wired into RLS + route-guard            | —             | Access Control, NFR (GDPR)              | done |
 | F-02  | design-system-foundation     | (foundation) brand palette, typography, and component conventions locked in `context/foundation/design-system.md`, with a screen-by-screen mapping directing each slice to its exact brochure screen for near-1:1 reference | —             | NFR (readable in 2 seconds)             | done |
 | S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | done |
-| S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | proposed |
+| S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | in-progress |
 | S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | proposed |
 | S-04  | worker-status-changes        | (worker) change an appointment's status on the day plan: waiting → in progress → done / no-show  | S-03, F-01    | FR-007, FR-005 (slot release)           | proposed |
 | S-05  | customer-directory           | manage the customer directory — add, search, assign a returning customer with car(s) to a visit  | S-02          | FR-009 (full card)                      | proposed |
@@ -116,10 +116,10 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Do we ship an "add now" option for walk-ins that skips slot suggestions (Socratic on FR-004)? — Owner: user. Block: no.
-  - Is the number of suggested slots capped (nearest 5? 10?)? — Owner: user. Block: no.
+  - ~~Do we ship an "add now" option for walk-ins that skips slot suggestions (Socratic on FR-004)?~~ Resolved during planning: **no** — every appointment goes through a suggested slot, keeping one code path and one invariant.
+  - ~~Is the number of suggested slots capped (nearest 5? 10?)?~~ Resolved during planning: **nearest 6**, rolling into the next open working day when today is full.
 - **Risk:** This is the product's domain core — the slot algorithm plus a hard block on overlapping appointments (a PRD guardrail). A bug in the constraint = two appointments at the same bay at the same time = a regression worse than paper. Enforce validation both at the zod boundary (API) and at the DB level (exclusion constraint over `tstzrange` per `bay_id`).
-- **Status:** proposed
+- **Status:** in-progress
 
 ### S-03: Day plan — appointments with statuses (north star)
 
