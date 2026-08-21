@@ -623,38 +623,38 @@ before this slice — `/wizyty/nowa` keeps its owner-only rule, pinned by a test
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Production build succeeds: `npm run build`
+- [x] 2.1 Unit tests pass: `npm test` — 0d213e5
+- [x] 2.2 Type checking passes: `npm run typecheck` — 0d213e5
+- [x] 2.3 Linting passes: `npm run lint` — 0d213e5
+- [x] 2.4 Production build succeeds: `npm run build` — 0d213e5
 
 #### Manual
 
-- [x] 2.5 A booked appointment appears on `/dashboard` at the correct time with status *Oczekuje*
-- [x] 2.6 Stat tiles match the list; each filter pill shows exactly its matching cards; *Wszystkie* restores all
-- [x] 2.7 Day navigation moves one day at a time, *Dzisiaj* returns, browser back retraces
-- [x] 2.8 Empty open day and closed (Sunday) day each show their own message
-- [x] 2.9 Usable at 360px — no horizontal scroll, tiles and pills wrap
-- [x] 2.10 Visually compared side by side against the brochure's `TodayScreen`
-- [x] 2.11 A worker account sees the day plan without the "Nowa wizyta" CTA
-- [x] 2.12 Sign-out still works from `/dashboard` and returns to the sign-in page
+- [x] 2.5 A booked appointment appears on `/dashboard` at the correct time with status *Oczekuje* — 0d213e5
+- [x] 2.6 Stat tiles match the list; each filter pill shows exactly its matching cards; *Wszystkie* restores all — 0d213e5
+- [x] 2.7 Day navigation moves one day at a time, *Dzisiaj* returns, browser back retraces — 0d213e5
+- [x] 2.8 Empty open day and closed (Sunday) day each show their own message — 0d213e5
+- [x] 2.9 Usable at 360px — no horizontal scroll, tiles and pills wrap — 0d213e5
+- [x] 2.10 Visually compared side by side against the brochure's `TodayScreen` — 0d213e5
+- [x] 2.11 A worker account sees the day plan without the "Nowa wizyta" CTA — 0d213e5
+- [x] 2.12 Sign-out still works from `/dashboard` and returns to the sign-in page — 0d213e5
 
 ### Phase 3: Detail route and guard split
 
 #### Automated
 
-- [ ] 3.1 `src/lib/auth-guard.test.ts` exists and all its cases pass: `npm test`
-- [ ] 3.2 Type checking passes: `npm run typecheck`
-- [ ] 3.3 Linting passes: `npm run lint`
-- [ ] 3.4 Production build succeeds: `npm run build`
-- [ ] 3.5 RLS suite still passes: `npm run db:test`
+- [x] 3.1 `src/lib/auth-guard.test.ts` exists and all its cases pass: `npm test`
+- [x] 3.2 Type checking passes: `npm run typecheck`
+- [x] 3.3 Linting passes: `npm run lint`
+- [x] 3.4 Production build succeeds: `npm run build`
+- [x] 3.5 RLS suite still passes: `npm run db:test`
 
 #### Manual
 
-- [ ] 3.6 Tapping a card opens that visit's details; the back link returns to the same day
-- [ ] 3.7 A worker can open a visit detail but is redirected away from `/wizyty/nowa`
-- [ ] 3.8 A random UUID and a malformed id both render the 404 page with a link back, status 404
-- [ ] 3.9 Detail page readable at 360px and matches `VisitDetailScreen`'s main card, minus omitted blocks
+- [x] 3.6 Tapping a card opens that visit's details; the back link returns to the same day
+- [x] 3.7 A worker can open a visit detail but is redirected away from `/wizyty/nowa`
+- [x] 3.8 A random UUID and a malformed id both render the 404 page with a link back, status 404
+- [x] 3.9 Detail page readable at 360px and matches `VisitDetailScreen`'s main card, minus omitted blocks
 
 ### Phase 4: Ship
 

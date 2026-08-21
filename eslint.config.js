@@ -66,6 +66,10 @@ const astroConfig = tseslint.config({
     "astro/no-set-html-directive": "error",
     "astro/no-unused-css-selector": "warn",
     "astro/prefer-class-list-directive": "warn",
+    // astro-eslint-parser wraps frontmatter such that this rule crashes ESLint outright (not just a
+    // false positive) on any top-level `return` in a page's frontmatter — the documented Astro
+    // pattern for a dynamic route returning `new Response(null, { status: 404 })`.
+    "@typescript-eslint/no-misused-promises": "off",
   },
 });
 
