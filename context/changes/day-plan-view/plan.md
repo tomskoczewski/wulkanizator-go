@@ -643,29 +643,29 @@ before this slice — `/wizyty/nowa` keeps its owner-only rule, pinned by a test
 
 #### Automated
 
-- [x] 3.1 `src/lib/auth-guard.test.ts` exists and all its cases pass: `npm test`
-- [x] 3.2 Type checking passes: `npm run typecheck`
-- [x] 3.3 Linting passes: `npm run lint`
-- [x] 3.4 Production build succeeds: `npm run build`
-- [x] 3.5 RLS suite still passes: `npm run db:test`
+- [x] 3.1 `src/lib/auth-guard.test.ts` exists and all its cases pass: `npm test` — e383de8
+- [x] 3.2 Type checking passes: `npm run typecheck` — e383de8
+- [x] 3.3 Linting passes: `npm run lint` — e383de8
+- [x] 3.4 Production build succeeds: `npm run build` — e383de8
+- [x] 3.5 RLS suite still passes: `npm run db:test` — e383de8
 
 #### Manual
 
-- [x] 3.6 Tapping a card opens that visit's details; the back link returns to the same day
-- [x] 3.7 A worker can open a visit detail but is redirected away from `/wizyty/nowa`
-- [x] 3.8 A random UUID and a malformed id both render the 404 page with a link back, status 404
-- [x] 3.9 Detail page readable at 360px and matches `VisitDetailScreen`'s main card, minus omitted blocks
+- [x] 3.6 Tapping a card opens that visit's details; the back link returns to the same day — e383de8
+- [x] 3.7 A worker can open a visit detail but is redirected away from `/wizyty/nowa` — e383de8
+- [x] 3.8 A random UUID and a malformed id both render the 404 page with a link back, status 404 — e383de8
+- [x] 3.9 Detail page readable at 360px and matches `VisitDetailScreen`'s main card, minus omitted blocks — e383de8
 
 ### Phase 4: Ship
 
 #### Automated
 
-- [ ] 4.1 Full gate passes: `npm run lint && npm run typecheck && npm test && npm run build`
-- [ ] 4.2 RLS suite passes: `npm run db:test`
+- [x] 4.1 Full gate passes: `npm run lint && npm run typecheck && npm test && npm run build`
+- [x] 4.2 RLS suite passes: `npm run db:test`
 - [ ] 4.3 CI is green on the PR
 
 #### Manual
 
-- [ ] 4.4 Grep sweep returns no stale references to the moved helper or the old `/wizyty` access rule
-- [ ] 4.5 README's route table matches the shipped guard table
+- [x] 4.4 Grep sweep returns no stale references to the moved helper or the old `/wizyty` access rule
+- [x] 4.5 README's route table matches the shipped guard table
 - [ ] 4.6 Production `/dashboard` shows the day plan and a visit's detail page opens
