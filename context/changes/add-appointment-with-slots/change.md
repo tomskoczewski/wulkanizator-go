@@ -1,7 +1,7 @@
 ---
 change_id: add-appointment-with-slots
 title: Add appointment with free-slot suggestions
-status: implementing
+status: implemented
 created: 2026-08-21
 updated: 2026-08-21
 archived_at: null

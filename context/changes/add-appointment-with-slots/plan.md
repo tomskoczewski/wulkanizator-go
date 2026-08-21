@@ -860,21 +860,21 @@ is the reason the table exists in this slice rather than denormalized columns on
 - [x] 4.6 End-to-end booking lands the right bay, times and `waiting` status
 - [x] 4.7 Changing service clears the chosen slot and reloads suggestions
 - [x] 4.8 A forced 409 keeps typed data, swaps chips, and shows the message inline
-- [ ] 4.9 Usable at 360px with no horizontal overflow
+- [x] 4.9 Usable at 360px with no horizontal overflow
 - [x] 4.10 A worker is redirected away from `/wizyty/nowa`
 
 ### Phase 5: Ship
 
 #### Automated
 
-- [x] 5.1 Full local suite from scratch: `npm run db:reset && npm run db:test && npm test`
-- [x] 5.2 Lint, typecheck, and build pass
-- [x] 5.3 Docs name the new script: `grep -n "npm test" README.md`
-- [x] 5.4 Docs name the timezone contract: `grep -rn "workshop-clock" AGENTS.md`
+- [x] 5.1 Full local suite from scratch: `npm run db:reset && npm run db:test && npm test` — d6353c7
+- [x] 5.2 Lint, typecheck, and build pass — d6353c7
+- [x] 5.3 Docs name the new script: `grep -n "npm test" README.md` — d6353c7
+- [x] 5.4 Docs name the timezone contract: `grep -rn "workshop-clock" AGENTS.md` — d6353c7
 
 #### Manual
 
-- [ ] 5.5 Production shows both tables with RLS, `btree_gist`, and the exclusion constraint
-- [ ] 5.6 Hand-run overlap insert rejected on production with `23P01`
-- [ ] 5.7 A real appointment books successfully on production after deploy
-- [ ] 5.8 The roadmap's S-02 edits are committed with a bumped frontmatter `updated:`
+- [x] 5.5 Production shows both tables with RLS, `btree_gist`, and the exclusion constraint
+- [x] 5.6 Hand-run overlap insert rejected on production with `23P01`
+- [x] 5.7 A real appointment books successfully on production after deploy
+- [x] 5.8 The roadmap's S-02 edits are committed with a bumped frontmatter `updated:`
