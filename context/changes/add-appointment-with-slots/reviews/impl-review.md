@@ -4,8 +4,9 @@
 - **Plan**: context/changes/add-appointment-with-slots/plan.md
 - **Scope**: Phase 5 of 5 (full plan)
 - **Date**: 2026-08-21
-- **Verdict**: REJECTED
+- **Verdict**: REJECTED (at time of review — see Triage below)
 - **Findings**: 1 critical, 2 warnings, 4 observations
+- **Triage**: Complete — F1, F2, F3, F4, F5 fixed and shipped to production; F6, F7 skipped (justified). See each finding's Decision.
 
 ## Verdicts
 
@@ -51,7 +52,7 @@
   - Tradeoff: Leaves a wider-than-strictly-necessary write surface live in production for the entire S-02→S-04 gap.
   - Confidence: HIGH that this matches the plan's literal words.
   - Blind spot: None significant.
-- **Decision**: FIXED — Fix A applied, commit `329390b` (local; production push batched with remaining findings)
+- **Decision**: FIXED — Fix A applied, commit `329390b` (local; production push complete)
 
 ### F3 — `NewAppointmentForm.tsx`'s booking submit bypasses the `useJsonMutation` pattern
 
@@ -61,7 +62,7 @@
 - **Location**: src/components/appointments/NewAppointmentForm.tsx:97-137
 - **Detail**: The plan's Phase 4 Intent names `useJsonMutation` explicitly ("so a network rejection can never escape as an unhandled promise"), and the slots-fetch call in the same component (line 92) does use it. The booking `handleSubmit`, however, hand-rolls `fetch()` + manual JSON parsing + status branching. This is a deliberate, justified deviation — `useJsonMutation`'s `MutationResult` shape only carries `ok`/`fieldErrors`/`message` on failure, with no room for the 409 response's `slots`/`emptyReason` payload the booking flow needs to swap in fresh chips — and the raw version still satisfies the underlying guarantee (try/catch, no unhandled rejection). It just isn't visually obvious from the code that this is intentional rather than an oversight.
 - **Fix**: Add a one-line comment above `handleSubmit` noting why `useJsonMutation` isn't used here (needs the 409 body's `slots`/`emptyReason`, which the hook's generic result shape can't carry).
-- **Decision**: FIXED — comment added
+- **Decision**: FIXED — comment added, commit `31b4e42`
 
 ### F4 — `STARTS_AT_PATTERN` validates digit shape, not value ranges
 
@@ -71,7 +72,7 @@
 - **Location**: src/lib/schemas/appointment.ts:6
 - **Detail**: `/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(:\d{2})?$/` accepts a value like `2026-01-01T99:99`; `timestampStringToNaiveDate` → `Date.UTC(...)` silently normalizes it into a different (wrong) date rather than rejecting it. In practice this is caught downstream — an out-of-range time will essentially never match a real offered slot in `bookAppointment()`'s `stillOffered` check, so it degrades to a 409 rather than corrupting data — but the schema doesn't do the range-validation job its name implies, unlike the existing `TIME_HH_MM` precedent in `workshop-setup.ts`.
 - **Fix**: Constrain hour/minute/second ranges in the regex, e.g. `^\d{4}-\d{2}-\d{2}[T ](?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$`, matching `TIME_HH_MM`'s existing convention.
-- **Decision**: FIXED — also constrained month (01-12) and day (01-31) ranges
+- **Decision**: FIXED — also constrained month (01-12) and day (01-31) ranges, commit `31b4e42`
 
 ### F5 — Redundant `services` round-trip in `bookAppointment()`
 
@@ -81,7 +82,7 @@
 - **Location**: src/lib/services/appointments.ts:176, 185-189
 - **Detail**: The preflight call (`suggestSlotsForService`) already fetches `duration_min` from `services`. `bookAppointment()` re-queries `services` again immediately after for the same value — not a correctness issue, just an avoidable extra round trip on every booking.
 - **Fix**: Thread the `durationMin` already fetched during preflight through to the insert path instead of re-querying.
-- **Decision**: FIXED — `SuggestionResult` now carries `durationMin`; `bookAppointment()` reuses `preflight.durationMin`
+- **Decision**: FIXED — `SuggestionResult` now carries `durationMin`; `bookAppointment()` reuses `preflight.durationMin`, commit `31b4e42`
 
 ### F6 — `suggestSlots()`'s per-bay loop isn't limit-bounded within a single day
 
@@ -91,7 +92,7 @@
 - **Location**: src/lib/services/slot-suggestions.ts:54-84
 - **Detail**: `results.length >= limit` is only checked between day-window iterations (line 55); within one day, every bay's `while` loop runs to completion before `dayResults` is trimmed by the final `.slice(0, limit)`. Fine at current scale (1-5 bays, 14-day horizon) — flagged only because it would scale linearly with bay count × window/step rather than stopping early once a day already has enough candidates.
 - **Fix**: Not urgent at current scale; revisit only if bay count grows materially.
-- **Decision**: PENDING
+- **Decision**: SKIPPED — negligible at current scale (1-5 bays)
 
 ### F7 — Production-only manual checks (5.5–5.7) have no observable artifact in this session
 
@@ -101,4 +102,4 @@
 - **Location**: N/A (process note)
 - **Detail**: Every other manual Progress item in this plan (3.5-3.12, 4.5-4.10) was directly witnessed in this session via curl or live browser automation. Items 5.5 (production RLS/extension/constraint check), 5.6 (hand-run `23P01` test), and 5.7 (real production booking) were confirmed by the user, but the implementer had no production database credentials and so has no screenshot or query output on record for these three — unlike the rest of the checklist.
 - **Fix**: None required; noted per the review's rubber-stamp-detection guidance. Re-verify only if there's reason to doubt the confirmation.
-- **Decision**: PENDING
+- **Decision**: SKIPPED — already confirmed by user earlier in this session
