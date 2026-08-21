@@ -662,7 +662,7 @@ before this slice — `/wizyty/nowa` keeps its owner-only rule, pinned by a test
 
 - [x] 4.1 Full gate passes: `npm run lint && npm run typecheck && npm test && npm run build`
 - [x] 4.2 RLS suite passes: `npm run db:test`
-- [ ] 4.3 CI is green on the PR
+- [x] 4.3 CI is green on the PR
 
 #### Manual
 
