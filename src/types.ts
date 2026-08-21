@@ -14,6 +14,9 @@ export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 export type Bay = Database["public"]["Tables"]["bays"]["Row"];
 export type Service = Database["public"]["Tables"]["services"]["Row"];
 export type WorkingHours = Database["public"]["Tables"]["working_hours"]["Row"];
+export type Appointment = Database["public"]["Tables"]["appointments"]["Row"];
+export type Customer = Database["public"]["Tables"]["customers"]["Row"];
+export type AppointmentStatus = Database["public"]["Enums"]["appointment_status"];
 
 export interface UserProfile {
   workshopId: string;

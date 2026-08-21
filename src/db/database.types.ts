@@ -35,6 +35,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          bay_id: string
+          created_at: string
+          customer_id: string
+          ends_at: string
+          id: string
+          service_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          workshop_id: string
+        }
+        Insert: {
+          bay_id: string
+          created_at?: string
+          customer_id: string
+          ends_at: string
+          id?: string
+          service_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          workshop_id: string
+        }
+        Update: {
+          bay_id?: string
+          created_at?: string
+          customer_id?: string
+          ends_at?: string
+          id?: string
+          service_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_bay_id_fkey"
+            columns: ["bay_id"]
+            isOneToOne: false
+            referencedRelation: "bays"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bays: {
         Row: {
           created_at: string
@@ -63,6 +128,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "bays_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          created_at: string
+          first_name: string
+          id: string
+          phone: string
+          workshop_id: string
+        }
+        Insert: {
+          created_at?: string
+          first_name: string
+          id?: string
+          phone: string
+          workshop_id: string
+        }
+        Update: {
+          created_at?: string
+          first_name?: string
+          id?: string
+          phone?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_workshop_id_fkey"
             columns: ["workshop_id"]
             isOneToOne: false
             referencedRelation: "workshops"
@@ -201,6 +298,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      book_appointment: {
+        Args: {
+          p_bay_id: string
+          p_ends_at: string
+          p_first_name: string
+          p_phone: string
+          p_service_id: string
+          p_starts_at: string
+        }
+        Returns: {
+          bay_id: string
+          created_at: string
+          customer_id: string
+          ends_at: string
+          id: string
+          service_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          workshop_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
@@ -212,6 +336,12 @@ export type Database = {
       }
     }
     Enums: {
+      appointment_status:
+        | "waiting"
+        | "in_progress"
+        | "done"
+        | "no_show"
+        | "cancelled"
       user_role: "owner" | "worker"
     }
     CompositeTypes: {
@@ -343,6 +473,13 @@ export const Constants = {
   },
   public: {
     Enums: {
+      appointment_status: [
+        "waiting",
+        "in_progress",
+        "done",
+        "no_show",
+        "cancelled",
+      ],
       user_role: ["owner", "worker"],
     },
   },

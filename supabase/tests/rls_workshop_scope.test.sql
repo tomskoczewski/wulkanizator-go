@@ -8,7 +8,7 @@
 
 begin;
 
-select plan(26);
+select plan(45);
 
 -- Switches the session to `authenticated` acting as the given user, for the rest of the
 -- transaction. Declared in pg_temp so it never survives past this test file's rollback.
@@ -90,6 +90,22 @@ declare
   affected int;
 begin
   update public.working_hours set is_closed = true
+  where workshop_id = public.current_workshop_id();
+  get diagnostics affected = row_count;
+  return affected;
+end;
+$$;
+
+-- S-02: worker A is allowed to update an appointment's status (S-04's precondition), unlike the
+-- owner-only tables above.
+
+create function pg_temp.try_worker_update_appointment_status() returns int
+language plpgsql
+as $$
+declare
+  affected int;
+begin
+  update public.appointments set status = 'in_progress'
   where workshop_id = public.current_workshop_id();
   get diagnostics affected = row_count;
   return affected;
@@ -267,6 +283,195 @@ select throws_ok(
   '42501',
   'permission denied for table bays',
   'direct DELETE from bays is rejected for any authenticated user (no DELETE grant)'
+);
+
+-- S-02: appointments and customers. book_appointment() inserts both rows in one implicit
+-- transaction, so it is the primary path exercised here; direct INSERTs are used only where the
+-- point is to prove they're denied (worker) or to build fixture rows for the overlap-guard tests.
+
+-- Owner A books one appointment. This is also the RLS isolation fixture for the next block: if
+-- owner B could see it, the counts below would be wrong.
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+select lives_ok(
+  $$ select public.book_appointment('Jan', '600100100',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-01 09:00'::timestamp, '2026-09-01 09:45'::timestamp) $$,
+  'owner A can book an appointment via book_appointment()'
+);
+
+select is(
+  (select count(*)::int from public.appointments),
+  1,
+  'owner A sees exactly one appointment after booking'
+);
+
+select is(
+  (select count(*)::int from public.customers),
+  1,
+  'owner A sees exactly one customer after booking'
+);
+
+-- Owner B books their own appointment in their own workshop.
+
+select pg_temp.authenticate_as('22222222-2222-2222-2222-222222222222');
+
+select lives_ok(
+  $$ select public.book_appointment('Ola', '600200200',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-01 09:00'::timestamp, '2026-09-01 09:45'::timestamp) $$,
+  'owner B can book an appointment via book_appointment()'
+);
+
+select is(
+  (select count(*)::int from public.appointments),
+  1,
+  'owner B sees exactly one appointment (isolation: not owner A''s)'
+);
+
+select is(
+  (select count(*)::int from public.customers),
+  1,
+  'owner B sees exactly one customer (isolation: not owner A''s)'
+);
+
+-- Back to owner A: still exactly their own row, proving the isolation holds in both directions.
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+select is(
+  (select count(*)::int from public.appointments),
+  1,
+  'owner A cannot select owner B''s appointments (still sees exactly one, their own)'
+);
+
+select is(
+  (select count(*)::int from public.customers),
+  1,
+  'owner A cannot select owner B''s customers (still sees exactly one, their own)'
+);
+
+-- Worker A: can read and update status in their own workshop, but cannot insert directly or call
+-- the owner-gated booking function.
+
+select pg_temp.authenticate_as('33333333-3333-3333-3333-333333333333');
+
+select throws_ok(
+  $$ insert into public.appointments (workshop_id, customer_id, service_id, bay_id, starts_at, ends_at)
+     values (
+       public.current_workshop_id(),
+       (select id from public.customers where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-02 09:00', '2026-09-02 09:45'
+     ) $$,
+  '42501',
+  null,
+  'worker A cannot insert an appointment directly (owner-only INSERT policy)'
+);
+
+select is(
+  (select count(*)::int from public.appointments),
+  1,
+  'worker A can select the appointment booked in their own workshop'
+);
+
+select is(
+  pg_temp.try_worker_update_appointment_status(),
+  1,
+  'worker A can update an appointment''s status in their own workshop'
+);
+
+select throws_ok(
+  $$ select public.book_appointment('Ktos', '600300300',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-03 09:00'::timestamp, '2026-09-03 09:45'::timestamp) $$,
+  'P0001',
+  'only an owner may book an appointment',
+  'worker A cannot call book_appointment() (in-function role check, since SECURITY DEFINER bypasses RLS)'
+);
+
+-- Owner A: the overlap guard itself.
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+select throws_ok(
+  $$ insert into public.appointments (workshop_id, customer_id, service_id, bay_id, starts_at, ends_at)
+     values (
+       public.current_workshop_id(),
+       (select id from public.customers where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-01 09:30', '2026-09-01 10:15'
+     ) $$,
+  '23P01',
+  null,
+  'an appointment overlapping an existing one on the same bay is rejected by the exclusion constraint'
+);
+
+select lives_ok(
+  $$ insert into public.appointments (workshop_id, customer_id, service_id, bay_id, starts_at, ends_at)
+     values (
+       public.current_workshop_id(),
+       (select id from public.customers where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-01 09:45', '2026-09-01 10:30'
+     ) $$,
+  'a back-to-back appointment starting exactly when another ends is accepted (the ''[)'' bound)'
+);
+
+select lives_ok(
+  $$ update public.appointments set status = 'no_show'
+     where workshop_id = public.current_workshop_id() and starts_at = '2026-09-01 09:00'::timestamp $$,
+  'the first appointment can be marked no_show'
+);
+
+select lives_ok(
+  $$ insert into public.appointments (workshop_id, customer_id, service_id, bay_id, starts_at, ends_at)
+     values (
+       public.current_workshop_id(),
+       (select id from public.customers where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-01 09:00', '2026-09-01 09:45'
+     ) $$,
+  'overlapping a no_show appointment on the same bay is accepted (the partial-index regression test)'
+);
+
+-- book_appointment() losing the race leaves no orphan customer: the second call for the same bay
+-- and slot must raise 23P01 AND leave the customers count unchanged, proving the rollback covers
+-- both inserts made inside the function body.
+
+select lives_ok(
+  $$ select public.book_appointment('Race1', '600400400',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-05 09:00'::timestamp, '2026-09-05 09:45'::timestamp) $$,
+  'first book_appointment() call for a fresh slot succeeds'
+);
+
+create temporary table pg_temp.customer_count_before as
+  select count(*)::int as n from public.customers;
+
+select throws_ok(
+  $$ select public.book_appointment('Race2', '600500500',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-05 09:00'::timestamp, '2026-09-05 09:45'::timestamp) $$,
+  '23P01',
+  null,
+  'a second book_appointment() call for the same bay and slot loses the race'
+);
+
+select is(
+  (select count(*)::int from public.customers),
+  (select n from pg_temp.customer_count_before),
+  'book_appointment() losing the race leaves no orphan customer row'
 );
 
 -- Anonymous: execute is revoked on the scoping helpers (Phase 1), not merely scoped by RLS.
