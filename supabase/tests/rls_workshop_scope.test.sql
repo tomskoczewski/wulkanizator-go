@@ -8,7 +8,7 @@
 
 begin;
 
-select plan(45);
+select plan(47);
 
 -- Switches the session to `authenticated` acting as the given user, for the rest of the
 -- transaction. Declared in pg_temp so it never survives past this test file's rollback.
@@ -472,6 +472,39 @@ select is(
   (select count(*)::int from public.customers),
   (select n from pg_temp.customer_count_before),
   'book_appointment() losing the race leaves no orphan customer row'
+);
+
+-- impl-review F1: book_appointment() must reject a bay/service belonging to a *different*
+-- workshop, not merely check that the row exists somewhere. Capture workshop B's own ids while
+-- authenticated as owner B (RLS-scoped), then attempt to use them as owner A.
+
+select pg_temp.authenticate_as('22222222-2222-2222-2222-222222222222');
+
+create temporary table pg_temp.workshop_b_refs as
+  select
+    (select id from public.bays where workshop_id = public.current_workshop_id() limit 1) as bay_id,
+    (select id from public.services where workshop_id = public.current_workshop_id() limit 1) as service_id;
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+select throws_ok(
+  $$ select public.book_appointment('Cross1', '600666777',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select bay_id from pg_temp.workshop_b_refs),
+       '2026-09-06 09:00'::timestamp, '2026-09-06 09:45'::timestamp) $$,
+  'P0001',
+  'bay does not belong to this workshop',
+  'owner A cannot book_appointment() using workshop B''s bay_id'
+);
+
+select throws_ok(
+  $$ select public.book_appointment('Cross2', '600777888',
+       (select service_id from pg_temp.workshop_b_refs),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-07 09:00'::timestamp, '2026-09-07 09:45'::timestamp) $$,
+  'P0001',
+  'service does not belong to this workshop',
+  'owner A cannot book_appointment() using workshop B''s service_id'
 );
 
 -- Anonymous: execute is revoked on the scoping helpers (Phase 1), not merely scoped by RLS.
