@@ -610,34 +610,34 @@ before this slice — `/wizyty/nowa` keeps its owner-only rule, pinned by a test
 
 #### Automated
 
-- [x] 1.1 `src/lib/services/day-plan.test.ts` exists and all its cases pass: `npm test`
-- [x] 1.2 Type checking passes: `npm run typecheck`
-- [x] 1.3 Linting passes: `npm run lint`
-- [x] 1.4 Production build succeeds: `npm run build`
+- [x] 1.1 `src/lib/services/day-plan.test.ts` exists and all its cases pass: `npm test` — 71e27c5
+- [x] 1.2 Type checking passes: `npm run typecheck` — 71e27c5
+- [x] 1.3 Linting passes: `npm run lint` — 71e27c5
+- [x] 1.4 Production build succeeds: `npm run build` — 71e27c5
 
 #### Manual
 
-- [x] 1.5 No UI changed — `/dashboard`, `/ustawienia` and `/wizyty/nowa` still render exactly as before
+- [x] 1.5 No UI changed — `/dashboard`, `/ustawienia` and `/wizyty/nowa` still render exactly as before — 71e27c5
 
 ### Phase 2: Day plan screen
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Production build succeeds: `npm run build`
+- [x] 2.1 Unit tests pass: `npm test`
+- [x] 2.2 Type checking passes: `npm run typecheck`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.5 A booked appointment appears on `/dashboard` at the correct time with status *Oczekuje*
-- [ ] 2.6 Stat tiles match the list; each filter pill shows exactly its matching cards; *Wszystkie* restores all
-- [ ] 2.7 Day navigation moves one day at a time, *Dzisiaj* returns, browser back retraces
-- [ ] 2.8 Empty open day and closed (Sunday) day each show their own message
-- [ ] 2.9 Usable at 360px — no horizontal scroll, tiles and pills wrap
-- [ ] 2.10 Visually compared side by side against the brochure's `TodayScreen`
-- [ ] 2.11 A worker account sees the day plan without the "Nowa wizyta" CTA
-- [ ] 2.12 Sign-out still works from `/dashboard` and returns to the sign-in page
+- [x] 2.5 A booked appointment appears on `/dashboard` at the correct time with status *Oczekuje*
+- [x] 2.6 Stat tiles match the list; each filter pill shows exactly its matching cards; *Wszystkie* restores all
+- [x] 2.7 Day navigation moves one day at a time, *Dzisiaj* returns, browser back retraces
+- [x] 2.8 Empty open day and closed (Sunday) day each show their own message
+- [x] 2.9 Usable at 360px — no horizontal scroll, tiles and pills wrap
+- [x] 2.10 Visually compared side by side against the brochure's `TodayScreen`
+- [x] 2.11 A worker account sees the day plan without the "Nowa wizyta" CTA
+- [x] 2.12 Sign-out still works from `/dashboard` and returns to the sign-in page
 
 ### Phase 3: Detail route and guard split
 

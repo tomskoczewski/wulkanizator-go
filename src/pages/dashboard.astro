@@ -1,13 +1,15 @@
 ---
 import AppShell from "@/layouts/AppShell.astro";
-import type { UserRole } from "@/types";
+import DayPlanBoard from "@/components/appointments/DayPlanBoard";
+import { getDayPlan } from "@/lib/services/appointments";
+import { resolveDayParam } from "@/lib/schemas/day-plan";
+import { shiftDateString, workshopTodayDateString } from "@/lib/workshop-clock";
 
-const { user, profile } = Astro.locals;
+const { profile, supabase } = Astro.locals;
 
-const roleLabel: Record<UserRole, string> = {
-  owner: "właściciel",
-  worker: "pracownik",
-};
+const today = workshopTodayDateString();
+const date = resolveDayParam(Astro.url.searchParams.get("data"));
+const plan = supabase ? await getDayPlan(supabase, date) : null;
 ---
 
 <AppShell
@@ -16,44 +18,30 @@ const roleLabel: Record<UserRole, string> = {
   ctaLabel="Nowa wizyta"
   ctaHref={profile?.role === "owner" ? "/wizyty/nowa" : undefined}
 >
-  <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-    <h1 class="text-xl font-black text-slate-900">Dashboard</h1>
-    <p class="mt-2 text-sm font-medium text-slate-600">
-      Witaj, <span class="font-black text-slate-900">{user?.email}</span>
-    </p>
-    {
-      profile && (
-        <p class="mt-1 text-sm font-medium text-slate-600">
-          Warsztat: <span class="font-black text-slate-900">{profile.workshopName}</span> · Rola:{" "}
-          <span class="font-black text-slate-900">{roleLabel[profile.role]}</span>
-        </p>
-      )
-    }
-    <p class="mt-2 text-xs font-medium text-slate-400">Plan dnia pojawi się tutaj (S-03).</p>
-    <form method="POST" action="/api/auth/signout" class="mt-4">
-      <button
-        type="submit"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-      >
-        Wyloguj
-      </button>
-    </form>
-  </div>
-
   {
-    profile?.role === "owner" && (
-      <a
-        href="/ustawienia"
-        class="mt-4 flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 hover:ring-orange-200"
-      >
-        <div>
-          <div class="text-sm font-black text-slate-900">Skonfiguruj warsztat</div>
-          <div class="text-xs font-medium text-slate-500">
-            Usługi, stanowiska i godziny pracy — sprawdź lub zmień ustawienia.
-          </div>
-        </div>
-        <span class="text-xs font-black text-orange-600">Ustawienia →</span>
-      </a>
+    plan ? (
+      <DayPlanBoard
+        client:load
+        entries={plan.entries}
+        workingHours={plan.workingHours}
+        date={date}
+        prevDate={shiftDateString(date, -1)}
+        nextDate={shiftDateString(date, 1)}
+        today={today}
+      />
+    ) : (
+      <div class="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100">
+        Supabase nie jest skonfigurowany.
+      </div>
     )
   }
+
+  <form method="POST" action="/api/auth/signout" class="mt-4">
+    <button
+      type="submit"
+      class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+    >
+      Wyloguj
+    </button>
+  </form>
 </AppShell>
