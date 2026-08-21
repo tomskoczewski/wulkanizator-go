@@ -1,7 +1,7 @@
 ---
 change_id: day-plan-view
 title: Day plan — owner/worker sees all appointments with statuses in one view
-status: implementing
+status: impl_reviewed
 created: 2026-08-21
 updated: 2026-08-21
 archived_at: null

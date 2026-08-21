@@ -12,7 +12,7 @@ const { id } = Astro.params;
 const entry = supabase && id && z.uuid().safeParse(id).success ? await getAppointmentDetail(supabase, id) : null;
 
 if (!entry) {
-  return new Response(null, { status: 404 });
+  return Astro.rewrite("/404");
 }
 
 function timeLabel(wire: string): string {
