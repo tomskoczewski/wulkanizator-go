@@ -33,7 +33,7 @@ Tire workshops today run their day on Excel and paper — no clear day plan, no 
 | F-02  | design-system-foundation     | (foundation) brand palette, typography, and component conventions locked in `context/foundation/design-system.md`, with a screen-by-screen mapping directing each slice to its exact brochure screen for near-1:1 reference | —             | NFR (readable in 2 seconds)             | done |
 | S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | done |
 | S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | done |
-| S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | in-progress |
+| S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | done |
 | S-04  | worker-status-changes        | (worker) change an appointment's status on the day plan: waiting → in progress → done / no-show  | S-03, F-01    | FR-007, FR-005 (slot release)           | proposed |
 | S-05  | customer-directory           | manage the customer directory — add, search, assign a returning customer with car(s) to a visit  | S-02          | FR-009 (full card)                      | proposed |
 | S-06  | tire-storage                 | take a customer's tires into storage and track state (who owns them, where they sit)             | S-05          | FR-010 (nice-to-have)                   | parked   |
@@ -133,7 +133,7 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Unknowns:**
   - ~~Sort order and status color palette — stick to shadcn tokens or define custom ones?~~ Resolved by F-02: custom palette, documented in `context/foundation/design-system.md` (status-color mapping: waiting=amber, in progress=blue, done=emerald, no-show=rose, cancelled=slate). ~~Sort order~~ Resolved by `day-plan-view` Phase 1: start time ascending, bay name as tie-break.
 - **Risk:** This is the north star (see above) — if the S-01 → S-02 → S-03 chain drifts (e.g., appointment `workshop_id` derived differently than in F-01), it will show up here. Keep the view minimal: today + "previous / next day", no weekly view.
-- **Status:** in-progress
+- **Status:** done
 
 ### S-04: Worker changes appointment status
 
@@ -220,3 +220,4 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 
 - **F-01: (foundation) a `profiles` table exists (`user_id`, `workshop_id`, `role: owner|worker`), the RLS pattern is established (workshop-scoped + role-scoped), and `src/middleware.ts` is role-aware. Everything downstream can safely add domain tables under this contract.** — Archived 2026-08-15 → `context/archive/2026-08-15-role-and-workshop-scope/`. Lesson: —.
 - **F-02: (foundation) the visual language already validated in the private `wulkanizator-go-brochure` mockup (orange accent on slate neutrals, weight-driven typography, rounded-2xl card/shadow conventions, a 5-way status-color mapping) is captured in `context/foundation/design-system.md`, including an explicit screen-by-screen mapping (roadmap slice → exact brochure screen, with file:line pointers) that directs every UI-touching slice below to open the corresponding brochure screen and replicate it near 1:1, rather than working from memory or inventing its own look. Reference only in this foundation — no `src/` code changes; each slice applies the tokens/layout itself when it builds its screen.** — Archived 2026-08-15 → `context/archive/2026-08-15-design-system-foundation/`. Lesson: —.
+- **S-03: the owner/worker, after logging in, sees the day plan as a chronological list — stat tiles, five status filter pills, and a time-ordered appointment card per visit with a color-coded status pill. Tapping a card opens the visit's detail page. View is readable within 2 seconds per the NFR.** — Archived 2026-08-21 → `context/archive/2026-08-21-day-plan-view/`. Lesson: —.
