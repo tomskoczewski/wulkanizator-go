@@ -800,26 +800,26 @@ is the reason the table exists in this slice rather than denormalized columns on
 
 #### Automated
 
-- [x] 1.1 Migration applies from scratch: `npm run db:reset`
-- [x] 1.2 pgTAP suite passes with the new assertions: `npm run db:test`
-- [x] 1.3 Generated types are current: `npm run db:types && git diff --exit-code src/db/database.types.ts`
-- [x] 1.4 Type checking passes: `npm run typecheck`
-- [x] 1.5 Linting passes: `npm run lint`
+- [x] 1.1 Migration applies from scratch: `npm run db:reset` — 4443a01
+- [x] 1.2 pgTAP suite passes with the new assertions: `npm run db:test` — 4443a01
+- [x] 1.3 Generated types are current: `npm run db:types && git diff --exit-code src/db/database.types.ts` — 4443a01
+- [x] 1.4 Type checking passes: `npm run typecheck` — 4443a01
+- [x] 1.5 Linting passes: `npm run lint` — 4443a01
 
 #### Manual
 
-- [ ] 1.6 Both tables show RLS enabled with the expected per-operation policies in Studio
-- [ ] 1.7 `btree_gist` is installed
-- [ ] 1.8 Overlapping insert on one bay fails with `23P01`; same insert across two bays succeeds
+- [x] 1.6 Both tables show RLS enabled with the expected per-operation policies in Studio
+- [x] 1.7 `btree_gist` is installed
+- [x] 1.8 Overlapping insert on one bay fails with `23P01`; same insert across two bays succeeds
 
 ### Phase 2: Slot algorithm & Vitest
 
 #### Automated
 
-- [ ] 2.1 Test suite passes: `npm test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 Build succeeds with the new dev dependency: `npm run build`
+- [x] 2.1 Test suite passes: `npm test`
+- [x] 2.2 Type checking passes: `npm run typecheck`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 Build succeeds with the new dev dependency: `npm run build`
 
 #### Manual
 
