@@ -8,7 +8,7 @@
 
 begin;
 
-select plan(47);
+select plan(48);
 
 -- Switches the session to `authenticated` acting as the given user, for the rest of the
 -- transaction. Declared in pg_temp so it never survives past this test file's rollback.
@@ -383,6 +383,17 @@ select is(
   pg_temp.try_worker_update_appointment_status(),
   1,
   'worker A can update an appointment''s status in their own workshop'
+);
+
+-- impl-review F2: the UPDATE grant is column-restricted to `status` — any other column is denied
+-- at the privilege-check layer, before RLS is even consulted (42501, not a zero-row USING filter).
+
+select throws_ok(
+  $$ update public.appointments set bay_id = (select id from public.bays where workshop_id = public.current_workshop_id() limit 1)
+     where workshop_id = public.current_workshop_id() $$,
+  '42501',
+  null,
+  'worker A cannot update a column other than status (column-level UPDATE grant)'
 );
 
 select throws_ok(

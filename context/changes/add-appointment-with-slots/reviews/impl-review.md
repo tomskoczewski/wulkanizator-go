@@ -32,7 +32,7 @@
   - Tradeoff: Requires a new production migration and a fresh `db push`/deploy cycle, since the vulnerable version is already live.
   - Confidence: HIGH — the fix is a straightforward `if not exists (select 1 from public.bays where id = p_bay_id and workshop_id = v_workshop_id) then raise exception ...` pair, matching patterns already used elsewhere in the function.
   - Blind spot: Haven't checked whether any other `SECURITY DEFINER` function in the codebase has the same class of gap (only this migration was in scope for this review).
-- **Decision**: PENDING
+- **Decision**: FIXED — commit `ecad10c`, migration pushed to production and code pushed to `origin/main`
 
 ### F2 — `appointments` UPDATE policy grants full-row write, not status-only, to both roles
 
@@ -51,7 +51,7 @@
   - Tradeoff: Leaves a wider-than-strictly-necessary write surface live in production for the entire S-02→S-04 gap.
   - Confidence: HIGH that this matches the plan's literal words.
   - Blind spot: None significant.
-- **Decision**: PENDING
+- **Decision**: FIXED — Fix A applied
 
 ### F3 — `NewAppointmentForm.tsx`'s booking submit bypasses the `useJsonMutation` pattern
 
