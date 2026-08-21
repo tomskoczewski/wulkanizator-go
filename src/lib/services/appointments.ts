@@ -1,7 +1,12 @@
 import type { TypedSupabaseClient } from "@/lib/supabase";
 import type { AppointmentBookingRequestInput } from "@/lib/schemas/appointment";
-import type { Appointment } from "@/types";
-import { getWorkshopNow, naiveDateToTimestampString, timestampStringToNaiveDate } from "@/lib/workshop-clock";
+import type { Appointment, WorkingHours } from "@/types";
+import {
+  getWorkshopNow,
+  naiveDateToTimestampString,
+  shiftDateString,
+  timestampStringToNaiveDate,
+} from "@/lib/workshop-clock";
 import {
   DEFAULT_STEP_MIN,
   suggestSlots,
@@ -9,6 +14,7 @@ import {
   type SlotBay,
   type SuggestedSlot,
 } from "@/lib/services/slot-suggestions";
+import { sortDayPlan, type DayPlanEntry } from "@/lib/services/day-plan";
 
 /**
  * RLS scopes every query below to the caller's own workshop, following `workshop-setup.ts`: no
@@ -204,4 +210,86 @@ export async function bookAppointment(
   }
 
   return { status: "created", appointment: data };
+}
+
+const DAY_PLAN_SELECT =
+  "id, status, starts_at, ends_at, customers(first_name, phone), services(name, duration_min), bays(name)";
+
+interface DayPlanRow {
+  id: string;
+  status: DayPlanEntry["status"];
+  starts_at: string;
+  ends_at: string;
+  customers: { first_name: string; phone: string } | null;
+  services: { name: string; duration_min: number } | null;
+  bays: { name: string } | null;
+}
+
+function toDayPlanEntry(row: DayPlanRow): DayPlanEntry | null {
+  if (!row.customers || !row.services || !row.bays) {
+    console.warn(`day-plan: dropping appointment ${row.id} with a missing join`);
+    return null;
+  }
+
+  return {
+    id: row.id,
+    status: row.status,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    customerFirstName: row.customers.first_name,
+    customerPhone: row.customers.phone,
+    serviceName: row.services.name,
+    durationMin: row.services.duration_min,
+    bayName: row.bays.name,
+  };
+}
+
+function weekdayForDateString(date: string): number {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+}
+
+/**
+ * Fetches one day's appointments, joined to `customers`, `services` and `bays`, plus the working
+ * hours row for that weekday — which is what lets the screen tell a closed day from a merely empty
+ * one. RLS scopes both queries to the caller's workshop, so neither takes a `workshop_id` parameter.
+ * `cancelled` appointments are excluded; a row with an impossible-by-schema null join is dropped
+ * (logged, not thrown) rather than crashing the north-star screen on a non-null assertion.
+ */
+export async function getDayPlan(
+  supabase: TypedSupabaseClient,
+  date: string,
+): Promise<{ entries: DayPlanEntry[]; workingHours: WorkingHours | null }> {
+  const nextDate = shiftDateString(date, 1);
+  const weekday = weekdayForDateString(date);
+
+  const [appointmentsResult, hoursResult] = await Promise.all([
+    supabase
+      .from("appointments")
+      .select(DAY_PLAN_SELECT)
+      .gte("starts_at", `${date} 00:00:00`)
+      .lt("starts_at", `${nextDate} 00:00:00`)
+      .neq("status", "cancelled"),
+    supabase.from("working_hours").select("*").eq("weekday", weekday).maybeSingle(),
+  ]);
+
+  if (appointmentsResult.error) throw appointmentsResult.error;
+  if (hoursResult.error) throw hoursResult.error;
+
+  const entries = (appointmentsResult.data as DayPlanRow[])
+    .map(toDayPlanEntry)
+    .filter((entry): entry is DayPlanEntry => entry !== null);
+
+  return { entries: sortDayPlan(entries), workingHours: hoursResult.data };
+}
+
+/** Same join as `getDayPlan`, for a single id. Returns `null` for a bad id or another workshop's id
+ * — RLS makes the two indistinguishable, so this never leaks existence. */
+export async function getAppointmentDetail(supabase: TypedSupabaseClient, id: string): Promise<DayPlanEntry | null> {
+  const { data, error } = await supabase.from("appointments").select(DAY_PLAN_SELECT).eq("id", id).maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return toDayPlanEntry(data);
 }

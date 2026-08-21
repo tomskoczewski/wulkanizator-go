@@ -54,6 +54,28 @@ export function naiveDateToTimestampString(date: Date): string {
   )}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
 }
 
+/** The workshop-local date, as `YYYY-MM-DD`, for the given instant (or now). */
+export function workshopTodayDateString(now?: Date): string {
+  return naiveDateToTimestampString(getWorkshopNow(now)).slice(0, 10);
+}
+
+const DATE_STRING_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+/** Shifts a naive `YYYY-MM-DD` string by `days`, via `Date.UTC` arithmetic only. */
+export function shiftDateString(date: string, days: number): string {
+  const match = DATE_STRING_PATTERN.exec(date);
+
+  if (!match) {
+    throw new Error(`invalid date string: ${date}`);
+  }
+
+  const [, year, month, day] = match;
+  const shifted = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day) + days));
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${shifted.getUTCFullYear()}-${pad(shifted.getUTCMonth() + 1)}-${pad(shifted.getUTCDate())}`;
+}
+
 const TIMESTAMP_PATTERN = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?/;
 
 /** Parses a Postgres `timestamp` literal into a naive `Date` (UTC fields hold local values). */

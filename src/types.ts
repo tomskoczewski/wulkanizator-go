@@ -9,6 +9,7 @@ import type {
 } from "@/lib/schemas/workshop-setup";
 import type { AppointmentBookingRequestInput, SlotSuggestionRequestInput } from "@/lib/schemas/appointment";
 import type { EmptyReason, WireSlot } from "@/lib/services/appointments";
+import type { DayPlanEntry } from "@/lib/services/day-plan";
 
 export type UserRole = Database["public"]["Enums"]["user_role"];
 export type Workshop = Database["public"]["Tables"]["workshops"]["Row"];
@@ -44,4 +45,5 @@ export type {
   SlotSuggestionRequestInput,
   EmptyReason,
   WireSlot,
+  DayPlanEntry,
 };
