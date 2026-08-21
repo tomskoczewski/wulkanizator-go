@@ -66,9 +66,17 @@ const astroConfig = tseslint.config({
     "astro/no-set-html-directive": "error",
     "astro/no-unused-css-selector": "warn",
     "astro/prefer-class-list-directive": "warn",
-    // astro-eslint-parser wraps frontmatter such that this rule crashes ESLint outright (not just a
-    // false positive) on any top-level `return` in a page's frontmatter — the documented Astro
-    // pattern for a dynamic route returning `new Response(null, { status: 404 })`.
+  },
+});
+
+// astro-eslint-parser wraps frontmatter such that no-misused-promises crashes ESLint outright (not
+// just a false positive) on any top-level `return` in a page's frontmatter — the documented Astro
+// pattern for a dynamic route rewriting to a 404. An inline eslint-disable comment can't suppress
+// this because it's a rule-traversal exception, not a reportable lint message — so the rule must be
+// turned off for this file at the config level. Scoped to just this file, not every `.astro` page.
+const wizytaDetailConfig = tseslint.config({
+  files: ["src/pages/wizyty/\\[id\\].astro"],
+  rules: {
     "@typescript-eslint/no-misused-promises": "off",
   },
 });
@@ -84,5 +92,6 @@ export default tseslint.config(
   eslintPluginAstro.configs["flat/recommended"],
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
+  wizytaDetailConfig,
   eslintPluginPrettier,
 );

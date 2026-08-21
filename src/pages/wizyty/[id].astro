@@ -11,47 +11,62 @@ const { id } = Astro.params;
 // resolves to the same 404 as a well-formed id that doesn't exist, never a 500.
 const entry = supabase && id && z.uuid().safeParse(id).success ? await getAppointmentDetail(supabase, id) : null;
 
-if (!entry) {
+// Only a configured Supabase with no matching entry is a genuine not-found; an unconfigured
+// Supabase falls through to the same placeholder dashboard.astro / wizyty/nowa.astro render.
+if (supabase && !entry) {
   return Astro.rewrite("/404");
 }
 
 function timeLabel(wire: string): string {
   return /\d{2}:\d{2}/.exec(wire)?.[0] ?? wire;
 }
-
-const backHref = `/dashboard?data=${entry.startsAt.slice(0, 10)}`;
 ---
 
 <AppShell title="Szczegóły wizyty" active="Dzisiaj">
-  <div class="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-100">
-    <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h2 class="text-2xl font-black text-slate-900">{entry.customerFirstName}</h2>
-        <p class="mt-0.5 text-xs font-bold text-slate-500">
-          {timeLabel(entry.startsAt)}–{timeLabel(entry.endsAt)} · {entry.serviceName}
-        </p>
-        <a href={`tel:${entry.customerPhone}`} class="mt-0.5 inline-block text-xs font-bold text-orange-600">
-          {entry.customerPhone}
+  {
+    entry ? (
+      <>
+        <div class="rounded-[24px] bg-white p-5 shadow-sm ring-1 ring-slate-100">
+          <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 class="text-2xl font-black text-slate-900">{entry.customerFirstName}</h2>
+              <p class="mt-0.5 text-xs font-bold text-slate-500">
+                {timeLabel(entry.startsAt)}–{timeLabel(entry.endsAt)} · {entry.serviceName}
+              </p>
+              <a href={`tel:${entry.customerPhone}`} class="mt-0.5 inline-block text-xs font-bold text-orange-600">
+                {entry.customerPhone}
+              </a>
+            </div>
+            <StatusPill status={entry.status} />
+          </div>
+
+          <div class="mb-4 grid gap-3 md:grid-cols-3">
+            <div class="rounded-xl bg-slate-50 p-3">
+              <div class="text-xs font-bold text-slate-400">Usługa</div>
+              <div class="mt-1 text-sm font-black text-slate-900">{entry.serviceName}</div>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-3">
+              <div class="text-xs font-bold text-slate-400">Czas</div>
+              <div class="mt-1 text-sm font-black text-slate-900">{entry.durationMin} min</div>
+            </div>
+            <div class="rounded-xl bg-slate-50 p-3">
+              <div class="text-xs font-bold text-slate-400">Stanowisko</div>
+              <div class="mt-1 text-sm font-black text-slate-900">{entry.bayName}</div>
+            </div>
+          </div>
+        </div>
+
+        <a
+          href={`/dashboard?data=${entry.startsAt.slice(0, 10)}`}
+          class="mt-4 inline-block text-xs font-black text-orange-600"
+        >
+          ← Wróć do planu dnia
         </a>
+      </>
+    ) : (
+      <div class="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100">
+        Supabase nie jest skonfigurowany.
       </div>
-      <StatusPill status={entry.status} />
-    </div>
-
-    <div class="mb-4 grid gap-3 md:grid-cols-3">
-      <div class="rounded-xl bg-slate-50 p-3">
-        <div class="text-xs font-bold text-slate-400">Usługa</div>
-        <div class="mt-1 text-sm font-black text-slate-900">{entry.serviceName}</div>
-      </div>
-      <div class="rounded-xl bg-slate-50 p-3">
-        <div class="text-xs font-bold text-slate-400">Czas</div>
-        <div class="mt-1 text-sm font-black text-slate-900">{entry.durationMin} min</div>
-      </div>
-      <div class="rounded-xl bg-slate-50 p-3">
-        <div class="text-xs font-bold text-slate-400">Stanowisko</div>
-        <div class="mt-1 text-sm font-black text-slate-900">{entry.bayName}</div>
-      </div>
-    </div>
-  </div>
-
-  <a href={backHref} class="mt-4 inline-block text-xs font-black text-orange-600">← Wróć do planu dnia</a>
+    )
+  }
 </AppShell>
