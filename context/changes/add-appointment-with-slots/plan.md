@@ -816,34 +816,34 @@ is the reason the table exists in this slice rather than denormalized columns on
 
 #### Automated
 
-- [x] 2.1 Test suite passes: `npm test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 Build succeeds with the new dev dependency: `npm run build`
+- [x] 2.1 Test suite passes: `npm test` — 517166b
+- [x] 2.2 Type checking passes: `npm run typecheck` — 517166b
+- [x] 2.3 Linting passes: `npm run lint` — 517166b
+- [x] 2.4 Build succeeds with the new dev dependency: `npm run build` — 517166b
 
 #### Manual
 
-- [ ] 2.5 No edge case from the Phase 2 contract is missing or trivially asserted
+- [x] 2.5 No edge case from the Phase 2 contract is missing or trivially asserted
 
 ### Phase 3: Service layer, zod schemas & API routes
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npm run typecheck`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Build succeeds: `npm run build`
-- [ ] 3.4 Existing pgTAP suite still passes: `npm run db:test`
+- [x] 3.1 Type checking passes: `npm run typecheck`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Build succeeds: `npm run build`
+- [x] 3.4 Existing pgTAP suite still passes: `npm run db:test`
 
 #### Manual
 
-- [ ] 3.5 Slots endpoint returns 6 chronologically-ordered slots for a seeded service
-- [ ] 3.6 Booking returns 201 and the row appears with `status = 'waiting'`
-- [ ] 3.7 Re-posting the same slot returns 409 with fresh slots and no second row
-- [ ] 3.8 The 409 body leaks no constraint `DETAIL` or other-workshop data
-- [ ] 3.9 A worker gets `403` JSON (not an HTML redirect) from both endpoints
-- [ ] 3.10 A closed day yields no slots; a fully-closed workshop returns `[]` without hanging
-- [ ] 3.11 A stale slot (bay deactivated or day closed after the chips loaded) is rejected with 409 and creates no row
-- [ ] 3.12 Zero active bays and a fully-closed week return distinguishable `emptyReason` values
+- [x] 3.5 Slots endpoint returns 6 chronologically-ordered slots for a seeded service
+- [x] 3.6 Booking returns 201 and the row appears with `status = 'waiting'`
+- [x] 3.7 Re-posting the same slot returns 409 with fresh slots and no second row
+- [x] 3.8 The 409 body leaks no constraint `DETAIL` or other-workshop data
+- [x] 3.9 A worker gets `403` JSON (not an HTML redirect) from both endpoints
+- [x] 3.10 A closed day yields no slots; a fully-closed workshop returns `[]` without hanging
+- [x] 3.11 A stale slot (bay deactivated or day closed after the chips loaded) is rejected with 409 and creates no row
+- [x] 3.12 Zero active bays and a fully-closed week return distinguishable `emptyReason` values
 
 ### Phase 4: "Nowa wizyta" screen
 

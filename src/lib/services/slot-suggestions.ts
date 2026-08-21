@@ -42,8 +42,8 @@ export interface SuggestSlotsInput {
   limit?: number;
 }
 
-const DEFAULT_STEP_MIN = 15;
-const DEFAULT_LIMIT = 6;
+export const DEFAULT_STEP_MIN = 15;
+export const DEFAULT_LIMIT = 6;
 
 export function suggestSlots(input: SuggestSlotsInput): SuggestedSlot[] {
   const step = (input.stepMin ?? DEFAULT_STEP_MIN) * 60_000;
