@@ -3,7 +3,7 @@ project: "Wulkanizator GO"
 version: 1
 status: draft
 created: 2026-08-14
-updated: 2026-08-21 # S-02 → done
+updated: 2026-08-21 # S-06 → parked (out of MVP scope)
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -33,10 +33,10 @@ Tire workshops today run their day on Excel and paper — no clear day plan, no 
 | F-02  | design-system-foundation     | (foundation) brand palette, typography, and component conventions locked in `context/foundation/design-system.md`, with a screen-by-screen mapping directing each slice to its exact brochure screen for near-1:1 reference | —             | NFR (readable in 2 seconds)             | done |
 | S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | done |
 | S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | done |
-| S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | proposed |
+| S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | in-progress |
 | S-04  | worker-status-changes        | (worker) change an appointment's status on the day plan: waiting → in progress → done / no-show  | S-03, F-01    | FR-007, FR-005 (slot release)           | proposed |
 | S-05  | customer-directory           | manage the customer directory — add, search, assign a returning customer with car(s) to a visit  | S-02          | FR-009 (full card)                      | proposed |
-| S-06  | tire-storage                 | take a customer's tires into storage and track state (who owns them, where they sit)             | S-05          | FR-010 (nice-to-have)                   | proposed |
+| S-06  | tire-storage                 | take a customer's tires into storage and track state (who owns them, where they sit)             | S-05          | FR-010 (nice-to-have)                   | parked   |
 
 ## Streams
 
@@ -47,7 +47,7 @@ Navigation aid — groups slices that share a prerequisites chain. The canonical
 | A      | Core loop (north star)    | `F-01` → `S-01` → `S-02` → `S-03`                | Critical must-have path; `main_goal: speed` means this is the priority spine.               |
 | B      | Worker adoption           | `S-04`                                           | Joins Stream A at `S-03`; also needs the role from `F-01`. Runnable in parallel with C.    |
 | C      | Customer directory        | `S-05`                                           | Branches off Stream A at `S-02` (basic walk-in customer already exists); parallel with B.  |
-| D      | Tire storage (nice-to-have) | `S-06`                                          | Extension of Stream C; timeline risk — see Open Q and Unknowns.                             |
+| D      | Tire storage — **parked**   | `S-06`                                          | Parked 2026-08-21, out of MVP scope (see §Parked). Chain kept so it can be picked back up as-is. |
 
 `F-02` (design-system-foundation) is intentionally absent from this table — it has no prerequisites and isn't a hard blocker for any single stream (unlike `F-01`, which gates Stream A). It's cross-cutting: a reference every stream's UI-touching slices can draw on, not a link in one chain.
 
@@ -123,7 +123,7 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 
 ### S-03: Day plan — appointments with statuses (north star)
 
-- **Outcome:** the owner/worker, after logging in, sees the day plan as a bays × time grid with color-coded appointment tiles (status). Clicking a tile shows appointment details. View is readable within 2 seconds per the NFR.
+- **Outcome:** the owner/worker, after logging in, sees the day plan as a chronological list — stat tiles, five status filter pills, and a time-ordered appointment card per visit with a color-coded status pill. Tapping a card opens the visit's detail page. View is readable within 2 seconds per the NFR.
 - **Change ID:** day-plan-view
 - **PRD refs:** FR-006, FR-008
 - **Brochure reference:** `TodayScreen` (brochure `src/App.jsx:293`) — the north star's direct 1:1 mockup: stat tiles, status filters, appointment list with `StatusPill` (`src/App.jsx:169`). See `context/foundation/design-system.md` screen-mapping table.
@@ -131,9 +131,9 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - ~~Sort order and status color palette — stick to shadcn tokens or define custom ones?~~ Resolved by F-02: custom palette, documented in `context/foundation/design-system.md` (status-color mapping: waiting=amber, in progress=blue, done=emerald, no-show=rose, cancelled=slate). Sort order still open — Owner: user. Block: no.
+  - ~~Sort order and status color palette — stick to shadcn tokens or define custom ones?~~ Resolved by F-02: custom palette, documented in `context/foundation/design-system.md` (status-color mapping: waiting=amber, in progress=blue, done=emerald, no-show=rose, cancelled=slate). ~~Sort order~~ Resolved by `day-plan-view` Phase 1: start time ascending, bay name as tie-break.
 - **Risk:** This is the north star (see above) — if the S-01 → S-02 → S-03 chain drifts (e.g., appointment `workshop_id` derived differently than in F-01), it will show up here. Keep the view minimal: today + "previous / next day", no weekly view.
-- **Status:** proposed
+- **Status:** in-progress
 
 ### S-04: Worker changes appointment status
 
@@ -163,7 +163,9 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Risk:** Scope-creep risk — a customer card easily grows into visit history, notes, tags. Hold the minimum: customer + cars + simple search by last name / phone / plate.
 - **Status:** proposed
 
-### S-06: Tire storage
+### S-06: Tire storage — PARKED
+
+> Parked 2026-08-21, out of MVP scope. Section kept in place (not deleted) so the slice can be un-parked without re-deriving it — see **Park decision** and **Re-entry trigger** below.
 
 - **Outcome:** the owner accepts a customer's tire set into storage (linked to the customer + location: shelf/rack), then searches later: "whose tires do I have?" and "where does customer X's set sit?".
 - **Change ID:** tire-storage
@@ -173,9 +175,11 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Parallel with:** —
 - **Blockers:** —
 - **Unknowns:**
-  - Does tire storage fit within the 3-week after-hours budget (the PRD itself flags this timeline risk in FR-010)? — Owner: user. Block: no. (If not — move to Parked.)
-- **Risk:** Marked as nice-to-have in the PRD with a timeline warning. The real "do it / park it" call happens after S-04, once remaining budget is visible. Consequence of parking: losing the industry differentiator ("no calendar has tire storage" from Vision).
-- **Status:** proposed
+  - ~~Does tire storage fit within the 3-week after-hours budget (the PRD itself flags this timeline risk in FR-010)?~~ Resolved 2026-08-21: **no** — parked, taking the escape hatch this Unknown itself named ("If not — move to Parked").
+- **Park decision (2026-08-21):** FR-010 is the PRD's only `nice-to-have`, and the PRD's own Socratic resolution already conceded the timeline risk ("Jeśli nie zmieści się w 3 tygodniach, zostaje na v2"). No must-have FR depends on it, and nothing in `src/` references tire storage yet — the S-02 plan explicitly deferred the brochure's "Opony" block to S-06 — so parking removes work without leaving a stub behind. The remaining after-hours budget goes to S-03 → S-04 → S-05, the chain that makes the MVP demonstrable.
+- **Risk (accepted):** parking costs the industry differentiator ("no calendar has tire storage" from Vision) for the MVP demo; it moves to the v2 pitch. Accepted under `main_goal: speed` / `top_blocker: time`.
+- **Re-entry trigger:** S-05 ships with budget left over, or a real workshop asks for storage before v2. Un-parking = flip this Status back to `proposed`, restore the Stream D row and the §Parked bullet, and reopen the GitHub issue; no code was built against it.
+- **Status:** parked
 
 ## Backlog Handoff
 
@@ -188,12 +192,12 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 | S-03       | day-plan-view                | Day plan — appointments with statuses (north star)           | no                    | Waits on S-02.                                               |
 | S-04       | worker-status-changes        | Worker changes appointment status                            | no                    | Waits on S-03 + F-01.                                        |
 | S-05       | customer-directory           | Customer directory with cars                                 | no                    | Waits on S-02; parallel with S-04.                           |
-| S-06       | tire-storage                 | Tire storage (nice-to-have)                                  | no                    | Waits on S-05; candidate for Parked, see Unknown.            |
+| S-06       | tire-storage                 | Tire storage (nice-to-have)                                  | no — **parked**       | Parked 2026-08-21, out of MVP scope. Do not open a change for it. |
 
 ## Open Roadmap Questions
 
 1. **Missing user stories for the remaining MVP flows (registration, service configuration, status change, day-plan view)** — Owner: user. Block: `roadmap-wide` (FRs cover these, but formal user stories will make `/10x-plan` acceptance criteria cleaner). Source: PRD Open Q #1.
-2. **Are "revenue and forecast" part of the MVP?** — Access Control in the PRD lists them as owner-only permissions, but no FR defines them. Owner: user. Block: `S-05, S-06` if yes (adds roughly one more slice); if no — move to Parked. Recommendation given `main_goal: speed`: park.
+2. **Are "revenue and forecast" part of the MVP?** — Access Control in the PRD lists them as owner-only permissions, but no FR defines them. Owner: user. Block: `S-05` if yes (adds roughly one more slice); if no — move to Parked. (S-06 was also listed here until it was parked 2026-08-21.) Recommendation given `main_goal: speed`: park.
 
 ## Parked
 
@@ -203,8 +207,9 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Multi-tenant (multiple workshops on one account)** — PRD §Non-Goals: one account = one workshop; the limit is also baked into F-01.
 - **Manual slot override (editing appointment time outside the suggestion grid)** — Socratic on FR-005: possibly post-MVP; deprioritized under `main_goal: speed`.
 - **Per-bay / per-worker filter on the day plan** — Socratic on FR-006: possible but non-blocking. Comes back if a worker's view gets too crowded.
+- **Bays × time grid view of the day plan** — the locked design reference maps S-03 to `TodayScreen` (a chronological list), not the grid; the grid-shaped brochure screen is `WeekScreen` (brochure `src/App.jsx`), explicitly unmapped to any MVP slice. `day-plan-view` ships the list. Revisit if the per-bay filter above ever ships and a grid becomes the more legible layout.
 - **Variable service duration by car type** — Socratic on FR-003: v2; fixed duration per service on MVP.
-- **Tire storage (S-06)** — conditional; see S-06's Unknown: if the time budget doesn't close, move it here.
+- **Tire storage (S-06 / FR-010)** — parked 2026-08-21, no longer conditional. The 3-week after-hours budget doesn't close with it in; FR-010 is the PRD's only nice-to-have and already flags this timeline risk, and no must-have FR depends on it. Full rationale and re-entry trigger in §S-06 above.
 
 ## Done
 

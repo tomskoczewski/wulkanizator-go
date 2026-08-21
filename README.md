@@ -147,9 +147,10 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 | `/auth/signin`        | Email/password sign-in form                                             |
 | `/auth/signup`        | Email/password sign-up form                                             |
 | `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
-| `/dashboard`          | Example protected page (redirects to `/auth/signin` if unauthenticated) |
+| `/dashboard`          | Day plan — every appointment for a chosen day, with status filters (any authenticated role) |
 | `/ustawienia`         | Owner-only workshop configuration (bays, services, working hours)       |
 | `/wizyty/nowa`        | Owner-only: book an appointment with free-slot suggestions             |
+| `/wizyty/<id>`        | Appointment details (any authenticated role)                            |
 
 Route protection is handled in `src/middleware.ts`, which delegates to the route table in `src/lib/auth-guard.ts`. Add a `[pathPrefix, accessLevel]` entry there to require authentication (`"any"`) or a specific role (`"owner"` / `"worker"`) — longest matching prefix wins.
 

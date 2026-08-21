@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useJsonMutation } from "@/components/hooks/useJsonMutation";
-import { getWorkshopNow } from "@/lib/workshop-clock";
+import { workshopTodayDateString } from "@/lib/workshop-clock";
 import type { Appointment, EmptyReason, Service, WireSlot } from "@/types";
 
 interface Props {
@@ -45,15 +45,6 @@ const EMPTY_REASON_MESSAGE: Record<Exclude<EmptyReason, null>, string> = {
   closed_all_week: "Warsztat jest zamknięty w najbliższych dwóch tygodniach. Sprawdź godziny pracy w ustawieniach.",
   no_slots: "Brak wolnych terminów dla tej usługi w najbliższych dwóch tygodniach.",
 };
-
-function pad2(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-function workshopTodayDateString(): string {
-  const now = getWorkshopNow();
-  return `${now.getUTCFullYear()}-${pad2(now.getUTCMonth() + 1)}-${pad2(now.getUTCDate())}`;
-}
 
 function timeLabel(wire: string): string {
   return /\d{2}:\d{2}/.exec(wire)?.[0] ?? wire;

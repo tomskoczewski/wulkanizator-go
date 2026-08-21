@@ -10,7 +10,8 @@ type AccessLevel = "any" | UserRole;
 const ROUTE_ACCESS: readonly [prefix: string, access: AccessLevel][] = [
   ["/dashboard", "any"],
   ["/ustawienia", "owner"],
-  ["/wizyty", "owner"],
+  ["/wizyty", "any"],
+  ["/wizyty/nowa", "owner"],
   ["/api/workshop", "owner"],
   ["/api/bays", "owner"],
   ["/api/services", "owner"],
