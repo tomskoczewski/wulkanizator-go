@@ -10,7 +10,12 @@ const roleLabel: Record<UserRole, string> = {
 };
 ---
 
-<AppShell title="Dzień dobry — plan dnia" active="Dzisiaj">
+<AppShell
+  title="Dzień dobry — plan dnia"
+  active="Dzisiaj"
+  ctaLabel="Nowa wizyta"
+  ctaHref={profile?.role === "owner" ? "/wizyty/nowa" : undefined}
+>
   <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
     <h1 class="text-xl font-black text-slate-900">Dashboard</h1>
     <p class="mt-2 text-sm font-medium text-slate-600">

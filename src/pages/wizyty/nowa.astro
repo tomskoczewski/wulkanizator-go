@@ -1,0 +1,21 @@
+---
+import AppShell from "@/layouts/AppShell.astro";
+import NewAppointmentForm from "@/components/appointments/NewAppointmentForm";
+import { getWorkshopConfiguration } from "@/lib/services/workshop-setup";
+
+const { supabase } = Astro.locals;
+
+const config = supabase ? await getWorkshopConfiguration(supabase) : null;
+---
+
+<AppShell title="Nowa wizyta" active="Dzisiaj">
+  {
+    config ? (
+      <NewAppointmentForm client:load services={config.services} />
+    ) : (
+      <div class="rounded-2xl bg-white p-4 text-sm font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100">
+        Supabase nie jest skonfigurowany.
+      </div>
+    )
+  }
+</AppShell>

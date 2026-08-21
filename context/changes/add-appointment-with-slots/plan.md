@@ -829,10 +829,10 @@ is the reason the table exists in this slice rather than denormalized columns on
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run typecheck`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Build succeeds: `npm run build`
-- [x] 3.4 Existing pgTAP suite still passes: `npm run db:test`
+- [x] 3.1 Type checking passes: `npm run typecheck` — a1e44d6
+- [x] 3.2 Linting passes: `npm run lint` — a1e44d6
+- [x] 3.3 Build succeeds: `npm run build` — a1e44d6
+- [x] 3.4 Existing pgTAP suite still passes: `npm run db:test` — a1e44d6
 
 #### Manual
 
@@ -849,19 +849,19 @@ is the reason the table exists in this slice rather than denormalized columns on
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npm run typecheck`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Build succeeds: `npm run build`
-- [ ] 4.4 Unit tests still pass: `npm test`
+- [x] 4.1 Type checking passes: `npm run typecheck`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Build succeeds: `npm run build`
+- [x] 4.4 Unit tests still pass: `npm test`
 
 #### Manual
 
-- [ ] 4.5 Layout, spacing and colour match the brochure's `AddVisitScreen` on every in-scope block; the only omissions are "Opony", "Notatka", "Auto"
-- [ ] 4.6 End-to-end booking lands the right bay, times and `waiting` status
-- [ ] 4.7 Changing service clears the chosen slot and reloads suggestions
-- [ ] 4.8 A forced 409 keeps typed data, swaps chips, and shows the message inline
+- [x] 4.5 Layout, spacing and colour match the brochure's `AddVisitScreen` on every in-scope block; the only omissions are "Opony", "Notatka", "Auto"
+- [x] 4.6 End-to-end booking lands the right bay, times and `waiting` status
+- [x] 4.7 Changing service clears the chosen slot and reloads suggestions
+- [x] 4.8 A forced 409 keeps typed data, swaps chips, and shows the message inline
 - [ ] 4.9 Usable at 360px with no horizontal overflow
-- [ ] 4.10 A worker is redirected away from `/wizyty/nowa`
+- [x] 4.10 A worker is redirected away from `/wizyty/nowa`
 
 ### Phase 5: Ship
 
