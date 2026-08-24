@@ -35,13 +35,4 @@ const plan = supabase ? await getDayPlan(supabase, date) : null;
       </div>
     )
   }
-
-  <form method="POST" action="/api/auth/signout" class="mt-4">
-    <button
-      type="submit"
-      class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-    >
-      Wyloguj
-    </button>
-  </form>
 </AppShell>

@@ -1,17 +1,9 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Logo from "@/components/Logo.astro";
+import UserMenu from "@/components/UserMenu";
 import { cn } from "@/lib/utils";
-import {
-  Banknote,
-  CalendarRange,
-  LayoutDashboard,
-  Plus,
-  SlidersHorizontal,
-  UserRound,
-  Users,
-  Warehouse,
-} from "lucide-react";
+import { Banknote, CalendarRange, LayoutDashboard, Plus, SlidersHorizontal, Users, Warehouse } from "lucide-react";
 
 export type NavKey = "Dzisiaj" | "Kalendarz" | "Klienci" | "Opony" | "Cennik" | "Ustawienia";
 
@@ -58,9 +50,16 @@ const visibleNavItems = navItems.filter((item) => !item.ownerOnly || Astro.local
           </a>
         )
       }
-      <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/20">
-        <UserRound size={16} className="text-white" />
-      </div>
+      {
+        Astro.locals.user && Astro.locals.profile && (
+          <UserMenu
+            client:load
+            email={Astro.locals.user.email ?? ""}
+            workshopName={Astro.locals.profile.workshopName}
+            role={Astro.locals.profile.role}
+          />
+        )
+      }
     </header>
 
     <div class="flex flex-1 overflow-hidden">
