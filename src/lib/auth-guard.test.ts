@@ -55,3 +55,25 @@ describe("requireRole — /api/appointment-status split", () => {
     expect(requireRole(worker, "/api/appointments")).toEqual({ type: "redirect", to: "/dashboard" });
   });
 });
+
+describe("requireRole — root entry point", () => {
+  it("redirects an unauthenticated visitor from / to sign-in", () => {
+    expect(requireRole(null, "/")).toEqual({ type: "redirect", to: "/auth/signin" });
+  });
+
+  it("forwards a signed-in worker from / to the day plan", () => {
+    expect(requireRole(worker, "/")).toEqual({ type: "redirect", to: "/dashboard" });
+  });
+
+  it("forwards a signed-in owner from / to the day plan", () => {
+    expect(requireRole(owner, "/")).toEqual({ type: "redirect", to: "/dashboard" });
+  });
+
+  it("does not let the root rule swallow the sign-in page", () => {
+    expect(requireRole(null, "/auth/signin")).toEqual({ type: "allow" });
+  });
+
+  it("does not let the root rule swallow the sign-up page", () => {
+    expect(requireRole(null, "/auth/signup")).toEqual({ type: "allow" });
+  });
+});

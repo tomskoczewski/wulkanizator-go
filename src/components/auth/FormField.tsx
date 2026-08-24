@@ -3,7 +3,7 @@ import { CircleAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const inputBase =
-  "w-full rounded-lg bg-white/10 border px-3 py-2 pl-10 text-white placeholder-white/40 focus:outline-none focus:ring-2 transition-colors";
+  "w-full rounded-xl border bg-slate-50 px-3 py-2.5 pl-10 text-sm font-semibold text-slate-900 placeholder-slate-400 transition-colors focus:bg-white focus:outline-none focus:ring-2";
 
 interface FormFieldProps {
   id: string;
@@ -34,11 +34,11 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1 block text-sm text-blue-100/80">
+      <label htmlFor={id} className="mb-1 block text-xs font-bold text-slate-600">
         {label}
       </label>
       <div className="relative">
-        <span className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/40">{icon}</span>
+        <span className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400">{icon}</span>
         <input
           id={id}
           name={name ?? id}
@@ -50,13 +50,13 @@ export function FormField({
           placeholder={placeholder}
           className={cn(
             inputBase,
-            error ? "border-red-400/60 focus:ring-red-400" : "border-white/20 focus:ring-purple-400",
+            error ? "border-red-300 focus:ring-red-400" : "border-slate-200 focus:ring-orange-400",
           )}
         />
         {endContent}
       </div>
       {error ? (
-        <p className="mt-1 flex items-center gap-1 text-xs text-red-300">
+        <p className="mt-1 flex items-center gap-1 text-xs font-bold text-red-600">
           <CircleAlert className="size-3" />
           {error}
         </p>
