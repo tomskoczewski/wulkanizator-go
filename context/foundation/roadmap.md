@@ -3,7 +3,7 @@ project: "Wulkanizator GO"
 version: 1
 status: draft
 created: 2026-08-14
-updated: 2026-08-24 # S-04 → done
+updated: 2026-08-25 # S-04 archived
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -221,3 +221,4 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **F-01: (foundation) a `profiles` table exists (`user_id`, `workshop_id`, `role: owner|worker`), the RLS pattern is established (workshop-scoped + role-scoped), and `src/middleware.ts` is role-aware. Everything downstream can safely add domain tables under this contract.** — Archived 2026-08-15 → `context/archive/2026-08-15-role-and-workshop-scope/`. Lesson: —.
 - **F-02: (foundation) the visual language already validated in the private `wulkanizator-go-brochure` mockup (orange accent on slate neutrals, weight-driven typography, rounded-2xl card/shadow conventions, a 5-way status-color mapping) is captured in `context/foundation/design-system.md`, including an explicit screen-by-screen mapping (roadmap slice → exact brochure screen, with file:line pointers) that directs every UI-touching slice below to open the corresponding brochure screen and replicate it near 1:1, rather than working from memory or inventing its own look. Reference only in this foundation — no `src/` code changes; each slice applies the tokens/layout itself when it builds its screen.** — Archived 2026-08-15 → `context/archive/2026-08-15-design-system-foundation/`. Lesson: —.
 - **S-03: the owner/worker, after logging in, sees the day plan as a chronological list — stat tiles, five status filter pills, and a time-ordered appointment card per visit with a color-coded status pill. Tapping a card opens the visit's detail page. View is readable within 2 seconds per the NFR.** — Archived 2026-08-21 → `context/archive/2026-08-21-day-plan-view/`. Lesson: —.
+- **S-04: the worker taps an appointment tile on the day plan and moves its status: `waiting → in progress → done`, or `→ no-show`. Big buttons (dirty hands), change visible immediately. `no-show` releases the slot (but keeps the appointment in history).** — Archived 2026-08-25 → `context/archive/2026-08-21-worker-status-changes/`. Lesson: —.

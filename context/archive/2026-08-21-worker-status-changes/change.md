@@ -1,10 +1,10 @@
 ---
 change_id: worker-status-changes
 title: Worker status changes
-status: impl_reviewed
+status: archived
 created: 2026-08-21
-updated: 2026-08-24
-archived_at: null
+updated: 2026-08-25
+archived_at: 2026-08-24T22:41:10Z
 ---
 
 ## Notes
