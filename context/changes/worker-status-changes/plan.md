@@ -388,33 +388,33 @@ None. This slice ships no `supabase/migrations/` file and does not regenerate `s
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm test`
-- [x] 2.2 Type checking passes: `npm run typecheck`
-- [x] 2.3 Linting passes: `npm run lint`
-- [x] 2.4 pgTAP suite passes: `npm run db:test`
+- [x] 2.1 Unit tests pass: `npm test` — 383dfbb
+- [x] 2.2 Type checking passes: `npm run typecheck` — 383dfbb
+- [x] 2.3 Linting passes: `npm run lint` — 383dfbb
+- [x] 2.4 pgTAP suite passes: `npm run db:test` — 383dfbb
 
 #### Manual
 
-- [x] 2.5 PATCH as a signed-in worker returns 200 and the updated entry
-- [x] 2.6 PATCH unauthenticated returns 401 JSON, not an HTML redirect
-- [x] 2.7 Worker hitting `POST /api/appointments` still gets 403 JSON
+- [x] 2.5 PATCH as a signed-in worker returns 200 and the updated entry — 383dfbb
+- [x] 2.6 PATCH unauthenticated returns 401 JSON, not an HTML redirect — 383dfbb
+- [x] 2.7 Worker hitting `POST /api/appointments` still gets 403 JSON — 383dfbb
 
 ### Phase 3: Detail page status block
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npm run typecheck`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.4 Worker advances `waiting → in_progress → done` from the detail page with no reload
-- [ ] 3.5 Walking a `done` appointment back to `waiting` works
-- [ ] 3.6 `no_show` releases the slot — window reappears in `/wizyty/nowa` suggestions
-- [ ] 3.7 Reversing a `no_show` into a re-booked slot shows the Polish conflict message
-- [ ] 3.8 Zadzwoń opens the dialer; layout holds at 360px
-- [ ] 3.9 Screen matches the brochure `VisitDetailScreen` near 1:1
+- [x] 3.4 Worker advances `waiting → in_progress → done` from the detail page with no reload
+- [x] 3.5 Walking a `done` appointment back to `waiting` works
+- [x] 3.6 `no_show` releases the slot — window reappears in `/wizyty/nowa` suggestions
+- [x] 3.7 Reversing a `no_show` into a re-booked slot shows the Polish conflict message
+- [x] 3.8 Zadzwoń opens the dialer; layout holds at 360px
+- [x] 3.9 Screen matches the brochure `VisitDetailScreen` near 1:1
 
 ### Phase 4: Day-plan inline advance and ship
 
