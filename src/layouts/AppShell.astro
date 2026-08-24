@@ -24,14 +24,18 @@ interface Props {
 
 const { title, active, ctaLabel, ctaHref } = Astro.props;
 
-const navItems: { icon: typeof LayoutDashboard; label: NavKey; href?: string }[] = [
+const navItems: { icon: typeof LayoutDashboard; label: NavKey; href?: string; ownerOnly?: boolean }[] = [
   { icon: LayoutDashboard, label: "Dzisiaj", href: "/dashboard" },
   { icon: CalendarRange, label: "Kalendarz" },
   { icon: Users, label: "Klienci" },
   { icon: Warehouse, label: "Opony" },
   { icon: Banknote, label: "Cennik" },
-  { icon: SlidersHorizontal, label: "Ustawienia", href: "/ustawienia" },
+  { icon: SlidersHorizontal, label: "Ustawienia", href: "/ustawienia", ownerOnly: true },
 ];
+
+// Presentation only — `src/lib/auth-guard.ts` remains the enforcement point (`/ustawienia` is
+// `"owner"` there). This just stops a worker being shown an icon that only bounces them back.
+const visibleNavItems = navItems.filter((item) => !item.ownerOnly || Astro.locals.profile?.role === "owner");
 ---
 
 <Layout title={title}>
@@ -62,7 +66,7 @@ const navItems: { icon: typeof LayoutDashboard; label: NavKey; href?: string }[]
     <div class="flex flex-1 overflow-hidden">
       <nav class="hidden w-14 flex-col items-center gap-1 bg-slate-950 py-4 md:flex">
         {
-          navItems.map(({ icon: Icon, label, href }) =>
+          visibleNavItems.map(({ icon: Icon, label, href }) =>
             href ? (
               <a
                 href={href}
