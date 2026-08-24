@@ -420,18 +420,18 @@ None. This slice ships no `supabase/migrations/` file and does not regenerate `s
 
 #### Automated
 
-- [x] 4.1 Unit tests pass: `npm test`
-- [x] 4.2 Type checking passes: `npm run typecheck`
-- [x] 4.3 Linting passes: `npm run lint`
-- [x] 4.4 Build succeeds: `npm run build`
-- [x] 4.5 `grep -n "api/appointment-status" src/lib/auth-guard.ts src/lib/auth-guard.test.ts` hits both files
+- [x] 4.1 Unit tests pass: `npm test` — d0c200c
+- [x] 4.2 Type checking passes: `npm run typecheck` — d0c200c
+- [x] 4.3 Linting passes: `npm run lint` — d0c200c
+- [x] 4.4 Build succeeds: `npm run build` — d0c200c
+- [x] 4.5 `grep -n "api/appointment-status" src/lib/auth-guard.ts src/lib/auth-guard.test.ts` hits both files — d0c200c
 
 #### Manual
 
-- [x] 4.6 One tap advances an appointment; pill and tiles update with no reload
-- [x] 4.7 Tapping the card body still navigates to `/wizyty/<id>`
-- [x] 4.8 A `done` row shows no advance button
-- [x] 4.9 Two rows advanced in quick succession stay independent
-- [x] 4.10 Offline tap rolls back with the connection message
-- [x] 4.11 Advancing a row under the "Oczekuje" filter keeps the card on screen
-- [x] 4.12 Board is usable one-handed at 360px width
+- [x] 4.6 One tap advances an appointment; pill and tiles update with no reload — d0c200c
+- [x] 4.7 Tapping the card body still navigates to `/wizyty/<id>` — d0c200c
+- [x] 4.8 A `done` row shows no advance button — d0c200c
+- [x] 4.9 Two rows advanced in quick succession stay independent — d0c200c
+- [x] 4.10 Offline tap rolls back with the connection message — d0c200c
+- [x] 4.11 Advancing a row under the "Oczekuje" filter keeps the card on screen — d0c200c
+- [x] 4.12 Board is usable one-handed at 360px width — d0c200c
