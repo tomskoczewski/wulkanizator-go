@@ -3,7 +3,7 @@ project: "Wulkanizator GO"
 version: 1
 status: draft
 created: 2026-08-14
-updated: 2026-08-21 # S-06 → parked (out of MVP scope)
+updated: 2026-08-24 # S-04 → done
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -34,7 +34,7 @@ Tire workshops today run their day on Excel and paper — no clear day plan, no 
 | S-01  | workshop-setup               | register the workshop and configure bays, working hours, and services with duration              | F-01          | FR-001, FR-002, FR-003                  | done |
 | S-02  | add-appointment-with-slots   | add an appointment (walk-in or existing customer) by picking a service and a suggested free slot | S-01          | US-01, FR-004, FR-005, FR-009 (walk-in) | done |
 | S-03  | day-plan-view                | see the day plan with all appointments and their statuses in one view (click = details)          | S-02          | FR-006, FR-008                          | done |
-| S-04  | worker-status-changes        | (worker) change an appointment's status on the day plan: waiting → in progress → done / no-show  | S-03, F-01    | FR-007, FR-005 (slot release)           | proposed |
+| S-04  | worker-status-changes        | (worker) change an appointment's status on the day plan: waiting → in progress → done / no-show  | S-03, F-01    | FR-007, FR-005 (slot release)           | done |
 | S-05  | customer-directory           | manage the customer directory — add, search, assign a returning customer with car(s) to a visit  | S-02          | FR-009 (full card)                      | proposed |
 | S-06  | tire-storage                 | take a customer's tires into storage and track state (who owns them, where they sit)             | S-05          | FR-010 (nice-to-have)                   | parked   |
 
@@ -145,10 +145,10 @@ What's already wired in the codebase as of `2026-08-14` (auto-researched + user-
 - **Parallel with:** S-05
 - **Blockers:** —
 - **Unknowns:**
-  - Does the owner get a manual slot override (Socratic on FR-005)? Owner: user. Block: no.
-  - Are transitions strict (linear) or free (e.g., back from `in progress` to `waiting`)? Owner: user. Block: no.
+  - ~~Does the owner get a manual slot override (Socratic on FR-005)?~~ Resolved by `worker-status-changes` Phase 4: no — parked (`roadmap.md:46`), owner-only manual slot override stays out of scope.
+  - ~~Are transitions strict (linear) or free (e.g., back from `in progress` to `waiting`)?~~ Resolved by `worker-status-changes` Phase 3/4: guided one-tap forward on both surfaces, but reversible from the detail page — any non-`cancelled` pair is a legal move except a no-op.
 - **Risk:** This is the slice where worker adoption is won or lost ("worker forgets to change status" was flagged explicitly in the Socratic on FR-007). If the UX is even mildly click-heavy or form-shaped, the feature loses its value. Hold the line: one tap on a tile = next status.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Customer directory — full customer card with cars
 

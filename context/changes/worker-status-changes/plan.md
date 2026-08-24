@@ -403,35 +403,35 @@ None. This slice ships no `supabase/migrations/` file and does not regenerate `s
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run typecheck`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Build succeeds: `npm run build`
+- [x] 3.1 Type checking passes: `npm run typecheck` — 6901406
+- [x] 3.2 Linting passes: `npm run lint` — 6901406
+- [x] 3.3 Build succeeds: `npm run build` — 6901406
 
 #### Manual
 
-- [x] 3.4 Worker advances `waiting → in_progress → done` from the detail page with no reload
-- [x] 3.5 Walking a `done` appointment back to `waiting` works
-- [x] 3.6 `no_show` releases the slot — window reappears in `/wizyty/nowa` suggestions
-- [x] 3.7 Reversing a `no_show` into a re-booked slot shows the Polish conflict message
-- [x] 3.8 Zadzwoń opens the dialer; layout holds at 360px
-- [x] 3.9 Screen matches the brochure `VisitDetailScreen` near 1:1
+- [x] 3.4 Worker advances `waiting → in_progress → done` from the detail page with no reload — 6901406
+- [x] 3.5 Walking a `done` appointment back to `waiting` works — 6901406
+- [x] 3.6 `no_show` releases the slot — window reappears in `/wizyty/nowa` suggestions — 6901406
+- [x] 3.7 Reversing a `no_show` into a re-booked slot shows the Polish conflict message — 6901406
+- [x] 3.8 Zadzwoń opens the dialer; layout holds at 360px — 6901406
+- [x] 3.9 Screen matches the brochure `VisitDetailScreen` near 1:1 — 6901406
 
 ### Phase 4: Day-plan inline advance and ship
 
 #### Automated
 
-- [ ] 4.1 Unit tests pass: `npm test`
-- [ ] 4.2 Type checking passes: `npm run typecheck`
-- [ ] 4.3 Linting passes: `npm run lint`
-- [ ] 4.4 Build succeeds: `npm run build`
-- [ ] 4.5 `grep -n "api/appointment-status" src/lib/auth-guard.ts src/lib/auth-guard.test.ts` hits both files
+- [x] 4.1 Unit tests pass: `npm test`
+- [x] 4.2 Type checking passes: `npm run typecheck`
+- [x] 4.3 Linting passes: `npm run lint`
+- [x] 4.4 Build succeeds: `npm run build`
+- [x] 4.5 `grep -n "api/appointment-status" src/lib/auth-guard.ts src/lib/auth-guard.test.ts` hits both files
 
 #### Manual
 
-- [ ] 4.6 One tap advances an appointment; pill and tiles update with no reload
-- [ ] 4.7 Tapping the card body still navigates to `/wizyty/<id>`
-- [ ] 4.8 A `done` row shows no advance button
-- [ ] 4.9 Two rows advanced in quick succession stay independent
-- [ ] 4.10 Offline tap rolls back with the connection message
-- [ ] 4.11 Advancing a row under the "Oczekuje" filter keeps the card on screen
-- [ ] 4.12 Board is usable one-handed at 360px width
+- [x] 4.6 One tap advances an appointment; pill and tiles update with no reload
+- [x] 4.7 Tapping the card body still navigates to `/wizyty/<id>`
+- [x] 4.8 A `done` row shows no advance button
+- [x] 4.9 Two rows advanced in quick succession stay independent
+- [x] 4.10 Offline tap rolls back with the connection message
+- [x] 4.11 Advancing a row under the "Oczekuje" filter keeps the card on screen
+- [x] 4.12 Board is usable one-handed at 360px width

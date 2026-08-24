@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusPill } from "@/components/appointments/StatusPill";
+import { useRowMutation } from "@/components/hooks/useJsonMutation";
 import { DAY_PLAN_FILTER_STATUSES, APPOINTMENT_STATUS_PRESENTATION } from "@/lib/appointment-status";
+import { nextStatus } from "@/lib/services/appointment-transitions";
 import { countByStatus, filterByStatus, type DayPlanEntry } from "@/lib/services/day-plan";
 import type { AppointmentStatus, WorkingHours } from "@/types";
 
@@ -50,13 +52,64 @@ function timeLabel(wire: string): string {
   return /\d{2}:\d{2}/.exec(wire)?.[0] ?? wire;
 }
 
-export default function DayPlanBoard({ entries, workingHours, date, prevDate, nextDate, today }: Props) {
+export default function DayPlanBoard({
+  entries: initialEntries,
+  workingHours,
+  date,
+  prevDate,
+  nextDate,
+  today,
+}: Props) {
+  const [entries, setEntries] = useState<DayPlanEntry[]>(initialEntries);
   const [filter, setFilter] = useState<AppointmentStatus | null>(null);
+  // Ids advanced under the current filter, kept visible even after the tap moves them out of
+  // `filterByStatus`'s result — otherwise the card would vanish mid-tap. Cleared on filter change.
+  const [recentlyChanged, setRecentlyChanged] = useState<ReadonlySet<string>>(() => new Set());
+  const { run, isPending, rowErrors } = useRowMutation();
 
   const counts = countByStatus(entries);
-  const visible = filterByStatus(entries, filter);
+  const filteredIds = new Set(filterByStatus(entries, filter).map((entry) => entry.id));
+  const visible = entries.filter((entry) => filteredIds.has(entry.id) || recentlyChanged.has(entry.id));
   const isToday = date === today;
   const isClosed = !workingHours || workingHours.is_closed;
+
+  function changeFilter(next: AppointmentStatus | null) {
+    setFilter(next);
+    setRecentlyChanged(new Set());
+  }
+
+  async function advance(entry: DayPlanEntry) {
+    const target = nextStatus(entry.status);
+    if (!target) return;
+    const from = entry.status;
+
+    setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, status: target } : e)));
+    setRecentlyChanged((prev) => new Set(prev).add(entry.id));
+
+    await run(
+      entry.id,
+      { url: `/api/appointment-status/${entry.id}`, method: "PATCH", body: { status: target, from } },
+      {
+        rollback: () => {
+          setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, status: from } : e)));
+        },
+        fallbackMessage: "Coś poszło nie tak. Spróbuj ponownie.",
+        onFailure: (failure) => {
+          // A 409 carries the row's true server-side status — resync to it rather than rolling
+          // back to the stale value we started from.
+          if (failure.status === 409) {
+            const body = failure.body as { current?: AppointmentStatus } | null;
+            if (body?.current) {
+              const current = body.current;
+              setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, status: current } : e)));
+              return true;
+            }
+          }
+          return false;
+        },
+      },
+    );
+  }
 
   return (
     <div>
@@ -106,7 +159,7 @@ export default function DayPlanBoard({ entries, workingHours, date, prevDate, ne
         <button
           type="button"
           onClick={() => {
-            setFilter(null);
+            changeFilter(null);
           }}
           className={cn(
             "rounded-full px-3 py-1.5 text-xs font-black",
@@ -120,7 +173,7 @@ export default function DayPlanBoard({ entries, workingHours, date, prevDate, ne
             key={status}
             type="button"
             onClick={() => {
-              setFilter(status);
+              changeFilter(status);
             }}
             className={cn(
               "rounded-full px-3 py-1.5 text-xs font-black",
@@ -140,36 +193,62 @@ export default function DayPlanBoard({ entries, workingHours, date, prevDate, ne
         </div>
       ) : (
         <div className="space-y-2">
-          {visible.map((entry) => (
-            <a
-              key={entry.id}
-              href={`/wizyty/${entry.id}`}
-              className="grid grid-cols-[60px_1fr] gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 hover:ring-orange-200"
-            >
-              <div className="text-center">
-                <div className="text-sm font-black text-slate-900">{timeLabel(entry.startsAt)}</div>
-                <div className="text-xs font-bold text-slate-400">{timeLabel(entry.endsAt)}</div>
-              </div>
-              <div>
-                <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <div className="text-sm font-black text-slate-900">{entry.customerFirstName}</div>
-                    <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-                      <Car size={12} />
-                      {entry.bayName}
+          {visible.map((entry) => {
+            const target = nextStatus(entry.status);
+            const pending = isPending(entry.id);
+            const rowError = rowErrors[entry.id];
+
+            return (
+              <div
+                key={entry.id}
+                className="relative grid grid-cols-[60px_1fr] gap-3 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 hover:ring-orange-200"
+              >
+                {/* Stretched-link overlay: navigation stays a real `<a>` covering the whole card,
+                    while the advance button sits above it (z-10) as a sibling — a `<button>`
+                    nested inside an `<a>` is invalid HTML and its click would be swallowed. */}
+                <a
+                  href={`/wizyty/${entry.id}`}
+                  className="absolute inset-0 z-0 rounded-2xl"
+                  aria-label={`Szczegóły wizyty — ${entry.customerFirstName}`}
+                />
+                <div className="relative z-10 text-center">
+                  <div className="text-sm font-black text-slate-900">{timeLabel(entry.startsAt)}</div>
+                  <div className="text-xs font-bold text-slate-400">{timeLabel(entry.endsAt)}</div>
+                </div>
+                <div className="relative z-10">
+                  <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-black text-slate-900">{entry.customerFirstName}</div>
+                      <div className="flex items-center gap-1 text-xs font-semibold text-slate-500">
+                        <Car size={12} />
+                        {entry.bayName}
+                      </div>
                     </div>
+                    <StatusPill status={entry.status} />
                   </div>
-                  <StatusPill status={entry.status} />
-                </div>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <div className="text-xs font-bold text-slate-800">{entry.serviceName}</div>
-                    <div className="text-xs font-medium text-slate-500">{entry.durationMin} min</div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="text-xs font-bold text-slate-800">{entry.serviceName}</div>
+                      <div className="text-xs font-medium text-slate-500">{entry.durationMin} min</div>
+                    </div>
+                    {target && (
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => {
+                          void advance(entry);
+                        }}
+                        className="relative z-10 rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {pending ? "…" : APPOINTMENT_STATUS_PRESENTATION[target].label}
+                      </button>
+                    )}
                   </div>
+                  {rowError && <p className="relative z-10 mt-2 text-xs font-bold text-rose-600">{rowError}</p>}
                 </div>
               </div>
-            </a>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
