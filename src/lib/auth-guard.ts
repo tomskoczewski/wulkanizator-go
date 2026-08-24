@@ -37,6 +37,13 @@ function matchRoute(pathname: string): AccessLevel | null {
  * unauthenticated, so it redirects to sign-in like the flat PROTECTED_ROUTES check it replaces.
  */
 export function requireRole(profile: UserProfile | null, pathname: string): GuardResult {
+  // Root has no page of its own: it is the app's front door, forwarding a signed-in user to the
+  // day plan and everyone else to sign-in. Kept here rather than in an index page because that
+  // is the same decision the table below makes, and it belongs in one auditable place.
+  if (pathname === "/") {
+    return { type: "redirect", to: profile ? "/dashboard" : "/auth/signin" };
+  }
+
   const access = matchRoute(pathname);
 
   if (access === null) {

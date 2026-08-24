@@ -26,7 +26,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
         // Structurally shouldn't happen — the on_auth_user_created trigger provisions a profile
         // atomically at signup. If it does (e.g. manual row deletion), the session is left
         // half-signed-in: signing out and clearing locals.user (not just locals.profile) keeps
-        // Topbar.astro consistent with the redirect instead of rendering a signed-in header for a
+        // downstream UI consistent with the redirect instead of rendering a signed-in header for a
         // user this middleware now treats as anonymous.
         console.error(`No profile found for authenticated user ${user.id}; signing out.`);
         await supabase.auth.signOut();

@@ -1,0 +1,32 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Logo from "@/components/Logo.astro";
+import { cn } from "@/lib/utils";
+
+interface Props {
+  title: string;
+  heading: string;
+  subheading?: string;
+}
+
+const { title, heading, subheading } = Astro.props;
+---
+
+<Layout title={title}>
+  <div
+    class="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-orange-900 p-4"
+  >
+    <div class="mb-6 flex items-center gap-1.5 text-2xl font-black tracking-tight text-white">
+      <Logo size={30} />
+      <span>wulkanizator</span><span class="text-orange-400">go</span>
+    </div>
+
+    <div class="w-full max-w-sm rounded-2xl bg-white p-7 shadow-xl ring-1 ring-slate-200">
+      <h1 class:list={cn("text-lg font-black text-slate-900", !subheading && "mb-5")}>{heading}</h1>
+      {subheading && <p class="mt-1 mb-5 text-xs font-semibold text-slate-500">{subheading}</p>}
+      <slot />
+    </div>
+
+    <p class="mt-6 text-xs font-semibold text-white/50">Panel warsztatu wulkanizacyjnego</p>
+  </div>
+</Layout>
