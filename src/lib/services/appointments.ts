@@ -301,7 +301,8 @@ export type StatusChangeOutcome =
   | { status: "updated"; current: AppointmentStatus; entry: DayPlanEntry | null }
   | { status: "stale"; current: AppointmentStatus }
   | { status: "slot_taken" }
-  | { status: "not_found" };
+  | { status: "not_found" }
+  | { status: "illegal" };
 
 /**
  * The single write path for a status change. Compare-and-set: the update is scoped to the row's
@@ -314,8 +315,10 @@ export async function changeAppointmentStatus(
   id: string,
   input: AppointmentStatusChangeInput,
 ): Promise<StatusChangeOutcome> {
+  // Returned, not thrown: the route's exhaustive switch then has to handle it, so this stays a 400
+  // by construction rather than by the route recognising an error message.
   if (!isTransitionAllowed(input.from, input.status)) {
-    throw new Error(`Illegal status transition: ${input.from} -> ${input.status}`);
+    return { status: "illegal" };
   }
 
   const { data, error } = await supabase
@@ -339,9 +342,28 @@ export async function changeAppointmentStatus(
     // indistinguishable, matching getAppointmentDetail()'s posture). Never synthesize a `stale`
     // carrying the client's own `from` — that would tell the client its stale belief is the truth
     // while also signalling a conflict.
-    const current = await getAppointmentDetail(supabase, id);
-    if (!current) return { status: "not_found" };
-    return { status: "stale", current: current.status };
+    //
+    // This asks about existence, not presentation, so it reads `status` directly rather than
+    // reusing getAppointmentDetail(): that funnels through toDayPlanEntry(), which returns null on
+    // an incomplete join — which would report a row that exists and merely moved as `not_found`.
+    const { data: existing, error: readError } = await supabase
+      .from("appointments")
+      .select("status")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (readError) throw readError;
+    if (!existing) return { status: "not_found" };
+
+    // Someone else already moved the row to the status this caller was asking for. The requested
+    // end state holds, so this is a success, not a conflict — two workers tapping the same button
+    // is the common case on a shared day plan, and reporting it as an error would show a failure
+    // for an operation that achieved exactly what was asked.
+    if (existing.status === input.status) {
+      return { status: "updated", current: existing.status, entry: null };
+    }
+
+    return { status: "stale", current: existing.status };
   }
 
   // The UPDATE has already committed by this point — a thrown error past here would roll the

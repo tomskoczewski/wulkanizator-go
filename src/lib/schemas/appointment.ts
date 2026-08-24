@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { AppointmentStatus } from "@/types";
 
 // Naive workshop-local wall-clock, matching `naiveDateToTimestampString()` in workshop-clock.ts.
 // Validated with a regex rather than `z.coerce.date()`, which would apply UTC parsing semantics to
@@ -18,8 +19,10 @@ export const appointmentBookingRequestSchema = z.object({
 });
 
 // Deriving the enum from these four in-scope literals — not from the full `AppointmentStatus`
-// union — is what keeps `cancelled` unreachable through this API.
-const IN_SCOPE_STATUSES = ["waiting", "in_progress", "done", "no_show"] as const;
+// union — is what keeps `cancelled` unreachable through this API. The `satisfies` keeps the
+// narrowing while still tying the literals to the generated enum, so renaming a value there fails
+// the build here instead of leaving this file compiling but wrong.
+const IN_SCOPE_STATUSES = ["waiting", "in_progress", "done", "no_show"] as const satisfies readonly AppointmentStatus[];
 
 export const appointmentStatusChangeSchema = z.object({
   status: z.enum(IN_SCOPE_STATUSES, "Nieprawidłowy status wizyty"),

@@ -37,11 +37,10 @@ export const PATCH: APIRoute = async ({ request, params, locals }) => {
         return Response.json({ error: "Ten termin został właśnie zajęty" }, { status: 409 });
       case "not_found":
         return Response.json({ error: "Nie znaleziono wizyty" }, { status: 404 });
+      case "illegal":
+        return Response.json({ errors: { status: ["Niedozwolona zmiana statusu"] } }, { status: 400 });
     }
   } catch (error) {
-    if (error instanceof Error && error.message.startsWith("Illegal status transition")) {
-      return Response.json({ errors: { status: ["Niedozwolona zmiana statusu"] } }, { status: 400 });
-    }
     console.error("Failed to change appointment status", error);
     return Response.json({ error: "Failed to change appointment status" }, { status: 500 });
   }

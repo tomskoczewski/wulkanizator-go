@@ -92,6 +92,13 @@ export default function DayPlanBoard({
       {
         rollback: () => {
           setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, status: from } : e)));
+          // The row is back at its original status, so the filter pin that kept it on screen mid-tap
+          // no longer has anything to protect — leaving it would strand a non-matching card there.
+          setRecentlyChanged((prev) => {
+            const next = new Set(prev);
+            next.delete(entry.id);
+            return next;
+          });
         },
         fallbackMessage: "Coś poszło nie tak. Spróbuj ponownie.",
         onFailure: (failure) => {
@@ -211,11 +218,11 @@ export default function DayPlanBoard({
                   className="absolute inset-0 z-0 rounded-2xl"
                   aria-label={`Szczegóły wizyty — ${entry.customerFirstName}`}
                 />
-                <div className="relative z-10 text-center">
+                <div className="text-center">
                   <div className="text-sm font-black text-slate-900">{timeLabel(entry.startsAt)}</div>
                   <div className="text-xs font-bold text-slate-400">{timeLabel(entry.endsAt)}</div>
                 </div>
-                <div className="relative z-10">
+                <div>
                   <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <div className="text-sm font-black text-slate-900">{entry.customerFirstName}</div>
@@ -235,16 +242,25 @@ export default function DayPlanBoard({
                       <button
                         type="button"
                         disabled={pending}
+                        aria-busy={pending}
+                        aria-label={`${APPOINTMENT_STATUS_PRESENTATION[target].label} — ${entry.customerFirstName}, ${timeLabel(entry.startsAt)}`}
                         onClick={() => {
                           void advance(entry);
                         }}
-                        className="relative z-10 rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed disabled:opacity-50"
+                        className={cn(
+                          "relative z-10 rounded-xl bg-orange-500 px-4 py-2.5 text-xs font-black text-white disabled:cursor-not-allowed",
+                          pending && "opacity-50",
+                        )}
                       >
-                        {pending ? "…" : APPOINTMENT_STATUS_PRESENTATION[target].label}
+                        {APPOINTMENT_STATUS_PRESENTATION[target].label}
                       </button>
                     )}
                   </div>
-                  {rowError && <p className="relative z-10 mt-2 text-xs font-bold text-rose-600">{rowError}</p>}
+                  {rowError && (
+                    <p role="status" aria-live="polite" className="mt-2 text-xs font-bold text-rose-600">
+                      {rowError}
+                    </p>
+                  )}
                 </div>
               </div>
             );

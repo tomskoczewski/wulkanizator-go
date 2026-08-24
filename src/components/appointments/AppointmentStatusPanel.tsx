@@ -67,7 +67,7 @@ export function AppointmentStatusPanel({ id, status: initialStatus, customerPhon
     <>
       <div className="mb-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 xl:col-start-1 xl:row-start-2">
         <div className="mb-2 text-xs font-black text-slate-700">Szybka zmiana statusu</div>
-        <div className="grid gap-2 md:grid-cols-3">
+        <div className="grid gap-2 md:grid-cols-3" role="group" aria-label="Status wizyty">
           {FORWARD_STEPS.map((step) => {
             // FORWARD_STEPS is typed `readonly AppointmentStatus[]` (see appointment-transitions.ts)
             // but its three literal members are exactly STEP_META's keys.
@@ -80,6 +80,8 @@ export function AppointmentStatusPanel({ id, status: initialStatus, customerPhon
                 type="button"
                 disabled={isPending || !isTransitionAllowed(status, step)}
                 onClick={() => changeStatus(step)}
+                aria-current={isActive ? "step" : undefined}
+                aria-busy={pendingTarget === step}
                 className={cn(
                   "rounded-xl p-3 text-left disabled:cursor-not-allowed",
                   isActive ? "bg-amber-100 ring-2 ring-amber-200" : "bg-white ring-1 ring-slate-100",
@@ -93,7 +95,11 @@ export function AppointmentStatusPanel({ id, status: initialStatus, customerPhon
             );
           })}
         </div>
-        {message && <p className="mt-3 text-xs font-bold text-rose-600">{message}</p>}
+        {message && (
+          <p role="status" aria-live="polite" className="mt-3 text-xs font-bold text-rose-600">
+            {message}
+          </p>
+        )}
       </div>
 
       <div className="space-y-3 xl:col-start-2 xl:row-span-2 xl:row-start-1">

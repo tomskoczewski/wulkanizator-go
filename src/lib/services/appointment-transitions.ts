@@ -24,13 +24,25 @@ export function nextStatus(current: AppointmentStatus): AppointmentStatus | null
 }
 
 /**
- * The API guard: true when `from !== to`, neither side is `cancelled`, and both are valid enum
- * members. Every non-`cancelled` pair is legal except a no-op — `cancelled` is immutable in both
- * directions, so this slice can neither create nor resurrect one. `cancelled` is handled explicitly
- * rather than by omission, so a sixth enum value later surfaces as a type error here.
+ * Whether a status may take part in a transition at all, in either direction. A `Record` keyed by
+ * `AppointmentStatus` rather than an if-chain with a catch-all, so a sixth enum value fails the
+ * build here instead of silently becoming freely transitionable — the same reason
+ * `APPOINTMENT_STATUS_PRESENTATION` is shaped this way.
+ */
+const IS_MUTABLE: Record<AppointmentStatus, boolean> = {
+  waiting: true,
+  in_progress: true,
+  done: true,
+  no_show: true,
+  cancelled: false,
+};
+
+/**
+ * The API guard: true when `from !== to` and neither side is `cancelled`. Every non-`cancelled`
+ * pair is legal except a no-op — `cancelled` is immutable in both directions, so this slice can
+ * neither create nor resurrect one.
  */
 export function isTransitionAllowed(from: AppointmentStatus, to: AppointmentStatus): boolean {
   if (from === to) return false;
-  if (from === "cancelled" || to === "cancelled") return false;
-  return true;
+  return IS_MUTABLE[from] && IS_MUTABLE[to];
 }

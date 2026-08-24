@@ -305,6 +305,30 @@ select throws_ok(
 -- transaction, so it is the primary path exercised here; direct INSERTs are used only where the
 -- point is to prove they're denied (worker) or to build fixture rows for the overlap-guard tests.
 
+-- Baselines, captured per workshop before anything is booked. A developer's local database holds
+-- rows created through the app (`seed.sql` creates no appointments or customers), so asserting a
+-- literal `1` below would fail on any machine that has been used manually. RLS already scopes these
+-- counts to the caller's own workshop, so `baseline + 1` keeps the isolation signal exactly as
+-- sharp while surviving dev data.
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+create temporary table pg_temp.baseline as
+  select 'a_appointments' as key, (select count(*)::int from public.appointments) as n
+  union all
+  select 'a_customers', (select count(*)::int from public.customers);
+
+select pg_temp.authenticate_as('22222222-2222-2222-2222-222222222222');
+
+insert into pg_temp.baseline
+  select 'b_appointments', (select count(*)::int from public.appointments)
+  union all
+  select 'b_customers', (select count(*)::int from public.customers);
+
+create function pg_temp.baseline_of(p_key text) returns int
+language sql stable
+as $$ select n from pg_temp.baseline where key = p_key $$;
+
 -- Owner A books one appointment. This is also the RLS isolation fixture for the next block: if
 -- owner B could see it, the counts below would be wrong.
 
@@ -320,14 +344,14 @@ select lives_ok(
 
 select is(
   (select count(*)::int from public.appointments),
-  1,
-  'owner A sees exactly one appointment after booking'
+  pg_temp.baseline_of('a_appointments') + 1,
+  'owner A sees exactly one more appointment after booking'
 );
 
 select is(
   (select count(*)::int from public.customers),
-  1,
-  'owner A sees exactly one customer after booking'
+  pg_temp.baseline_of('a_customers') + 1,
+  'owner A sees exactly one more customer after booking'
 );
 
 -- Owner B books their own appointment in their own workshop.
@@ -344,14 +368,14 @@ select lives_ok(
 
 select is(
   (select count(*)::int from public.appointments),
-  1,
-  'owner B sees exactly one appointment (isolation: not owner A''s)'
+  pg_temp.baseline_of('b_appointments') + 1,
+  'owner B sees exactly one more appointment (isolation: not owner A''s)'
 );
 
 select is(
   (select count(*)::int from public.customers),
-  1,
-  'owner B sees exactly one customer (isolation: not owner A''s)'
+  pg_temp.baseline_of('b_customers') + 1,
+  'owner B sees exactly one more customer (isolation: not owner A''s)'
 );
 
 -- Back to owner A: still exactly their own row, proving the isolation holds in both directions.
@@ -360,14 +384,14 @@ select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
 
 select is(
   (select count(*)::int from public.appointments),
-  1,
-  'owner A cannot select owner B''s appointments (still sees exactly one, their own)'
+  pg_temp.baseline_of('a_appointments') + 1,
+  'owner A cannot select owner B''s appointments (count unchanged by B''s booking)'
 );
 
 select is(
   (select count(*)::int from public.customers),
-  1,
-  'owner A cannot select owner B''s customers (still sees exactly one, their own)'
+  pg_temp.baseline_of('a_customers') + 1,
+  'owner A cannot select owner B''s customers (count unchanged by B''s booking)'
 );
 
 -- Worker A: can read and update status in their own workshop, but cannot insert directly or call
@@ -391,13 +415,13 @@ select throws_ok(
 
 select is(
   (select count(*)::int from public.appointments),
-  1,
+  pg_temp.baseline_of('a_appointments') + 1,
   'worker A can select the appointment booked in their own workshop'
 );
 
 select is(
   pg_temp.try_worker_update_appointment_status(),
-  1,
+  pg_temp.baseline_of('a_appointments') + 1,
   'worker A can update an appointment''s status in their own workshop'
 );
 
@@ -540,17 +564,29 @@ select throws_ok(
 
 select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
 
+-- The slot is offset from the S-02 fixture date by whole weeks, so the weekday — and therefore the
+-- workshop's working hours — is unchanged, while the date itself is far enough out that a row a
+-- developer created through the app cannot occupy it and turn the `lives_ok` below into a spurious
+-- 23P01. The bay and service selects are ordered for the same reason: this block and the
+-- re-occupation insert further down must pick the *same* bay for the exclusion guard to be the
+-- thing under test.
+
+create temporary table pg_temp.s04_slot as
+  select ('2026-09-08 09:00'::timestamp + interval '520 weeks') as starts_at,
+         ('2026-09-08 09:45'::timestamp + interval '520 weeks') as ends_at;
+
 select lives_ok(
   $$ select public.book_appointment('Ela', '600800800',
-       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
-       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
-       '2026-09-08 09:00'::timestamp, '2026-09-08 09:45'::timestamp) $$,
+       (select id from public.services where workshop_id = public.current_workshop_id() order by id limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() order by id limit 1),
+       (select starts_at from pg_temp.s04_slot), (select ends_at from pg_temp.s04_slot)) $$,
   'owner A books the S-04 fixture appointment'
 );
 
 create temporary table pg_temp.s04_appointment as
   select id from public.appointments
-  where workshop_id = public.current_workshop_id() and starts_at = '2026-09-08 09:00'::timestamp;
+  where workshop_id = public.current_workshop_id()
+    and starts_at = (select starts_at from pg_temp.s04_slot);
 
 select pg_temp.authenticate_as('33333333-3333-3333-3333-333333333333');
 
@@ -578,10 +614,10 @@ select lives_ok(
   $$ insert into public.appointments (workshop_id, customer_id, service_id, bay_id, starts_at, ends_at)
      values (
        public.current_workshop_id(),
-       (select id from public.customers where workshop_id = public.current_workshop_id() limit 1),
-       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
-       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
-       '2026-09-08 09:00', '2026-09-08 09:45'
+       (select id from public.customers where workshop_id = public.current_workshop_id() order by id limit 1),
+       (select id from public.services where workshop_id = public.current_workshop_id() order by id limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() order by id limit 1),
+       (select starts_at from pg_temp.s04_slot), (select ends_at from pg_temp.s04_slot)
      ) $$,
   'the S-04 no_show window accepts a new overlapping appointment (slot released)'
 );
