@@ -35,3 +35,23 @@ describe("requireRole — /wizyty split", () => {
     expect(requireRole(worker, "/wizyty/nowabc")).toEqual({ type: "allow" });
   });
 });
+
+describe("requireRole — /api/appointment-status split", () => {
+  const statusPath = "/api/appointment-status/11111111-1111-1111-1111-111111111111";
+
+  it("allows a worker on the status-change route", () => {
+    expect(requireRole(worker, statusPath)).toEqual({ type: "allow" });
+  });
+
+  it("allows an owner on the status-change route", () => {
+    expect(requireRole(owner, statusPath)).toEqual({ type: "allow" });
+  });
+
+  it("redirects an unauthenticated caller to sign-in from the status-change route", () => {
+    expect(requireRole(null, statusPath)).toEqual({ type: "redirect", to: "/auth/signin" });
+  });
+
+  it("still redirects a worker away from the owner-only booking API", () => {
+    expect(requireRole(worker, "/api/appointments")).toEqual({ type: "redirect", to: "/dashboard" });
+  });
+});

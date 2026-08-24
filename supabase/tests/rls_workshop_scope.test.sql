@@ -8,7 +8,7 @@
 
 begin;
 
-select plan(48);
+select plan(54);
 
 -- Switches the session to `authenticated` acting as the given user, for the rest of the
 -- transaction. Declared in pg_temp so it never survives past this test file's rollback.
@@ -107,6 +107,22 @@ declare
 begin
   update public.appointments set status = 'in_progress'
   where workshop_id = public.current_workshop_id();
+  get diagnostics affected = row_count;
+  return affected;
+end;
+$$;
+
+-- S-04: the app's compare-and-set update (`.eq("status", from)`), reused across the S-04 block
+-- below to prove the worker path works end-to-end and that the slot-release invariant holds.
+
+create function pg_temp.try_cas_update(p_id uuid, p_from public.appointment_status, p_to public.appointment_status) returns int
+language plpgsql
+as $$
+declare
+  affected int;
+begin
+  update public.appointments set status = p_to
+  where id = p_id and status = p_from;
   get diagnostics affected = row_count;
   return affected;
 end;
@@ -516,6 +532,68 @@ select throws_ok(
   'P0001',
   'service does not belong to this workshop',
   'owner A cannot book_appointment() using workshop B''s service_id'
+);
+
+-- S-04: worker walks a fresh appointment through the compare-and-set flow the app's
+-- changeAppointmentStatus() service uses, and the slot-release/re-occupation invariant it depends
+-- on (FR-005's slot-release half).
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+select lives_ok(
+  $$ select public.book_appointment('Ela', '600800800',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-08 09:00'::timestamp, '2026-09-08 09:45'::timestamp) $$,
+  'owner A books the S-04 fixture appointment'
+);
+
+create temporary table pg_temp.s04_appointment as
+  select id from public.appointments
+  where workshop_id = public.current_workshop_id() and starts_at = '2026-09-08 09:00'::timestamp;
+
+select pg_temp.authenticate_as('33333333-3333-3333-3333-333333333333');
+
+select is(
+  pg_temp.try_cas_update((select id from pg_temp.s04_appointment), 'waiting', 'in_progress'),
+  1,
+  'worker A moves the S-04 appointment waiting -> in_progress via compare-and-set'
+);
+
+select is(
+  pg_temp.try_cas_update((select id from pg_temp.s04_appointment), 'in_progress', 'done'),
+  1,
+  'worker A moves the S-04 appointment in_progress -> done via compare-and-set'
+);
+
+select is(
+  pg_temp.try_cas_update((select id from pg_temp.s04_appointment), 'done', 'no_show'),
+  1,
+  'worker A marks the S-04 appointment no_show, releasing its bay window'
+);
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+select lives_ok(
+  $$ insert into public.appointments (workshop_id, customer_id, service_id, bay_id, starts_at, ends_at)
+     values (
+       public.current_workshop_id(),
+       (select id from public.customers where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-09-08 09:00', '2026-09-08 09:45'
+     ) $$,
+  'the S-04 no_show window accepts a new overlapping appointment (slot released)'
+);
+
+select pg_temp.authenticate_as('33333333-3333-3333-3333-333333333333');
+
+select throws_ok(
+  $$ update public.appointments set status = 'waiting'
+     where id = (select id from pg_temp.s04_appointment) and status = 'no_show' $$,
+  '23P01',
+  null,
+  'reversing the S-04 no_show into its now re-occupied window fails with the exclusion constraint'
 );
 
 -- Anonymous: execute is revoked on the scoping helpers (Phase 1), not merely scoped by RLS.

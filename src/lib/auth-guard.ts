@@ -17,6 +17,7 @@ const ROUTE_ACCESS: readonly [prefix: string, access: AccessLevel][] = [
   ["/api/services", "owner"],
   ["/api/working-hours", "owner"],
   ["/api/appointments", "owner"],
+  ["/api/appointment-status", "any"],
 ];
 
 export type GuardResult = { readonly type: "allow" } | { readonly type: "redirect"; readonly to: string };

@@ -379,25 +379,25 @@ None. This slice ships no `supabase/migrations/` file and does not regenerate `s
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm test`
-- [x] 1.2 Both new suites actually run: `npx vitest run src/lib/services/appointment-transitions.test.ts src/components/hooks/useJsonMutation.test.ts`
-- [x] 1.3 Type checking passes: `npm run typecheck`
-- [x] 1.4 Linting passes: `npm run lint`
+- [x] 1.1 Unit tests pass: `npm test` — be9ece7
+- [x] 1.2 Both new suites actually run: `npx vitest run src/lib/services/appointment-transitions.test.ts src/components/hooks/useJsonMutation.test.ts` — be9ece7
+- [x] 1.3 Type checking passes: `npm run typecheck` — be9ece7
+- [x] 1.4 Linting passes: `npm run lint` — be9ece7
 
 ### Phase 2: Service, API route, guard entry, and pgTAP
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm test`
-- [ ] 2.2 Type checking passes: `npm run typecheck`
-- [ ] 2.3 Linting passes: `npm run lint`
-- [ ] 2.4 pgTAP suite passes: `npm run db:test`
+- [x] 2.1 Unit tests pass: `npm test`
+- [x] 2.2 Type checking passes: `npm run typecheck`
+- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.4 pgTAP suite passes: `npm run db:test`
 
 #### Manual
 
-- [ ] 2.5 PATCH as a signed-in worker returns 200 and the updated entry
-- [ ] 2.6 PATCH unauthenticated returns 401 JSON, not an HTML redirect
-- [ ] 2.7 Worker hitting `POST /api/appointments` still gets 403 JSON
+- [x] 2.5 PATCH as a signed-in worker returns 200 and the updated entry
+- [x] 2.6 PATCH unauthenticated returns 401 JSON, not an HTML redirect
+- [x] 2.7 Worker hitting `POST /api/appointments` still gets 403 JSON
 
 ### Phase 3: Detail page status block
 

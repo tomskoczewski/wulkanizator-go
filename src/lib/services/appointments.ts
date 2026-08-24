@@ -1,6 +1,6 @@
 import type { TypedSupabaseClient } from "@/lib/supabase";
-import type { AppointmentBookingRequestInput } from "@/lib/schemas/appointment";
-import type { Appointment, WorkingHours } from "@/types";
+import type { AppointmentBookingRequestInput, AppointmentStatusChangeInput } from "@/lib/schemas/appointment";
+import type { Appointment, AppointmentStatus, WorkingHours } from "@/types";
 import {
   getWorkshopNow,
   naiveDateToTimestampString,
@@ -15,6 +15,7 @@ import {
   type SuggestedSlot,
 } from "@/lib/services/slot-suggestions";
 import { sortDayPlan, type DayPlanEntry } from "@/lib/services/day-plan";
+import { isTransitionAllowed } from "@/lib/services/appointment-transitions";
 
 /**
  * RLS scopes every query below to the caller's own workshop, following `workshop-setup.ts`: no
@@ -292,4 +293,60 @@ export async function getAppointmentDetail(supabase: TypedSupabaseClient, id: st
   if (!data) return null;
 
   return toDayPlanEntry(data);
+}
+
+export type StatusChangeOutcome =
+  // `entry` is null only when the row's joins are incomplete — the write still committed, so
+  // `current` is what the client settles its optimistic state on.
+  | { status: "updated"; current: AppointmentStatus; entry: DayPlanEntry | null }
+  | { status: "stale"; current: AppointmentStatus }
+  | { status: "slot_taken" }
+  | { status: "not_found" };
+
+/**
+ * The single write path for a status change. Compare-and-set: the update is scoped to the row's
+ * believed current status, so a concurrent change by another user is detected (`stale`) rather
+ * than silently overwritten. `isTransitionAllowed()` is the sole authority on legal moves — this
+ * function does not duplicate that table.
+ */
+export async function changeAppointmentStatus(
+  supabase: TypedSupabaseClient,
+  id: string,
+  input: AppointmentStatusChangeInput,
+): Promise<StatusChangeOutcome> {
+  if (!isTransitionAllowed(input.from, input.status)) {
+    throw new Error(`Illegal status transition: ${input.from} -> ${input.status}`);
+  }
+
+  const { data, error } = await supabase
+    .from("appointments")
+    .update({ status: input.status })
+    .eq("id", id)
+    .eq("status", input.from)
+    .select(DAY_PLAN_SELECT)
+    .maybeSingle();
+
+  if (error) {
+    if (error.code === "23P01") {
+      return { status: "slot_taken" };
+    }
+    throw error;
+  }
+
+  if (!data) {
+    // Zero rows affected: either the row moved underneath the caller (stale) or it isn't visible
+    // to this caller at all (not_found — RLS makes "wrong workshop" and "doesn't exist"
+    // indistinguishable, matching getAppointmentDetail()'s posture). Never synthesize a `stale`
+    // carrying the client's own `from` — that would tell the client its stale belief is the truth
+    // while also signalling a conflict.
+    const current = await getAppointmentDetail(supabase, id);
+    if (!current) return { status: "not_found" };
+    return { status: "stale", current: current.status };
+  }
+
+  // The UPDATE has already committed by this point — a thrown error past here would roll the
+  // client's optimistic change back while the database holds the new status. On an incomplete
+  // join, still report success with the confirmed status; toDayPlanEntry()'s own console.warn
+  // carries the diagnostic.
+  return { status: "updated", current: input.status, entry: toDayPlanEntry(data) };
 }
