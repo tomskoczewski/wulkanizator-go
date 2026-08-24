@@ -7,7 +7,11 @@ import type {
   WorkingHoursUpdateInput,
   WorkshopDetailsInput,
 } from "@/lib/schemas/workshop-setup";
-import type { AppointmentBookingRequestInput, SlotSuggestionRequestInput } from "@/lib/schemas/appointment";
+import type {
+  AppointmentBookingRequestInput,
+  AppointmentStatusChangeInput,
+  SlotSuggestionRequestInput,
+} from "@/lib/schemas/appointment";
 import type { EmptyReason, WireSlot } from "@/lib/services/appointments";
 import type { DayPlanEntry } from "@/lib/services/day-plan";
 
@@ -42,6 +46,7 @@ export type {
   WorkingHoursUpdateInput,
   WorkshopDetailsInput,
   AppointmentBookingRequestInput,
+  AppointmentStatusChangeInput,
   SlotSuggestionRequestInput,
   EmptyReason,
   WireSlot,

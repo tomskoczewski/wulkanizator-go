@@ -3,6 +3,8 @@ import { useCallback, useState } from "react";
 export interface MutationFailure {
   fieldErrors?: Record<string, string[] | undefined>;
   message?: string;
+  status?: number;
+  body?: unknown;
 }
 
 interface ErrorResponseBody {
@@ -51,6 +53,8 @@ export async function requestJson<TResponse>(
         failure: {
           fieldErrors: failure?.errors,
           message: failure?.error ?? "Coś poszło nie tak. Spróbuj ponownie.",
+          status: res.status,
+          body: json,
         },
       };
     }
@@ -102,6 +106,9 @@ export function useJsonMutation<TResponse>() {
  *
  * `rollback` runs on failure and must be a functional state update that touches only this row;
  * reverting to a whole-list snapshot would undo a concurrent mutation that actually succeeded.
+ * `onFailure`, if given, gets the raw `MutationFailure` and can return `true` to suppress the
+ * rollback — for a 409 that carries the row's true server-side state, resyncing to it is the
+ * correct response, not reverting to the caller's stale optimistic value.
  */
 export function useRowMutation() {
   const [pendingKeys, setPendingKeys] = useState<ReadonlySet<string>>(() => new Set());
@@ -111,7 +118,11 @@ export function useRowMutation() {
     async (
       key: string,
       request: { url: string; method: string; body: unknown },
-      handlers: { rollback: () => void; fallbackMessage: string },
+      handlers: {
+        rollback: () => void;
+        fallbackMessage: string;
+        onFailure?: (failure: MutationFailure) => boolean;
+      },
     ): Promise<boolean> => {
       setPendingKeys((prev) => new Set(prev).add(key));
       setRowErrors((prev) => ({ ...prev, [key]: "" }));
@@ -120,7 +131,8 @@ export function useRowMutation() {
         const result = await requestJson<unknown>(request.url, request.method, request.body);
 
         if (!result.ok) {
-          handlers.rollback();
+          const handled = handlers.onFailure?.(result.failure) ?? false;
+          if (!handled) handlers.rollback();
           setRowErrors((prev) => ({
             ...prev,
             [key]: firstFieldError(result.failure.fieldErrors) ?? result.failure.message ?? handlers.fallbackMessage,

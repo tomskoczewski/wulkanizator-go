@@ -17,5 +17,15 @@ export const appointmentBookingRequestSchema = z.object({
   phone: z.string().trim().min(1, "Telefon jest wymagany"),
 });
 
+// Deriving the enum from these four in-scope literals — not from the full `AppointmentStatus`
+// union — is what keeps `cancelled` unreachable through this API.
+const IN_SCOPE_STATUSES = ["waiting", "in_progress", "done", "no_show"] as const;
+
+export const appointmentStatusChangeSchema = z.object({
+  status: z.enum(IN_SCOPE_STATUSES, "Nieprawidłowy status wizyty"),
+  from: z.enum(IN_SCOPE_STATUSES, "Nieprawidłowy status wizyty"),
+});
+
 export type SlotSuggestionRequestInput = z.infer<typeof slotSuggestionRequestSchema>;
 export type AppointmentBookingRequestInput = z.infer<typeof appointmentBookingRequestSchema>;
+export type AppointmentStatusChangeInput = z.infer<typeof appointmentStatusChangeSchema>;

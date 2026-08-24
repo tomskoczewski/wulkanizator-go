@@ -86,7 +86,8 @@ export default function NewAppointmentForm({ services }: Props) {
   }
 
   // Hand-rolled instead of useJsonMutation: a 409 here carries slots/emptyReason alongside the
-  // error, which useJsonMutation's MutationResult (ok/fieldErrors/message only) can't carry.
+  // error. useJsonMutation's MutationFailure can now carry an arbitrary body (see `status`/`body`
+  // on MutationFailure), but folding this form onto the shared helper is a separate change.
   async function handleSubmit() {
     if (!selectedServiceId || !selectedSlot) return;
 
