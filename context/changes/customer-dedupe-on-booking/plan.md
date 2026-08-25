@@ -471,33 +471,33 @@ If the normalization rule ever needs to change, the stored generated column will
 
 #### Automated
 
-- [x] 1.1 `npm run db:reset` applies all migrations cleanly from scratch
-- [x] 1.2 `npm run db:types` produces no further diff after the committed regeneration
-- [x] 1.3 `npm run typecheck` passes
-- [x] 1.4 `npm run lint` passes
-- [x] 1.5 `npm test` passes
+- [x] 1.1 `npm run db:reset` applies all migrations cleanly from scratch — 7a186db
+- [x] 1.2 `npm run db:types` produces no further diff after the committed regeneration — 7a186db
+- [x] 1.3 `npm run typecheck` passes — 7a186db
+- [x] 1.4 `npm run lint` passes — 7a186db
+- [x] 1.5 `npm test` passes — 7a186db
 
 #### Manual
 
-- [x] 1.6 Duplicate normalized phone in one workshop is rejected by the unique index
-- [x] 1.7 The same phone in two different workshops is accepted in both
-- [x] 1.8 Two below-threshold phones in one workshop are both accepted
+- [x] 1.6 Duplicate normalized phone in one workshop is rejected by the unique index — 7a186db
+- [x] 1.7 The same phone in two different workshops is accepted in both — 7a186db
+- [x] 1.8 Two below-threshold phones in one workshop are both accepted — 7a186db
 
 ### Phase 2: Conditional customer insert in `book_appointment()`
 
 #### Automated
 
-- [ ] 2.1 `npm run db:reset` applies cleanly
-- [ ] 2.2 `npm run db:test` passes with the existing `plan(54)`
-- [ ] 2.3 `npm run db:types` produces no diff
-- [ ] 2.4 `npm run typecheck`, `npm run lint`, `npm test` all pass
+- [x] 2.1 `npm run db:reset` applies cleanly
+- [x] 2.2 `npm run db:test` passes with the existing `plan(54)`
+- [x] 2.3 `npm run db:types` produces no diff
+- [x] 2.4 `npm run typecheck`, `npm run lint`, `npm test` all pass
 
 #### Manual
 
-- [ ] 2.5 Two bookings with differently-formatted same phone produce one customer row and two appointments
-- [ ] 2.6 The second booking's day-plan entry shows the first booking's name
-- [ ] 2.7 Two bookings with phone `-` produce two separate customer rows
-- [ ] 2.8 A worker calling the RPC still raises `only an owner may book an appointment`
+- [x] 2.5 Two bookings with differently-formatted same phone produce one customer row and two appointments
+- [x] 2.6 The second booking's day-plan entry shows the first booking's name
+- [x] 2.7 Two bookings with phone `-` produce two separate customer rows
+- [x] 2.8 A worker calling the RPC still raises `only an owner may book an appointment`
 
 ### Phase 3: pgTAP coverage
 
