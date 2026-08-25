@@ -487,28 +487,28 @@ If the normalization rule ever needs to change, the stored generated column will
 
 #### Automated
 
-- [x] 2.1 `npm run db:reset` applies cleanly
-- [x] 2.2 `npm run db:test` passes with the existing `plan(54)`
-- [x] 2.3 `npm run db:types` produces no diff
-- [x] 2.4 `npm run typecheck`, `npm run lint`, `npm test` all pass
+- [x] 2.1 `npm run db:reset` applies cleanly — 17f7f45
+- [x] 2.2 `npm run db:test` passes with the existing `plan(54)` — 17f7f45
+- [x] 2.3 `npm run db:types` produces no diff — 17f7f45
+- [x] 2.4 `npm run typecheck`, `npm run lint`, `npm test` all pass — 17f7f45
 
 #### Manual
 
-- [x] 2.5 Two bookings with differently-formatted same phone produce one customer row and two appointments
-- [x] 2.6 The second booking's day-plan entry shows the first booking's name
-- [x] 2.7 Two bookings with phone `-` produce two separate customer rows
-- [x] 2.8 A worker calling the RPC still raises `only an owner may book an appointment`
+- [x] 2.5 Two bookings with differently-formatted same phone produce one customer row and two appointments — 17f7f45
+- [x] 2.6 The second booking's day-plan entry shows the first booking's name — 17f7f45
+- [x] 2.7 Two bookings with phone `-` produce two separate customer rows — 17f7f45
+- [x] 2.8 A worker calling the RPC still raises `only an owner may book an appointment` — 17f7f45
 
 ### Phase 3: pgTAP coverage
 
 #### Automated
 
-- [ ] 3.1 `npm run db:test` passes with the updated `plan(N)` and no planned-vs-ran warning
-- [ ] 3.2 `npm run db:reset && npm run db:test` passes from a clean database
+- [x] 3.1 `npm run db:test` passes with the updated `plan(N)` and no planned-vs-ran warning
+- [x] 3.2 `npm run db:reset && npm run db:test` passes from a clean database
 
 #### Manual
 
-- [ ] 3.3 Reverting Phase 2's migration makes assertions 1-4 fail (non-vacuous)
+- [x] 3.3 Reverting Phase 2's migration makes assertions 1-4 fail (non-vacuous)
 
 ### Phase 4: Correct the documents that describe the old behavior
 

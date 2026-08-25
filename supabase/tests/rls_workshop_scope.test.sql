@@ -8,7 +8,7 @@
 
 begin;
 
-select plan(54);
+select plan(54 + 12); -- customer-dedupe-on-booking Phase 3: 12 assertions in the new block above
 
 -- Switches the session to `authenticated` acting as the given user, for the rest of the
 -- transaction. Declared in pg_temp so it never survives past this test file's rollback.
@@ -556,6 +556,123 @@ select throws_ok(
   'P0001',
   'service does not belong to this workshop',
   'owner A cannot book_appointment() using workshop B''s service_id'
+);
+
+-- customer-dedupe-on-booking: normalized-phone dedupe inside book_appointment(). Slot dates
+-- (2026-10-01 .. 2026-10-04) and phone numbers ("601 200 300" family) are picked to collide with
+-- neither the S-02 fixtures above nor the S-04 block below.
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+create temporary table pg_temp.dedupe_a_customers_before as
+  select count(*)::int as n from public.customers;
+
+create temporary table pg_temp.dedupe_a_appointments_before as
+  select count(*)::int as n from public.appointments;
+
+select lives_ok(
+  $$ select public.book_appointment('Dedupe1', '601 200 300',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-10-01 09:00'::timestamp, '2026-10-01 09:45'::timestamp) $$,
+  'owner A books a fresh phone in one format ("601 200 300")'
+);
+
+select lives_ok(
+  $$ select public.book_appointment('Dedupe2', '+48601200300',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-10-02 09:00'::timestamp, '2026-10-02 09:45'::timestamp) $$,
+  'owner A books the same phone again in a different format, on a different slot'
+);
+
+select is(
+  (select count(*)::int from public.customers) - (select n from pg_temp.dedupe_a_customers_before),
+  1,
+  'the two differently-formatted bookings raise owner A''s customer count by exactly 1'
+);
+
+select is(
+  (select count(*)::int from public.appointments) - (select n from pg_temp.dedupe_a_appointments_before),
+  2,
+  'the two differently-formatted bookings raise owner A''s appointment count by exactly 2'
+);
+
+select is(
+  (select count(distinct customer_id)::int from public.appointments
+   where workshop_id = public.current_workshop_id()
+     and starts_at in ('2026-10-01 09:00'::timestamp, '2026-10-02 09:00'::timestamp)),
+  1,
+  'both bookings carry the same customer_id'
+);
+
+select is(
+  (select first_name from public.customers
+   where workshop_id = public.current_workshop_id() and phone_normalized = '601200300'),
+  'Dedupe1',
+  'the surviving first_name is the one from the first booking, not the second'
+);
+
+-- Isolation: owner B books the same normalized phone in a different workshop and gets their own row.
+
+select pg_temp.authenticate_as('22222222-2222-2222-2222-222222222222');
+
+create temporary table pg_temp.dedupe_b_customers_before as
+  select count(*)::int as n from public.customers;
+
+select lives_ok(
+  $$ select public.book_appointment('DedupeB', '601200300',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-10-01 09:00'::timestamp, '2026-10-01 09:45'::timestamp) $$,
+  'owner B books the same normalized phone in a different workshop'
+);
+
+select is(
+  (select count(*)::int from public.customers) - (select n from pg_temp.dedupe_b_customers_before),
+  1,
+  'owner B''s customer count rises by 1 (isolation: the unique index is scoped per workshop)'
+);
+
+-- Below-threshold exception: junk phones never merge into a shared row.
+
+select pg_temp.authenticate_as('11111111-1111-1111-1111-111111111111');
+
+create temporary table pg_temp.dedupe_junk_customers_before as
+  select count(*)::int as n from public.customers;
+
+select lives_ok(
+  $$ select public.book_appointment('Junk1', '-',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-10-03 09:00'::timestamp, '2026-10-03 09:45'::timestamp) $$,
+  'owner A books a below-threshold phone ("-")'
+);
+
+select lives_ok(
+  $$ select public.book_appointment('Junk2', '-',
+       (select id from public.services where workshop_id = public.current_workshop_id() limit 1),
+       (select id from public.bays where workshop_id = public.current_workshop_id() limit 1),
+       '2026-10-04 09:00'::timestamp, '2026-10-04 09:45'::timestamp) $$,
+  'owner A books a second below-threshold phone ("-")'
+);
+
+select is(
+  (select count(*)::int from public.customers) - (select n from pg_temp.dedupe_junk_customers_before),
+  2,
+  'two below-threshold phones do not merge (each keeps its own row)'
+);
+
+-- The unique index itself, not merely book_appointment()'s on-conflict path: a direct duplicate
+-- insert is rejected. current_user_role() = 'owner' and workshop_id match, so this clears RLS and
+-- fails on the index instead.
+
+select throws_ok(
+  $$ insert into public.customers (workshop_id, first_name, phone)
+     values (public.current_workshop_id(), 'Direct', '601-200-300') $$,
+  '23505',
+  null,
+  'a direct INSERT duplicating an existing normalized phone in the same workshop raises 23505'
 );
 
 -- S-04: worker walks a fresh appointment through the compare-and-set flow the app's
