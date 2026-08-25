@@ -1,10 +1,10 @@
 ---
 change_id: customer-dedupe-on-booking
 title: Dedupe customers by phone inside book_appointment()
-status: impl_reviewed
+status: archived
 created: 2026-08-25
 updated: 2026-08-25
-archived_at: null
+archived_at: 2026-08-25T15:56:07Z
 ---
 
 ## Notes
