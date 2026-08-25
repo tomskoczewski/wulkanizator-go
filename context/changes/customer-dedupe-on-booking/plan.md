@@ -517,27 +517,27 @@ If the normalization rule ever needs to change, the stored generated column will
 
 #### Automated
 
-- [x] 4.1 `grep -rn "orphan"` across the three documents returns only accurate statements
-- [x] 4.2 `npm run lint` and `npm run format` pass
-- [x] 4.3 `npm test` and `npm run typecheck` pass
+- [x] 4.1 `grep -rn "orphan"` across the three documents returns only accurate statements — f91e4d5
+- [x] 4.2 `npm run lint` and `npm run format` pass — f91e4d5
+- [x] 4.3 `npm test` and `npm run typecheck` pass — f91e4d5
 
 #### Manual
 
-- [x] 4.4 `lessons.md`'s entry reads accurately cold
-- [x] 4.5 No remaining document claims a 409 retry leaks a customer row
+- [x] 4.4 `lessons.md`'s entry reads accurately cold — f91e4d5
+- [x] 4.5 No remaining document claims a 409 retry leaks a customer row — f91e4d5
 
 ### Phase 5: Ship sequence
 
 #### Automated
 
-- [ ] 5.1 `npm run lint && npm run typecheck && npm test && npm run build` pass on the feature branch
-- [ ] 5.2 `npm run db:reset && npm run db:test` pass from a clean local database
-- [ ] 5.3 CI green on the PR
+- [x] 5.1 `npm run lint && npm run typecheck && npm test && npm run build` pass on the feature branch
+- [x] 5.2 `npm run db:reset && npm run db:test` pass from a clean local database
+- [x] 5.3 CI green on the PR (pushed directly to `main` per the branch-approach decision; run 32858855569 passed)
 
 #### Manual
 
-- [ ] 5.4 Production audit counts recorded in `change.md` before `db push`
-- [ ] 5.5 Both migrations confirmed applied after `db push` (`book_appointment` body contains `on conflict`)
-- [ ] 5.6 Post-`db push` production counts match the audit's prediction
-- [ ] 5.7 A repeat booking on the live URL reuses the existing customer row
-- [ ] 5.8 Day plan and appointment detail render unchanged
+- [x] 5.4 Production audit counts recorded in `change.md` before `db push`
+- [x] 5.5 Both migrations confirmed applied after `db push` (`book_appointment` body contains `on conflict`)
+- [x] 5.6 Post-`db push` production counts match the audit's prediction
+- [x] 5.7 A repeat booking on the live URL reuses the existing customer row
+- [x] 5.8 Day plan and appointment detail render unchanged

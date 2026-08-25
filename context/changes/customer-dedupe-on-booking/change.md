@@ -20,3 +20,5 @@ archived_at: null
 **Scope — out**: no UI, no customer directory, no route/nav changes, no decision on the customer name shape (first/last split vs single name — that's an S-05 concern, not this one's). Does not un-park S-05.
 
 **Relevant background** (avoid re-deriving): `context/archive/2026-08-25-customer-directory/research.md` §3 has the current RPC in full plus the ownership-guard pattern it must keep, §2 has the RLS/migration conventions, §9 has the migration workflow (`db:reset`, `db:test`, `db:types`, `.husky/pre-push` drift check).
+
+**Production audit (2026-08-25, Phase 5.1)**: run read-only against the linked production project (`dqcgpfvlzuvwlmozueaf`) inside `begin; … rollback;`, using `public.normalize_phone()` pasted verbatim from `20260825120000_customer_phone_dedupe.sql`. Result: **0 duplicate `(workshop_id, phone_normalized)` groups, 0 customer rows the merge would delete, 0 appointments it would repoint.** Production currently holds no phone duplicates — the merge migration is a no-op on live data; only the unique index and the RPC's new reuse path change behavior going forward.
