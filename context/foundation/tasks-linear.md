@@ -27,8 +27,8 @@ Team-scoped labels on `Tomsko`, matching `tasks-github.md`'s label table verbati
 | `type:parked` | Explicitly out of MVP scope, kept for later |
 | `stream:a-core-loop` | North-star chain: F-01 → S-01 → S-02 → S-03 |
 | `stream:b-worker` | Worker adoption (S-04) |
-| `stream:c-customer` | Customer directory (S-05) |
-| `stream:d-tire-storage` | Tire storage extension (S-06) |
+| `stream:c-customer` | Customer directory (S-05) — retained on TOM-10 though the slice is parked, so it comes back labelled if un-parked |
+| `stream:d-tire-storage` | Tire storage extension (S-06) — retained on TOM-11 though the slice is parked, so it comes back labelled if un-parked |
 | `north-star` | Marks the one slice (S-03) where the core loop closes end-to-end |
 
 ## Backlog issues (foundation + slices)
@@ -40,8 +40,8 @@ Team-scoped labels on `Tomsko`, matching `tasks-github.md`'s label table verbati
 | S-02 | [#3](https://github.com/tomskoczewski/wulkanizator-go/issues/3) | [TOM-7](https://linear.app/tomsko/issue/TOM-7/add-appointment-with-free-slot-suggestions) | Add appointment with free-slot suggestions | `type:slice`, `stream:a-core-loop` | TOM-6 (S-01) |
 | S-03 | [#4](https://github.com/tomskoczewski/wulkanizator-go/issues/4) | [TOM-8](https://linear.app/tomsko/issue/TOM-8/day-plan-appointments-with-statuses) | Day plan — appointments with statuses (**north star**) | `type:slice`, `stream:a-core-loop`, `north-star` | TOM-7 (S-02) |
 | S-04 | [#5](https://github.com/tomskoczewski/wulkanizator-go/issues/5) | [TOM-9](https://linear.app/tomsko/issue/TOM-9/worker-changes-appointment-status) | Worker changes appointment status | `type:slice`, `stream:b-worker` | TOM-8 (S-03), TOM-5 (F-01) |
-| S-05 | [#6](https://github.com/tomskoczewski/wulkanizator-go/issues/6) | [TOM-10](https://linear.app/tomsko/issue/TOM-10/customer-directory-with-cars) | Customer directory with cars | `type:slice`, `stream:c-customer` | TOM-7 (S-02) |
-| S-06 | [#7](https://github.com/tomskoczewski/wulkanizator-go/issues/7) | [TOM-11](https://linear.app/tomsko/issue/TOM-11/tire-storage-nice-to-have) | Tire storage (nice-to-have) | `type:slice`, `stream:d-tire-storage` | TOM-10 (S-05) |
+
+S-05 and S-06 were in this table until 2026-08-25; they now sit under §Parked.
 
 Unlike GitHub (which fakes dependencies with a checklist in the issue body), Linear has native issue-blocking relations: each dependent issue above was created with a `blockedBy` relation pointing at its dependency's Linear ID, verified via `get_issue(includeRelations: true)`. The same "Depends on: ..." text also appears in each issue's description for parity with the GitHub mirror.
 
@@ -50,7 +50,8 @@ Unlike GitHub (which fakes dependencies with a checklist in the issue body), Lin
 | Roadmap ref | GitHub issue | Linear issue | Title | Blocks |
 | --- | --- | --- | --- | --- |
 | Open Roadmap Q1 | [#8](https://github.com/tomskoczewski/wulkanizator-go/issues/8) | [TOM-12](https://linear.app/tomsko/issue/TOM-12/missing-user-stories-for-remaining-mvp-flows) | Missing user stories for remaining MVP flows | roadmap-wide (non-blocking) |
-| Open Roadmap Q2 | [#9](https://github.com/tomskoczewski/wulkanizator-go/issues/9) | [TOM-13](https://linear.app/tomsko/issue/TOM-13/are-revenueforecast-reports-part-of-the-mvp) | Are revenue/forecast reports part of the MVP? | S-05 (TOM-10), S-06 (TOM-11) if answered "yes" |
+
+Open Roadmap Q2 (TOM-13, "Are revenue/forecast reports part of the MVP?") was in this table until 2026-08-25, when it was resolved moot — its only blocking condition, S-05, is itself now parked. It moved to §Parked alongside TOM-10/TOM-11 rather than staying open with nothing left to block. TOM-13 itself was **not** relabelled or closed in Linear — it's a genuine open question, just one whose blocking condition evaporated.
 
 ## Parked
 
@@ -63,8 +64,13 @@ Unlike GitHub (which fakes dependencies with a checklist in the issue body), Lin
 | Parked | [#14](https://github.com/tomskoczewski/wulkanizator-go/issues/14) | [TOM-18](https://linear.app/tomsko/issue/TOM-18/manual-slot-override) | Manual slot override |
 | Parked | [#15](https://github.com/tomskoczewski/wulkanizator-go/issues/15) | [TOM-19](https://linear.app/tomsko/issue/TOM-19/per-bay-per-worker-filter-on-day-plan) | Per-bay / per-worker filter on day plan |
 | Parked | [#16](https://github.com/tomskoczewski/wulkanizator-go/issues/16) | [TOM-20](https://linear.app/tomsko/issue/TOM-20/variable-service-duration-by-car-type) | Variable service duration by car type |
+| S-05 → Parked | [#6](https://github.com/tomskoczewski/wulkanizator-go/issues/6) | [TOM-10](https://linear.app/tomsko/issue/TOM-10/customer-directory-with-cars) | Customer directory with cars — **canceled 2026-08-25** |
+| S-06 → Parked | [#7](https://github.com/tomskoczewski/wulkanizator-go/issues/7) | [TOM-11](https://linear.app/tomsko/issue/TOM-11/tire-storage-nice-to-have) | Tire storage (nice-to-have) — **canceled 2026-08-25** |
+| Open Roadmap Q2 → Parked | [#9](https://github.com/tomskoczewski/wulkanizator-go/issues/9) | [TOM-13](https://linear.app/tomsko/issue/TOM-13/are-revenueforecast-reports-part-of-the-mvp) | Are revenue/forecast reports part of the MVP? — **left open**, its only blocking condition (S-05) is parked |
 
-Note: same as `tasks-github.md`, the roadmap's Parked section has an 8th bullet ("Tire storage (S-06) — conditional...") that is not a separate parked item — it's a cross-reference back to S-06's own Unknown (TOM-11), so it wasn't migrated as its own issue; the conditional-park note lives in TOM-11's description instead.
+Note: same as `tasks-github.md`, the roadmap's Parked section has a bullet ("Revenue and forecast reports") that is not a separate parked item until 2026-08-25 — it was migrated as Open Roadmap Q2 / TOM-13 above, and moved to this table only as a cross-reference note, not relabelled or canceled itself.
+
+Note on TOM-10/TOM-11: parked 2026-08-25 after user review of `/10x-research`'s findings for S-05 (`context/archive/2026-08-25-customer-directory/research.md`), relabelled `type:slice` → `type:parked` and transitioned to `Canceled`. **Correction made in the same pass**: TOM-11 (S-06) had been left `Backlog`/`type:slice` in Linear since its 2026-08-21 park — GitHub #7 was closed and this file was updated to say so, but the Linear issue itself was never actually transitioned. That drift is now fixed. Since TOM-11 depends on TOM-10, un-parking S-06 first requires un-parking S-05; rationale and re-entry triggers live in `roadmap.md` §S-05 and §S-06.
 
 ## Differences from the GitHub mirror
 
