@@ -5,14 +5,14 @@ mirrors: roadmap v1
 repo: tomskoczewski/wulkanizator-go
 milestone: MVP
 generated: 2026-08-14
-last_synced: 2026-08-25 # S-05 parked (#6 closed as not planned)
+last_synced: 2026-08-25 # #18 closed to match Linear; F-02 (#20) and #18 added to this mirror
 ---
 
 # Task management system: GitHub Issues
 
 Wulkanizator GO's backlog lives in **GitHub Issues** on `tomskoczewski/wulkanizator-go`, migrated 1:1 from `context/foundation/roadmap.md` (v1) via the `gh` CLI. This file is the mirror/index — `roadmap.md` remains the source of truth for scope and rationale; this file tracks where each roadmap item landed in GitHub.
 
-All 16 issues sit under one milestone, `MVP`, and carry a `type:*` label plus (where applicable) a `stream:*` label matching the roadmap's Streams table. Two (#6 S-05, #7 S-06) have since been relabelled `type:parked` and closed — see §Parked.
+All 16 issues sit under one milestone, `MVP`, and carry a `type:*` label plus (where applicable) a `stream:*` label matching the roadmap's Streams table. Two (#6 S-05, #7 S-06) have since been relabelled `type:parked` and closed — see §Parked. Two further issues (#18, #20) were created after this initial migration and were missing from this mirror until 2026-08-25 — see §Additional issues below.
 
 ## Labels
 
@@ -37,8 +37,9 @@ All 16 issues sit under one milestone, `MVP`, and carry a `type:*` label plus (w
 | S-02 | [#3](https://github.com/tomskoczewski/wulkanizator-go/issues/3) | Add appointment with free-slot suggestions | `type:slice`, `stream:a-core-loop` | #2 (S-01) |
 | S-03 | [#4](https://github.com/tomskoczewski/wulkanizator-go/issues/4) | Day plan — appointments with statuses (**north star**) | `type:slice`, `stream:a-core-loop`, `north-star` | #3 (S-02) |
 | S-04 | [#5](https://github.com/tomskoczewski/wulkanizator-go/issues/5) | Worker changes appointment status | `type:slice`, `stream:b-worker` | #4 (S-03), #1 (F-01) |
+| F-02 | [#20](https://github.com/tomskoczewski/wulkanizator-go/issues/20) | Design system foundation (brochure as the canonical UI reference) | `type:foundation` | — |
 
-S-05 was in this table until 2026-08-25; it now sits under §Parked, alongside S-06 (removed 2026-08-21).
+S-05 was in this table until 2026-08-25; it now sits under §Parked, alongside S-06 (removed 2026-08-21). F-02 was added to this table 2026-08-25 — it was migrated to GitHub separately from the original 16-issue batch (see §Additional issues) and had never been added here.
 
 Dependencies are also recorded as a GitHub task-list (`- [ ] Depends on #N`) in each dependent issue's body, so they render as clickable, checkable cross-references in the GitHub UI.
 
@@ -70,6 +71,15 @@ Note on #6: parked 2026-08-25 after user review of `/10x-research`'s findings (`
 Note on #7: the roadmap's Parked section originally carried tire storage as a *conditional* bullet cross-referencing S-06's own Unknown, so it was never migrated as a separate parked issue. On 2026-08-21 that condition resolved to "park it" — #7 was relabelled `type:slice` → `type:parked` and closed as `not planned`, and the roadmap bullet became unconditional. Un-parking means reopening #7 and reversing the label swap; the rationale and re-entry trigger live in `roadmap.md` §S-06, which was deliberately kept in place rather than deleted.
 
 Note on #9: unlike #6/#7 this issue was **not** relabelled or closed — it's a genuine open question, just one whose blocking condition evaporated. It's listed here for visibility alongside the two parked slices rather than left in the Open Questions table implying it still gates something. If a future un-park of S-05 revives the "revenue and forecast" scope question, move #9 back to the Open Questions table.
+
+## Additional issues (created after the initial migration)
+
+Two issues exist outside the original 16-issue batch this file was generated from. Both were missing from this mirror until 2026-08-25, discovered while checking F-01/F-02 tracker status for drift — added now to close the gap.
+
+| GitHub issue | Title | Roadmap ID | Labels | Notes |
+| --- | --- | --- | --- | --- |
+| [#20](https://github.com/tomskoczewski/wulkanizator-go/issues/20) | Design system foundation (brochure as the canonical UI reference) | F-02 | `type:foundation` | Migrated separately from the original batch (no milestone set); already lived in the §Backlog issues table's roadmap frontmatter narrative but was never listed here. Closed `completed` 2026-08-15. Linear: TOM-22. |
+| [#18](https://github.com/tomskoczewski/wulkanizator-go/issues/18) | Verify README worker-promotion snippet in production | — (not a roadmap slice) | `type:foundation`, `stream:a-core-loop` | Deferred follow-up from F-01 (plan item 5.6, left unchecked at ship time) — production verification of the worker-promotion SQL snippet in README.md. Linear TOM-21 was marked Done 2026-08-15, but this GitHub issue was left open until it was closed `completed` 2026-08-25 to match. Depends on #1 (F-01). |
 
 ## Keeping this in sync
 
