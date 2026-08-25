@@ -530,14 +530,14 @@ If the normalization rule ever needs to change, the stored generated column will
 
 #### Automated
 
-- [x] 5.1 `npm run lint && npm run typecheck && npm test && npm run build` pass on the feature branch
-- [x] 5.2 `npm run db:reset && npm run db:test` pass from a clean local database
-- [x] 5.3 CI green on the PR (pushed directly to `main` per the branch-approach decision; run 32858855569 passed)
+- [x] 5.1 `npm run lint && npm run typecheck && npm test && npm run build` pass on the feature branch — 6f0000a
+- [x] 5.2 `npm run db:reset && npm run db:test` pass from a clean local database — 6f0000a
+- [x] 5.3 CI green on the PR (pushed directly to `main` per the branch-approach decision; run 32858855569 passed) — 6f0000a
 
 #### Manual
 
-- [x] 5.4 Production audit counts recorded in `change.md` before `db push`
-- [x] 5.5 Both migrations confirmed applied after `db push` (`book_appointment` body contains `on conflict`)
-- [x] 5.6 Post-`db push` production counts match the audit's prediction
-- [x] 5.7 A repeat booking on the live URL reuses the existing customer row
-- [x] 5.8 Day plan and appointment detail render unchanged
+- [x] 5.4 Production audit counts recorded in `change.md` before `db push` — 6f0000a
+- [x] 5.5 Both migrations confirmed applied after `db push` (`book_appointment` body contains `on conflict`) — 6f0000a
+- [x] 5.6 Post-`db push` production counts match the audit's prediction — 6f0000a
+- [x] 5.7 A repeat booking on the live URL reuses the existing customer row — 6f0000a
+- [x] 5.8 Day plan and appointment detail render unchanged — 6f0000a
