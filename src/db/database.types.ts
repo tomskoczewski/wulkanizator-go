@@ -141,6 +141,7 @@ export type Database = {
           first_name: string
           id: string
           phone: string
+          phone_normalized: string | null
           workshop_id: string
         }
         Insert: {
@@ -148,6 +149,7 @@ export type Database = {
           first_name: string
           id?: string
           phone: string
+          phone_normalized?: string | null
           workshop_id: string
         }
         Update: {
@@ -155,6 +157,7 @@ export type Database = {
           first_name?: string
           id?: string
           phone?: string
+          phone_normalized?: string | null
           workshop_id?: string
         }
         Relationships: [
@@ -330,6 +333,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       current_workshop_id: { Args: never; Returns: string }
+      normalize_phone: { Args: { p_phone: string }; Returns: string }
       seed_workshop_defaults: {
         Args: { p_workshop_id: string }
         Returns: undefined
