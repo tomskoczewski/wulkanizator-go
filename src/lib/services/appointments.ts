@@ -172,7 +172,8 @@ export async function suggestSlotsForService(
  *
  * Both rows are inserted through the `book_appointment` RPC, a single implicit transaction: a lost
  * race on the exclusion constraint rolls back the customer insert too, so retrying never leaves an
- * orphan `customers` row.
+ * orphan `customers` row. The RPC reuses an existing customer whose normalized phone matches
+ * `p_phone` and inserts a new `customers` row only when none exists.
  */
 export async function bookAppointment(
   supabase: TypedSupabaseClient,

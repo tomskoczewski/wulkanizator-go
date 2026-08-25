@@ -102,6 +102,11 @@ create policy appointments_update_own_workshop on public.appointments
 
 -- 4. Booking function
 --
+-- Superseded: this is the original definition; the current one is
+-- `supabase/migrations/20260825120100_book_appointment_dedupe_customer.sql`, which reuses an
+-- existing customer by normalized phone instead of inserting unconditionally. Left as-is below —
+-- an applied migration is a record of what ran.
+--
 -- Inserts the customer row and the appointment row in one function body, so Postgres runs both in
 -- a single implicit transaction: an exclusion violation on the second insert rolls the first back,
 -- and a lost race can never leave an orphan customer behind. This is what makes the client's

@@ -10,32 +10,32 @@ This change makes the customer insert conditional on a **normalized-phone** matc
 
 ### The premise in `change.md` was partly wrong — corrected here
 
-`change.md` and `context/foundation/lessons.md` § *"A `security definer` RPC that unconditionally inserts…"* both assert that a client retry after a 409 slot conflict **leaks an orphan `customers` row per failed attempt**. That is false, and the repository already proves it:
+`change.md` and `context/foundation/lessons.md` § _"A `security definer` RPC that unconditionally inserts…"_ both assert that a client retry after a 409 slot conflict **leaks an orphan `customers` row per failed attempt**. That is false, and the repository already proves it:
 
 - `book_appointment()` is a `plpgsql` function; both inserts run inside one implicit transaction. An exclusion violation (`23P01`) on the `appointments` insert rolls the `customers` insert back with it.
-- `supabase/tests/rls_workshop_scope.test.sql:497-526` asserts exactly this and passes: *"book_appointment() losing the race leaves no orphan customer row"*.
+- `supabase/tests/rls_workshop_scope.test.sql:497-526` asserts exactly this and passes: _"book_appointment() losing the race leaves no orphan customer row"_.
 - The guarantee is stated deliberately in `supabase/migrations/20260821090000_appointments_and_customers.sql:104-108` and again in `src/lib/services/appointments.ts:173-175`.
 
-The **other** half of the description is real and is what this change fixes: every *successful* booking mints a new customer row. Phase 4 corrects the false clause in both documents rather than letting it propagate — `lessons.md` is re-read by `/10x-frame`, `/10x-research`, `/10x-plan`, `/10x-plan-review` and `/10x-implement`.
+The **other** half of the description is real and is what this change fixes: every _successful_ booking mints a new customer row. Phase 4 corrects the false clause in both documents rather than letting it propagate — `lessons.md` is re-read by `/10x-frame`, `/10x-research`, `/10x-plan`, `/10x-plan-review` and `/10x-implement`.
 
 ### What exists today
 
-| Thing | Where | State |
-| --- | --- | --- |
-| `public.customers` | `20260821090000_appointments_and_customers.sql:25-33` | `id`, `workshop_id`, `first_name`, `phone text not null`, `created_at`. Index on `workshop_id` only. No unique constraint. |
-| `customers` grants/policies | `:71`, `:74-82` | `grant select, insert` only. `_select_own_workshop` is role-blind (workers read it for the day plan); `_insert_owner` is owner-gated. No `UPDATE`, no `DELETE` anywhere in the schema. |
-| `appointments.customer_id` | `:38` | `not null references public.customers (id) on delete restrict` — a merge **must** repoint before deleting. |
-| `book_appointment()` | `20260821150000_book_appointment_ownership_check.sql:13-59` | Guards workshop, role, bay ownership, service ownership — then inserts customer unconditionally at `:49-51`. |
-| RPC grant | `20260821090000:154-155` | `revoke execute … from public, anon; grant execute … to authenticated`. `create or replace` with an **unchanged signature preserves this grant** (stated at `20260821150000:10-11`). |
-| `phone` validation | `src/lib/schemas/appointment.ts:18` | `z.string().trim().min(1, "Telefon jest wymagany")` — free text. `"600 100 100"`, `"600100100"` and `"+48 600 100 100"` are three different strings today. |
-| Day-plan read | `src/lib/services/appointments.ts:216-217` | `DAY_PLAN_SELECT` names columns explicitly (`customers(first_name, phone)`), so a new column on `customers` does not change any read. |
-| pgTAP suite | `supabase/tests/rls_workshop_scope.test.sql:11` | `select plan(54)`. **Local-only** — not in `.husky/pre-push`, not in `ci.yml`. |
-| Production | `context/deployment/deploy-plan.md` Phases 3-6 | Live cloud Supabase (eu-central, Frankfurt) + Cloudflare Git integration auto-deploying `main` ~93s after push. |
+| Thing                       | Where                                                       | State                                                                                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `public.customers`          | `20260821090000_appointments_and_customers.sql:25-33`       | `id`, `workshop_id`, `first_name`, `phone text not null`, `created_at`. Index on `workshop_id` only. No unique constraint.                                                             |
+| `customers` grants/policies | `:71`, `:74-82`                                             | `grant select, insert` only. `_select_own_workshop` is role-blind (workers read it for the day plan); `_insert_owner` is owner-gated. No `UPDATE`, no `DELETE` anywhere in the schema. |
+| `appointments.customer_id`  | `:38`                                                       | `not null references public.customers (id) on delete restrict` — a merge **must** repoint before deleting.                                                                             |
+| `book_appointment()`        | `20260821150000_book_appointment_ownership_check.sql:13-59` | Guards workshop, role, bay ownership, service ownership — then inserts customer unconditionally at `:49-51`.                                                                           |
+| RPC grant                   | `20260821090000:154-155`                                    | `revoke execute … from public, anon; grant execute … to authenticated`. `create or replace` with an **unchanged signature preserves this grant** (stated at `20260821150000:10-11`).   |
+| `phone` validation          | `src/lib/schemas/appointment.ts:18`                         | `z.string().trim().min(1, "Telefon jest wymagany")` — free text. `"600 100 100"`, `"600100100"` and `"+48 600 100 100"` are three different strings today.                             |
+| Day-plan read               | `src/lib/services/appointments.ts:216-217`                  | `DAY_PLAN_SELECT` names columns explicitly (`customers(first_name, phone)`), so a new column on `customers` does not change any read.                                                  |
+| pgTAP suite                 | `supabase/tests/rls_workshop_scope.test.sql:11`             | `select plan(54)`. **Local-only** — not in `.husky/pre-push`, not in `ci.yml`.                                                                                                         |
+| Production                  | `context/deployment/deploy-plan.md` Phases 3-6              | Live cloud Supabase (eu-central, Frankfurt) + Cloudflare Git integration auto-deploying `main` ~93s after push.                                                                        |
 
 ### Key Discoveries
 
 - **The signature can stay identical.** `create or replace function public.book_appointment(text, text, uuid, uuid, timestamp, timestamp)` preserves the `execute` grant, so no `grant`/`revoke` statements and no change to `src/lib/services/appointments.ts:196-203`, `src/pages/api/appointments/index.ts`, or `NewAppointmentForm.tsx`. The `Functions.book_appointment` block in `src/db/database.types.ts:301-330` is unchanged.
-- **The generated column *does* change `database.types.ts`.** `customers.Row` (`src/db/database.types.ts:139-145`) gains `phone_normalized`. `npm run db:types` and a committed diff are part of this change; `.husky/pre-push` enforces it (best-effort — it exits 0 silently when the local stack is down).
+- **The generated column _does_ change `database.types.ts`.** `customers.Row` (`src/db/database.types.ts:139-145`) gains `phone_normalized`. `npm run db:types` and a committed diff are part of this change; `.husky/pre-push` enforces it (best-effort — it exits 0 silently when the local stack is down).
 - **Migrations run as the table owner.** No migration in `supabase/migrations/` sets `force row level security`, so the merge's `DELETE` needs no grant and no policy. The schema-wide "no DELETE grant" posture (`context/archive/2026-08-15-workshop-setup/plan.md:77`) is untouched — `authenticated` still cannot delete a customer.
 - **A partial unique index is what makes the junk-phone case safe.** Without it, every walk-in entered as `"-"` or `"brak"` collapses into one shared customer row — and the merge migration would do that collapse irreversibly.
 - **Ownership guards are non-negotiable.** They exist because S-02's impl-review found them missing and rated it CRITICAL (`context/archive/2026-08-21-add-appointment-with-slots/reviews/impl-review.md:24-36`, F1). `security definer` bypasses RLS, so the function is the only thing standing between a caller and another workshop's rows.
@@ -91,7 +91,7 @@ Introduce the normalization rule as a first-class database object, derive it ont
 
 **File**: `supabase/migrations/20260825120000_customer_phone_dedupe.sql`
 
-**Intent**: Add `public.normalize_phone()`, derive `customers.phone_normalized` from it, merge existing duplicate customers onto their oldest row, then create the partial unique index that prevents new ones. Lead with a comment explaining why the dedupe key is derived rather than stored in `phone` (display fidelity), why the index is partial (junk phones must not merge strangers), and the recompute caveat from *Critical Implementation Details*.
+**Intent**: Add `public.normalize_phone()`, derive `customers.phone_normalized` from it, merge existing duplicate customers onto their oldest row, then create the partial unique index that prevents new ones. Lead with a comment explaining why the dedupe key is derived rather than stored in `phone` (display fidelity), why the index is partial (junk phones must not merge strangers), and the recompute caveat from _Critical Implementation Details_.
 
 **Contract**:
 
@@ -110,7 +110,8 @@ Introduce the normalization rule as a first-class database object, derive it ont
   from s
   ```
 
-  The narrower "strip `48` only" rule was rejected during review: it leaves `0048600100100` and `0600100100` as distinct customers, and because the generated column never recomputes (see *Critical Implementation Details*), widening the rule after the fact costs a backfill migration **and** a second irreversible merge on live data. The wider rule must therefore be the one that ships first — and the Phase 5.1 audit must be run with this expression, since it merges strictly more rows than the narrow one would.
+  The narrower "strip `48` only" rule was rejected during review: it leaves `0048600100100` and `0600100100` as distinct customers, and because the generated column never recomputes (see _Critical Implementation Details_), widening the rule after the fact costs a backfill migration **and** a second irreversible merge on live data. The wider rule must therefore be the one that ships first — and the Phase 5.1 audit must be run with this expression, since it merges strictly more rows than the narrow one would.
+
 - `public.customers.phone_normalized text generated always as (public.normalize_phone(phone)) stored`. No grant changes needed: the existing table-wide `grant select` covers it, and a generated column cannot be written to.
 - Merge, in two statements, both scoped to `length(phone_normalized) >= 9`. Within each `(workshop_id, phone_normalized)` group the keeper is the row with the lowest `(created_at, id)` — `id` breaks a `created_at` tie deterministically. First `update public.appointments` to repoint every appointment pointing at a non-keeper (required: the FK is `on delete restrict`), then `delete from public.customers` for the non-keepers.
 
@@ -145,6 +146,7 @@ Introduce the normalization rule as a first-class database object, derive it ont
     and k.phone_normalized = c.phone_normalized
     and c.id <> k.keeper_id;
   ```
+
 - `create unique index customers_workshop_phone_normalized_key on public.customers (workshop_id, phone_normalized) where (length(phone_normalized) >= 9);` — the predicate is reused verbatim in Phase 2's `on conflict` clause.
 
 #### 2. Regenerated database types
@@ -168,7 +170,7 @@ Introduce the normalization rule as a first-class database object, derive it ont
 #### Manual Verification:
 
 - In Studio, a manually inserted pair of `customers` rows with `"600 100 100"` and `"+48600100100"` in one workshop — the second insert is rejected by the unique index
-- The same phone inserted into two *different* workshops is accepted in both
+- The same phone inserted into two _different_ workshops is accepted in both
 - Two rows with `phone = '-'` in one workshop are both accepted (below the digit threshold)
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause for manual confirmation before proceeding.
@@ -267,7 +269,7 @@ Assertions to add (7):
 1. Owner A books with `"601 200 300"`, then again with `"+48601200300"` on a different slot — the `customers` count rises by exactly 1 across both bookings
 2. …and the `appointments` count rises by exactly 2
 3. …and both appointments carry the same `customer_id`
-4. …and the surviving `first_name` is the one from the *first* booking
+4. …and the surviving `first_name` is the one from the _first_ booking
 5. Owner B books the same phone (`"601200300"`) in workshop B — B's `customers` count rises by 1 (isolation: the index is scoped per workshop)
 6. Owner A books `"-"` twice — the `customers` count rises by 2 (below-threshold phones do not merge)
 7. A direct `insert into public.customers` duplicating an existing normalized phone in the same workshop raises `23505`
@@ -277,7 +279,7 @@ Assertions to add (7):
 **Note — two kinds of fixture collision to avoid.** The whole file runs inside one `begin; … rollback;` (`:9`, tail), so every row an earlier block created is live when this block runs:
 
 - **Slot dates** must not collide with the existing fixtures (`2026-09-01` / `05` / `06` / `07`, plus the `+520 weeks` S-04 slot) or the exclusion constraint turns a `lives_ok` into a spurious `23P01`. Follow `:567-576`'s approach — offset by whole weeks so the weekday, and therefore the working-hours window, is unchanged.
-- **Phone numbers** must not collide *after normalization* with a phone an earlier block already booked in the same workshop — this is new with this change, and it is why `"601 200 300"` is used above rather than `"600 100 100"`: owner A already books `'600100100'` at `:338`, so a repeat of it would make assertion 1 count `+0` and pin assertion 4's name to that block's `Jan`. Before adding the block, `grep -n "book_appointment('" supabase/tests/rls_workshop_scope.test.sql` and confirm the chosen number normalizes to something no existing literal does.
+- **Phone numbers** must not collide _after normalization_ with a phone an earlier block already booked in the same workshop — this is new with this change, and it is why `"601 200 300"` is used above rather than `"600 100 100"`: owner A already books `'600100100'` at `:338`, so a repeat of it would make assertion 1 count `+0` and pin assertion 4's name to that block's `Jan`. Before adding the block, `grep -n "book_appointment('" supabase/tests/rls_workshop_scope.test.sql` and confirm the chosen number normalizes to something no existing literal does.
 
 ### Success Criteria:
 
@@ -308,7 +310,7 @@ Four documents currently state behavior this change alters, and one states a mec
 
 `lessons.md:3` calls itself an "Append-only register", so this in-place edit is deliberate and bounded: the dated `Corrected 2026-08-25` line is what honours the convention — it records what the entry used to claim, what is actually true, and why, rather than erasing the mistake. Do not silently delete the false clause and leave no trace of it; a reader who saw the original must be able to tell that it was retracted on purpose.
 
-**Contract**: In § *"A `security definer` RPC that unconditionally inserts leaves orphan rows on every failed retry"* — retitle to drop "orphan rows on every failed retry" (the accumulation is per *successful* booking); rewrite the **Problem** clause claiming the 409-retry loop "leaks a customer row per attempt", citing `supabase/tests/rls_workshop_scope.test.sql:497-526` as the disproof; append a `- **Corrected 2026-08-25**:` line recording what was revised and why. The **Rule** and **Applies to** lines stand unchanged. Update **Tracked fix** to note the change shipped and what the resolution was.
+**Contract**: In § _"A `security definer` RPC that unconditionally inserts leaves orphan rows on every failed retry"_ — retitle to drop "orphan rows on every failed retry" (the accumulation is per _successful_ booking); rewrite the **Problem** clause claiming the 409-retry loop "leaks a customer row per attempt", citing `supabase/tests/rls_workshop_scope.test.sql:497-526` as the disproof; append a `- **Corrected 2026-08-25**:` line recording what was revised and why. The **Rule** and **Applies to** lines stand unchanged. Update **Tracked fix** to note the change shipped and what the resolution was.
 
 #### 2. Change notes
 
@@ -334,7 +336,7 @@ Four documents currently state behavior this change alters, and one states a mec
 
 **Contract**: Add a one-line pointer above the § 4 comment naming `20260825120100_book_appointment_dedupe_customer.sql` as the current definition. Do not edit the historical text — an applied migration is a record of what ran.
 
-Per `lessons.md` § *"Deleting a symbol means grepping the docs that name it"*: this change adds symbols rather than removing any, but run `grep -rn "book_appointment\|phone_normalized\|normalize_phone" README.md AGENTS.md CLAUDE.md context/` and fold any further hit into this phase.
+Per `lessons.md` § _"Deleting a symbol means grepping the docs that name it"_: this change adds symbols rather than removing any, but run `grep -rn "book_appointment\|phone_normalized\|normalize_phone" README.md AGENTS.md CLAUDE.md context/` and fold any further hit into this phase.
 
 ### Success Criteria:
 
@@ -355,7 +357,7 @@ Per `lessons.md` § *"Deleting a symbol means grepping the docs that name it"*: 
 
 ### Overview
 
-The merge deletes rows from the live database irreversibly, and Cloudflare auto-deploys `main` ~93s after push. Per `lessons.md` § *"Merging is deploying"*, the ordering is written out as an explicit numbered sequence rather than assumed.
+The merge deletes rows from the live database irreversibly, and Cloudflare auto-deploys `main` ~93s after push. Per `lessons.md` § _"Merging is deploying"_, the ordering is written out as an explicit numbered sequence rather than assumed.
 
 ### Changes Required:
 
@@ -391,7 +393,7 @@ The `rollback` keeps the step genuinely read-only and leaves the migration free 
 4. `npm run db:types` — no diff beyond what Phase 1 committed
 5. `npm run lint && npm run typecheck && npm test && npm run build` — the full CI gate (`.github/workflows/ci.yml`)
 6. `npx supabase db push` — **both** migrations reach production before any code does
-7. **Confirm both landed, not just the first.** `db push` applies each migration file in its own transaction, so a failure on `20260825120100` leaves production with the index and the merge committed but the *old* unconditional-insert RPC — the exact `23505` → 500 window this sequence exists to prevent, with no undo for the merge. In the production SQL editor:
+7. **Confirm both landed, not just the first.** `db push` applies each migration file in its own transaction, so a failure on `20260825120100` leaves production with the index and the merge committed but the _old_ unconditional-insert RPC — the exact `23505` → 500 window this sequence exists to prevent, with no undo for the merge. In the production SQL editor:
 
    ```sql
    select prosrc like '%on conflict%' as rpc_dedupes
@@ -399,6 +401,7 @@ The `rollback` keeps the step genuinely read-only and leaves the migration free 
    ```
 
    If this returns `false`, paste the body of `20260825120100_book_appointment_dedupe_customer.sql` into the SQL editor and run it **immediately**, before investigating why the push failed — `create or replace` with an unchanged signature is idempotent and preserves the `execute` grant, so re-running it costs nothing and closes the window.
+
 8. Verify in the production SQL editor that the post-merge counts match the audit's prediction
 9. Merge the branch to `main`; Cloudflare rebuilds within ~93s
 10. Book a repeat customer through the live URL and confirm one `customers` row
@@ -456,7 +459,7 @@ If the normalization rule ever needs to change, the stored generated column will
 ## References
 
 - Origin and scope: `context/changes/customer-dedupe-on-booking/change.md`
-- Lessons register: `context/foundation/lessons.md` § *"A `security definer` RPC that unconditionally inserts…"*, § *"Merging is deploying"*, § *"Deleting a symbol means grepping the docs that name it"*
+- Lessons register: `context/foundation/lessons.md` § _"A `security definer` RPC that unconditionally inserts…"_, § _"Merging is deploying"_, § _"Deleting a symbol means grepping the docs that name it"_
 - Archived research (RPC anatomy §3, RLS conventions §2, testing §8, migration workflow §9): `context/archive/2026-08-25-customer-directory/research.md`
 - The CRITICAL finding the ownership guards answer: `context/archive/2026-08-21-add-appointment-with-slots/reviews/impl-review.md:24-36`
 - Current RPC: `supabase/migrations/20260821150000_book_appointment_ownership_check.sql:13-59`
@@ -503,25 +506,25 @@ If the normalization rule ever needs to change, the stored generated column will
 
 #### Automated
 
-- [x] 3.1 `npm run db:test` passes with the updated `plan(N)` and no planned-vs-ran warning
-- [x] 3.2 `npm run db:reset && npm run db:test` passes from a clean database
+- [x] 3.1 `npm run db:test` passes with the updated `plan(N)` and no planned-vs-ran warning — 22295ed
+- [x] 3.2 `npm run db:reset && npm run db:test` passes from a clean database — 22295ed
 
 #### Manual
 
-- [x] 3.3 Reverting Phase 2's migration makes assertions 1-4 fail (non-vacuous)
+- [x] 3.3 Reverting Phase 2's migration makes assertions 1-4 fail (non-vacuous) — 22295ed
 
 ### Phase 4: Correct the documents that describe the old behavior
 
 #### Automated
 
-- [ ] 4.1 `grep -rn "orphan"` across the three documents returns only accurate statements
-- [ ] 4.2 `npm run lint` and `npm run format` pass
-- [ ] 4.3 `npm test` and `npm run typecheck` pass
+- [x] 4.1 `grep -rn "orphan"` across the three documents returns only accurate statements
+- [x] 4.2 `npm run lint` and `npm run format` pass
+- [x] 4.3 `npm test` and `npm run typecheck` pass
 
 #### Manual
 
-- [ ] 4.4 `lessons.md`'s entry reads accurately cold
-- [ ] 4.5 No remaining document claims a 409 retry leaks a customer row
+- [x] 4.4 `lessons.md`'s entry reads accurately cold
+- [x] 4.5 No remaining document claims a 409 retry leaks a customer row
 
 ### Phase 5: Ship sequence
 
