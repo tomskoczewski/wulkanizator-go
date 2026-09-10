@@ -545,11 +545,11 @@ deployment ordering concerns, so `lessons.md`'s "Merging is deploying" rule does
 
 #### Automated
 
-- [x] 5.1 Full suite still green
-- [x] 5.2 Linting and formatting pass on the edited markdown
+- [x] 5.1 Full suite still green — 08beaff
+- [x] 5.2 Linting and formatting pass on the edited markdown — 08beaff
 
 #### Manual
 
-- [x] 5.3 §6.4 is specific enough to add a new island test without re-reading this plan
-- [x] 5.4 §3 Phase 1 and Phase 3 rows match what is on disk
-- [x] 5.5 AGENTS.md no longer implies *.test.ts is the only shape
+- [x] 5.3 §6.4 is specific enough to add a new island test without re-reading this plan — 08beaff
+- [x] 5.4 §3 Phase 1 and Phase 3 rows match what is on disk — 08beaff
+- [x] 5.5 AGENTS.md no longer implies *.test.ts is the only shape — 08beaff

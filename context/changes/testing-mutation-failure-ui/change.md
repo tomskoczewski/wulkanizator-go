@@ -1,7 +1,7 @@
 ---
 change_id: testing-mutation-failure-ui
 title: Prove a failed status write is visibly a failed write on the day plan (Risk #1)
-status: implementing
+status: implemented
 created: 2026-09-10
 updated: 2026-09-10
 archived_at: null
