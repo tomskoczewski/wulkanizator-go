@@ -1,0 +1,37 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: lint
+      glob: "*.{ts,tsx,astro}"
+      run: npx eslint --fix {staged_files}
+      stage_fixed: true
+
+    - name: format
+      glob: "*.{json,css,md}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
+
+    - name: typecheck
+      glob: "*.{ts,tsx,astro}"
+      run: npm run typecheck
+
+    - name: test
+      glob: "*.{ts,tsx}"
+      run: npx vitest related {staged_files} --run
+
+pre-push:
+  jobs:
+    - name: types-drift-check
+      run: |
+        if ! npx supabase status >/dev/null 2>&1; then
+          echo "pre-push: Supabase local stack is not running — skipping types-drift check."
+          exit 0
+        fi
+
+        npm run db:types >/dev/null 2>&1
+
+        if ! git diff --quiet -- src/db/database.types.ts; then
+          echo "pre-push: src/db/database.types.ts is out of date with the local schema."
+          echo "Run 'npm run db:types' and commit the result before pushing."
+          exit 1
+        fi
