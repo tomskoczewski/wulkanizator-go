@@ -519,27 +519,27 @@ deployment ordering concerns, so `lessons.md`'s "Merging is deploying" rule does
 
 #### Automated
 
-- [x] 3.1 All new board tests pass
-- [x] 3.2 Linting passes
-- [x] 3.3 Type-checking passes
+- [x] 3.1 All new board tests pass — 2a88170
+- [x] 3.2 Linting passes — 2a88170
+- [x] 3.3 Type-checking passes — 2a88170
 
 #### Manual
 
-- [x] 3.4 Non-vacuity check: broken rollback and forced-true onFailure each turn the matching test red
-- [x] 3.5 Test names read as user-visible outcomes
+- [x] 3.4 Non-vacuity check: broken rollback and forced-true onFailure each turn the matching test red — 2a88170
+- [x] 3.5 Test names read as user-visible outcomes — 2a88170
 
 ### Phase 4: AppointmentStatusPanel failure tests
 
 #### Automated
 
-- [ ] 4.1 All new panel tests pass
-- [ ] 4.2 Linting passes
-- [ ] 4.3 Type-checking passes
+- [x] 4.1 All new panel tests pass
+- [x] 4.2 Linting passes
+- [x] 4.3 Type-checking passes
 
 #### Manual
 
-- [ ] 4.4 Non-vacuity check: no-op setStatus and forced resync each turn the matching test red
-- [ ] 4.5 Panel-wide re-enable assertion fails if pendingTarget is left set
+- [x] 4.4 Non-vacuity check: no-op setStatus and forced resync each turn the matching test red
+- [x] 4.5 Panel-wide re-enable assertion fails if pendingTarget is left set
 
 ### Phase 5: Cookbook and rollout bookkeeping
 
