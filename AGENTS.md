@@ -21,7 +21,7 @@ Source lives in `src/`: pages and API routes in `src/pages/`, React hooks in `sr
 
 See @README.md for all available scripts.
 
-Unit tests use Vitest (`npm test` / `npm run test:watch`), colocated as `*.test.ts` next to the module under test. Pure business logic in `src/lib/services/` is expected to carry them — see `src/lib/services/slot-suggestions.ts` / `.test.ts` for the pattern.
+Unit tests use Vitest (`npm test` / `npm run test:watch`), colocated as `*.test.ts` next to the module under test. Pure business logic in `src/lib/services/` is expected to carry them — see `src/lib/services/slot-suggestions.ts` / `.test.ts` for the pattern. React island components carry colocated `*.test.tsx` tests instead, opted into the `happy-dom` environment per file via a `// @vitest-environment happy-dom` docblock — see `src/components/appointments/DayPlanBoard.test.tsx` and `context/foundation/test-plan.md` §6.4 for the full recipe.
 
 Pre-commit: lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
 

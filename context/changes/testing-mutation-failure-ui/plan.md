@@ -532,24 +532,24 @@ deployment ordering concerns, so `lessons.md`'s "Merging is deploying" rule does
 
 #### Automated
 
-- [x] 4.1 All new panel tests pass
-- [x] 4.2 Linting passes
-- [x] 4.3 Type-checking passes
+- [x] 4.1 All new panel tests pass — a8c1772
+- [x] 4.2 Linting passes — a8c1772
+- [x] 4.3 Type-checking passes — a8c1772
 
 #### Manual
 
-- [x] 4.4 Non-vacuity check: no-op setStatus and forced resync each turn the matching test red
-- [x] 4.5 Panel-wide re-enable assertion fails if pendingTarget is left set
+- [x] 4.4 Non-vacuity check: no-op setStatus and forced resync each turn the matching test red — a8c1772
+- [x] 4.5 Panel-wide re-enable assertion fails if pendingTarget is left set — a8c1772
 
 ### Phase 5: Cookbook and rollout bookkeeping
 
 #### Automated
 
-- [ ] 5.1 Full suite still green
-- [ ] 5.2 Linting and formatting pass on the edited markdown
+- [x] 5.1 Full suite still green
+- [x] 5.2 Linting and formatting pass on the edited markdown
 
 #### Manual
 
-- [ ] 5.3 §6.4 is specific enough to add a new island test without re-reading this plan
-- [ ] 5.4 §3 Phase 1 and Phase 3 rows match what is on disk
-- [ ] 5.5 AGENTS.md no longer implies *.test.ts is the only shape
+- [x] 5.3 §6.4 is specific enough to add a new island test without re-reading this plan
+- [x] 5.4 §3 Phase 1 and Phase 3 rows match what is on disk
+- [x] 5.5 AGENTS.md no longer implies *.test.ts is the only shape
