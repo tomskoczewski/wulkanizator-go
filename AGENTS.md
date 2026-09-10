@@ -12,6 +12,7 @@ wulkanizator-go is an Astro 6 SSR app with React 19 islands, Tailwind 4, Supabas
 - API route handlers must use uppercase exports (`GET`, `POST`) — Astro silently ignores lowercase-named exports.
 - Route access rules live in `src/lib/auth-guard.ts`'s route table — never gate a route ad hoc inside a page or API route. Protected `/api/` paths are declared in the same table like any other route; the middleware answers a failed guard on `/api/*` with `401`/`403` JSON (never a redirect), so a `fetch()` caller gets a parseable error instead of followed HTML.
 - Appointment and other domain times are naive workshop-local wall-clock (`timestamp`, not `timestamptz`) — `src/lib/workshop-clock.ts` is the only module permitted to convert between an instant and workshop-local parts. Reach for it (or extend it) rather than calling `Intl.DateTimeFormat`/`new Date()` local-field accessors elsewhere; on any naive `Date`, use the `getUTC*` accessors, never `getDate()`/`getHours()`/etc.
+- Resolve every `package-lock.json` merge conflict with `npm install --package-lock-only`, never a plain `npm install` — the latter rebuilds the tree from the local macOS `node_modules`, which holds only `darwin-arm64` optional binaries, and silently drops every Linux/Windows/wasm platform entry. The result installs fine here and breaks `npm ci` on the linux-x64 CI runner with "Cannot find native binding". After resolving, confirm the lockfile is purely additive: no packages removed, no versions changed.
 
 ## Project Structure
 
