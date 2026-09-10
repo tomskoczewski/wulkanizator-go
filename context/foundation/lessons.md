@@ -38,3 +38,10 @@
 - **Corrected 2026-08-25**: this entry originally claimed a client retry after a 409 slot conflict "leaks an orphan `customers` row per attempt". That is false: `book_appointment()`'s two inserts run inside one implicit transaction, so an exclusion violation (`23P01`) on the `appointments` insert rolls the `customers` insert back with it — `supabase/tests/rls_workshop_scope.test.sql:497-526` asserts exactly this ("book_appointment() losing the race leaves no orphan customer row") and passes. The rest of the entry — every _successful_ booking mints a new customer row, with no dedupe — was and remains accurate; that is the half this fix addresses.
 - **Tracked fix**: `context/changes/customer-dedupe-on-booking/` — phone-based dedupe inside `book_appointment()`, scoped deliberately smaller than S-05 (RPC/schema only, no UI). Opened 2026-08-25, shipped via a normalized-phone match key, a partial unique index, an in-migration merge of existing duplicates, and an `on conflict do nothing` reuse path in the RPC (oldest row wins).
 - **Applies to**: research, plan, plan-review, implement
+
+## Clear context and drop to Sonnet at every phase handoff
+
+- **Context**: Any handoff between phases of a plan, including `/10x-test-plan` rollout phases and `/10x-implement` phases.
+- **Problem**: Staying in one context carries the previous phase's loaded files forward, and implementation — largely mechanical once the plan is written — runs on Opus, which is slower and far more expensive than the work requires.
+- **Rule**: At every phase completion, propose the next step explicitly. Always clear context before the next phase rather than continuing in place, and switch the model from Opus to Sonnet for implementation phases — reserve Opus for planning, research, and review.
+- **Applies to**: plan, implement, impl-review

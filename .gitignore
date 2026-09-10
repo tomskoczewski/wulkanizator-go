@@ -4,6 +4,9 @@
 .agents/**/10x-*
 **/.10x-cli-manifest.json
 
+# Claude Code local settings — personal, not shared
+.claude/settings.local.json
+
 # Dependencies
 node_modules/
 .pnp
