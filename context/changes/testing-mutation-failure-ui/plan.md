@@ -506,27 +506,27 @@ deployment ordering concerns, so `lessons.md`'s "Merging is deploying" rule does
 
 #### Automated
 
-- [x] 2.1 Taxonomy test passes
-- [x] 2.2 Type-checking passes
-- [x] 2.3 Linting passes
+- [x] 2.1 Taxonomy test passes — 71d1c27
+- [x] 2.2 Type-checking passes — 71d1c27
+- [x] 2.3 Linting passes — 71d1c27
 
 #### Manual
 
-- [x] 2.4 Diff review confirms the extraction is behaviour-preserving on both call sites
-- [x] 2.5 A status change still works end to end on both surfaces
+- [x] 2.4 Diff review confirms the extraction is behaviour-preserving on both call sites — 71d1c27
+- [x] 2.5 A status change still works end to end on both surfaces — 71d1c27
 
 ### Phase 3: DayPlanBoard failure tests
 
 #### Automated
 
-- [ ] 3.1 All new board tests pass
-- [ ] 3.2 Linting passes
-- [ ] 3.3 Type-checking passes
+- [x] 3.1 All new board tests pass
+- [x] 3.2 Linting passes
+- [x] 3.3 Type-checking passes
 
 #### Manual
 
-- [ ] 3.4 Non-vacuity check: broken rollback and forced-true onFailure each turn the matching test red
-- [ ] 3.5 Test names read as user-visible outcomes
+- [x] 3.4 Non-vacuity check: broken rollback and forced-true onFailure each turn the matching test red
+- [x] 3.5 Test names read as user-visible outcomes
 
 ### Phase 4: AppointmentStatusPanel failure tests
 
