@@ -6,6 +6,7 @@ import { useRowMutation } from "@/components/hooks/useJsonMutation";
 import { DAY_PLAN_FILTER_STATUSES, APPOINTMENT_STATUS_PRESENTATION } from "@/lib/appointment-status";
 import { nextStatus } from "@/lib/services/appointment-transitions";
 import { countByStatus, filterByStatus, type DayPlanEntry } from "@/lib/services/day-plan";
+import { resolveFailureStatus } from "@/lib/services/status-failure";
 import type { AppointmentStatus, WorkingHours } from "@/types";
 
 interface Props {
@@ -102,17 +103,14 @@ export default function DayPlanBoard({
         },
         fallbackMessage: "Coś poszło nie tak. Spróbuj ponownie.",
         onFailure: (failure) => {
-          // A 409 carries the row's true server-side status — resync to it rather than rolling
-          // back to the stale value we started from.
-          if (failure.status === 409) {
-            const body = failure.body as { current?: AppointmentStatus } | null;
-            if (body?.current) {
-              const current = body.current;
-              setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, status: current } : e)));
-              return true;
-            }
-          }
-          return false;
+          // The shared rule, applied identically on the detail page. Returning `true` suppresses
+          // `useRowMutation`'s rollback, because the row is now at the server's value rather than
+          // the stale one we started from.
+          const { status, resynced } = resolveFailureStatus(from, failure);
+          if (!resynced) return false;
+
+          setEntries((prev) => prev.map((e) => (e.id === entry.id ? { ...e, status } : e)));
+          return true;
         },
       },
     );

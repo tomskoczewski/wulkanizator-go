@@ -492,28 +492,28 @@ deployment ordering concerns, so `lessons.md`'s "Merging is deploying" rule does
 
 #### Automated
 
-- [x] 1.1 New test passes and existing node suite unaffected
-- [x] 1.2 Lint accepts a .test.tsx
-- [x] 1.3 Type-checking accepts it
+- [x] 1.1 New test passes and existing node suite unaffected — 6d00962
+- [x] 1.2 Lint accepts a .test.tsx — 6d00962
+- [x] 1.3 Type-checking accepts it — 6d00962
 
 #### Manual
 
-- [x] 1.4 npm install completes with no EBADENGINE warning
-- [x] 1.5 npm test shows both node and happy-dom tests in one run
-- [x] 1.6 Total npm test wall-clock has not materially regressed
+- [x] 1.4 npm install completes with no EBADENGINE warning — 6d00962
+- [x] 1.5 npm test shows both node and happy-dom tests in one run — 6d00962
+- [x] 1.6 Total npm test wall-clock has not materially regressed — 6d00962
 
 ### Phase 2: Shared failure decision
 
 #### Automated
 
-- [ ] 2.1 Taxonomy test passes
-- [ ] 2.2 Type-checking passes
-- [ ] 2.3 Linting passes
+- [x] 2.1 Taxonomy test passes
+- [x] 2.2 Type-checking passes
+- [x] 2.3 Linting passes
 
 #### Manual
 
-- [ ] 2.4 Diff review confirms the extraction is behaviour-preserving on both call sites
-- [ ] 2.5 A status change still works end to end on both surfaces
+- [x] 2.4 Diff review confirms the extraction is behaviour-preserving on both call sites
+- [x] 2.5 A status change still works end to end on both surfaces
 
 ### Phase 3: DayPlanBoard failure tests
 

@@ -3,6 +3,7 @@ import { CheckCircle2, Clock, Phone, Wrench, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requestJson } from "@/components/hooks/useJsonMutation";
 import { FORWARD_STEPS, isTransitionAllowed } from "@/lib/services/appointment-transitions";
+import { resolveFailureStatus } from "@/lib/services/status-failure";
 import type { AppointmentStatus, DayPlanEntry } from "@/types";
 
 interface Props {
@@ -49,14 +50,9 @@ export function AppointmentStatusPanel({ id, status: initialStatus, customerPhon
     );
 
     if (!result.ok) {
-      // A 409 carries the row's true server-side status — resync to it rather than rolling back
-      // to the stale value we started from. Any other failure reverts the optimistic change.
-      const body = result.failure.body as { current?: AppointmentStatus } | null;
-      if (result.failure.status === 409 && body?.current) {
-        setStatus(body.current);
-      } else {
-        setStatus(from);
-      }
+      // Either the row's true server-side status from a 409, or `from` — the shared rule the day
+      // plan applies too. `resynced` is unused here: this surface has no rollback to suppress.
+      setStatus(resolveFailureStatus(from, result.failure).status);
       setMessage(result.failure.message ?? "Coś poszło nie tak. Spróbuj ponownie.");
     }
 
