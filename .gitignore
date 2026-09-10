@@ -23,6 +23,7 @@ dist/
 
 # Environment variables
 .env
+.env.e2e
 .env.local
 .env.*.local
 .env.production
@@ -51,6 +52,13 @@ Thumbs.db
 # Testing
 coverage/
 .nyc_output/
+
+# Playwright
+playwright/.auth/
+test-results/
+playwright-report/
+blob-report/
+.playwright-cli/
 
 # Cloudflare
 .wrangler/
