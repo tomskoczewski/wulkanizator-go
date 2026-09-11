@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-09-10
+> Last updated: 2026-09-11
 
 ## 1. Strategy
 
@@ -82,16 +82,60 @@ Each row is a discrete rollout phase that will open its own change folder
 via `/10x-new`. Status moves left-to-right through the values below; the
 orchestrator updates Status as artifacts appear on disk.
 
-| #   | Phase name           | Goal (one line)                                                                                                                  | Risks covered         | Test types          | Status      | Change folder                                  |
-| --- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ----------- | ---------------------------------------------- |
-| 1   | API contract harness | Prove unhappy paths answer with the right status and a client-parseable body, and give route tests somewhere to live             | #5, #3 (partial)      | integration         | not started | —                                              |
-| 2   | Booking invariants   | Prove a slot the workshop cannot serve is rejected, concurrent bookings cannot both win, and workshop-B resources stay invisible | #2, #3                | pgTAP + integration | not started | —                                              |
-| 3   | Mutation-failure UI  | Prove a failed write is visibly a failed write — rollback restores truth and the user is told                                    | #1                    | unit                | complete    | `context/changes/testing-mutation-failure-ui/` |
-| 4   | Core-loop e2e        | Prove the four-slice chain works as one flow, plus one cross-workshop denial and atomic signup provisioning                      | #4, #6, #2 (backstop) | e2e + pgTAP         | not started | —                                              |
-| 5   | Quality-gates wiring | Lock the floor in CI so the gates are enforced rather than remembered                                                            | cross-cutting         | gates               | not started | —                                              |
+| #   | Phase name           | Goal (one line)                                                                                                                  | Risks covered         | Test types          | Status       | Change folder                                  |
+| --- | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------------------- | ------------ | ---------------------------------------------- |
+| 1   | API contract harness | Prove unhappy paths answer with the right status and a client-parseable body, and give route tests somewhere to live             | #5, #3 (partial)      | integration         | not started  | — (see note 1)                                 |
+| 2   | Booking invariants   | Prove a slot the workshop cannot serve is rejected, concurrent bookings cannot both win, and workshop-B resources stay invisible | #2, #3                | pgTAP + integration | implementing | — (see note 2)                                 |
+| 3   | Mutation-failure UI  | Prove a failed write is visibly a failed write — rollback restores truth and the user is told                                    | #1                    | unit                | complete     | `context/changes/testing-mutation-failure-ui/` |
+| 4   | Core-loop e2e        | Prove the four-slice chain works as one flow, plus one cross-workshop denial and atomic signup provisioning                      | #4, #6, #2 (backstop) | e2e + pgTAP         | implementing | — (see note 3)                                 |
+| 5   | Quality-gates wiring | Lock the floor in CI so the gates are enforced rather than remembered                                                            | cross-cutting         | gates               | implementing | — (see note 4)                                 |
 
 **Status vocabulary** (fixed — parser literals): `not started` →
 `change opened` → `researched` → `planned` → `implementing` → `complete`.
+
+**Reconciliation with disk, 2026-09-11.** Phases 2, 4 and 5 read `not
+started` while assertions for them were already green — tests landed
+_inside feature changes_ and through `/10x-e2e`, not through their own
+rollout change folders, so nothing updated this table. Statuses below are
+now what the disk actually supports; `implementing` means real coverage
+exists and the phase's stated goal is not yet fully met. What is still
+outstanding per phase:
+
+1. **API contract harness — genuinely `not started`.** Nothing under
+   `src/pages/api/` has a test; there is no route-level harness. The folder
+   `context/changes/testing-api-contract-harness/` exists but is empty (no
+   `change.md`), so it is a stub, not an opened change. This phase remains
+   the prerequisite the ordering rationale below describes.
+2. **Booking invariants — pgTAP half landed, integration half outstanding.**
+   `supabase/tests/rls_workshop_scope.test.sql` already proves the overlap
+   guard rejects a double-booked bay, that a released `no_show` window is
+   re-bookable (the partial-index regression), that the loser of a
+   concurrent `book_appointment()` race leaves no orphan customer, and that
+   the RPC rejects a bay or service belonging to another workshop. These
+   arrived with `context/archive/2026-08-21-add-appointment-with-slots/`,
+   `2026-08-21-worker-status-changes/` and
+   `2026-08-25-customer-dedupe-on-booking/`. Not yet covered: a booking
+   request for a time **outside working hours / on a closed day**, and the
+   route-level half, which waits on Phase 1.
+3. **Core-loop e2e — e2e half landed, Risk #6 half outstanding.**
+   `e2e/core-loop.spec.ts` (Risk #4) walks booking → day plan → detail
+   against a real stack; `e2e/cross-workshop-denial.spec.ts` (Risk #3)
+   asserts denial survives to what the browser renders; `e2e/seed.spec.ts`
+   is the Risk #1 exemplar and `e2e/signout.spec.ts` covers session
+   teardown. Delivered via `/10x-e2e` without its own change folder. Not yet
+   covered: **atomic signup provisioning** (Risk #6). The pgTAP suite pins
+   the trigger's _seeded catalogue_ (1 bay, 6 services, 7 working-hours rows
+   per workshop) but never asserts atomicity — that a failing
+   `handle_new_user()` rolls the whole `auth.users` insert back rather than
+   leaving a user without a profile.
+4. **Quality-gates wiring — unit floor locked, expensive layers not.**
+   `.github/workflows/ci.yml` runs lint + `npm test` + typecheck + build on
+   every push and PR to `main`; `lefthook.yml` adds pre-commit lint, format,
+   typecheck and `vitest related`, plus a pre-push database-types drift
+   check. **Neither `npm run db:test` (pgTAP) nor `npm run test:e2e`
+   (Playwright) runs in CI** — the two most expensive suites are the two
+   nobody is forced to run, which is exactly the "enforced rather than
+   remembered" gap this phase names.
 
 Ordering rationale, in one line each. Phase 1 comes first despite Risk #1
 outranking Risk #5, because nothing tests `src/pages/api/` today and Phases
@@ -220,6 +264,7 @@ contributors should respect these unless the underlying assumption changes.
 - Strategy (§1–§5) last reviewed: 2026-09-09
 - Stack versions last verified: 2026-09-09
 - AI-native tool references: none in this plan (layer dropped 2026-09-09, see §7)
+- Rollout statuses (§3) last reconciled against disk: 2026-09-11
 
 Refresh (`/10x-test-plan --refresh`) when:
 
