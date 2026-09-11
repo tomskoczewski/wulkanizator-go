@@ -66,6 +66,8 @@ npm run dev
 - `npm run format` - Run Prettier
 - `npm run typecheck` - Type-check with `astro check`
 - `npm test` / `npm run test:watch` - Run unit tests with Vitest (colocated `*.test.ts` files)
+- `npm run test:e2e` - Run the Playwright E2E suite (boots `npm run dev` itself, or reuses a running one)
+- `npm run test:all` - Unit tests, then E2E — needs the local Supabase stack up (`npm run db:start`)
 - `npm run db:start` / `db:stop` / `db:reset` / `db:test` / `db:types` - Local Supabase workflow, see [Local database workflow](#local-database-workflow)
 
 ## Project Structure

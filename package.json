@@ -20,7 +20,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "test:all": "npm run test && npm run test:e2e"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",

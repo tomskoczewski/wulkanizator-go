@@ -11,11 +11,16 @@ hand-patched.
 
 ```bash
 npm run db:start && npm run db:reset   # local stack + fixture accounts from supabase/seed.sql
-npm run dev                            # the app under test, http://localhost:4321
 cp .env.e2e.example .env.e2e           # once
 npm run test:e2e                       # whole suite
+npm run test:all                       # unit tests first, then the whole suite
 npx playwright test e2e/<file>.spec.ts # single spec
 ```
+
+Playwright starts `npm run dev` itself (`webServer` in `playwright.config.ts`) and reuses one you
+already have running on port 4321. Setting `E2E_BASE_URL` disables that — point it at a deployment
+and nothing local is started. The Supabase stack is **not** started for you; `db:start` is a
+prerequisite either way.
 
 The suite runs against the **real** stack — real auth, real routing, real Postgres. Nothing internal
 is mocked; that is where the integration risk lives.

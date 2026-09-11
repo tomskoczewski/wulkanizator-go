@@ -27,6 +27,17 @@ export default defineConfig({
     trace: "on-first-retry",
     testIdAttribute: "data-testid",
   },
+  // `npm run test:e2e` boots the app itself, so the whole suite is one command (`npm run test:all`).
+  // An already-running `npm run dev` is reused; an explicit E2E_BASE_URL (staging, a preview
+  // deployment) means the app is somebody else's job, so nothing is started.
+  webServer: process.env.E2E_BASE_URL
+    ? undefined
+    : {
+        command: "npm run dev",
+        url: BASE_URL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
