@@ -20,14 +20,14 @@ The stack is already wired for it: `@astrojs/cloudflare` v13.5.0 targets Workers
 
 ## Platform Comparison
 
-| Platform | CLI-first | Managed/Serverless | Agent-readable docs | Stable deploy API | MCP / Integration | Total |
-|---|---|---|---|---|---|---|
-| **Cloudflare Workers** | ✅ Pass | ✅ Pass | ✅ Pass | ✅ Pass | ✅ Pass | **5/5** |
-| Vercel | ✅ Pass | ✅ Pass | ✅ Pass | ✅ Pass | ⚠️ Partial | 4.5/5 |
-| Netlify | ⚠️ Partial | ✅ Pass | ✅ Pass | ✅ Pass | ✅ Pass | 4.5/5 |
-| Railway | ⚠️ Partial | ✅ Pass | ✅ Pass | ✅ Pass | ✅ Pass | 4.5/5 |
-| Render | ⚠️ Partial | ✅ Pass | ✅ Pass | ✅ Pass | ✅ Pass | 4.5/5 |
-| Fly.io | ⚠️ Partial | ⚠️ Partial | ✅ Pass | ✅ Pass | ⚠️ Partial | 3/5 |
+| Platform               | CLI-first  | Managed/Serverless | Agent-readable docs | Stable deploy API | MCP / Integration | Total   |
+| ---------------------- | ---------- | ------------------ | ------------------- | ----------------- | ----------------- | ------- |
+| **Cloudflare Workers** | ✅ Pass    | ✅ Pass            | ✅ Pass             | ✅ Pass           | ✅ Pass           | **5/5** |
+| Vercel                 | ✅ Pass    | ✅ Pass            | ✅ Pass             | ✅ Pass           | ⚠️ Partial        | 4.5/5   |
+| Netlify                | ⚠️ Partial | ✅ Pass            | ✅ Pass             | ✅ Pass           | ✅ Pass           | 4.5/5   |
+| Railway                | ⚠️ Partial | ✅ Pass            | ✅ Pass             | ✅ Pass           | ✅ Pass           | 4.5/5   |
+| Render                 | ⚠️ Partial | ✅ Pass            | ✅ Pass             | ✅ Pass           | ✅ Pass           | 4.5/5   |
+| Fly.io                 | ⚠️ Partial | ⚠️ Partial         | ✅ Pass             | ✅ Pass           | ⚠️ Partial        | 3/5     |
 
 Notes per criterion:
 
@@ -91,19 +91,35 @@ The team deployed Astro 6 + Supabase on Workers, confident: the stack pointed th
 
 - **Logs**: `npx wrangler tail` — live-streams all requests and console output to the terminal. `npx wrangler tail --format json` for structured JSON. Through MCP: the `cloudflare_workers_observability` MCP server (GA) exposes logs and metrics as structured tool calls without parsing CLI output.
 
+- **Paused-backend outage**: the Supabase free tier pauses a project after roughly a week without
+  activity, and a paused project stops answering on its API hostname entirely. The Worker's
+  subrequest then fails at the origin, which surfaces in `wrangler tail` as
+  `AuthRetryableFetchError` with **status 530** — not as an application error, and not with any
+  message of its own (Cloudflare's own log view shows only a `supabase-js` stack, which is why the
+  530 is the signal worth grepping for). The site keeps _looking_ healthy: anonymous pages need no
+  network call, so `/` still answers 302 to `/auth/signin` and the form renders 200. Only requests
+  carrying a session, and sign-in itself, fail. Confirm with `npx supabase projects list`
+  (`"status":"INACTIVE"`) and by curling `https://<ref>.supabase.co/auth/v1/health`, which returns
+  no response at all rather than an HTTP error. Clear it from the Supabase dashboard's _Restore
+  project_ — the CLI has no restore subcommand (`list`, `create`, `api-keys`, `delete` only). The
+  project ref, URL and keys survive the pause, so no secret rotation and no redeploy are needed;
+  verify by signing in once. Observed in production 2026-09-11. **Runbook: `README.md` §Paused
+  Supabase project.**
+
 ## Risk Register
 
-| Risk | Source | Likelihood | Impact | Mitigation |
-|---|---|---|---|---|
-| `disable_nodejs_process_v2` missing → middleware errors in production | Unknown unknowns | H | H | Add `"disable_nodejs_process_v2"` to `compatibility_flags` in `wrangler.jsonc` before first deploy. |
-| `tech-stack.md` says `cloudflare-pages` (dropped in Astro 6) | Research finding | H | M | Update `tech-stack.md` `deployment_target` field to `cloudflare-workers`. |
-| Free tier 10ms CPU limit hit during peak scheduling computation | Devil's advocate | M | H | Upgrade to paid Workers plan ($5/month) before first real-traffic deploy; set `cpu_ms: 30` in `wrangler.jsonc`. |
-| CJS-only npm dependency throws at Workers runtime | Devil's advocate | M | H | Run `npx wrangler deploy --dry-run` and inspect the bundle; audit date/time and utility packages for ESM support. |
-| Supabase `Set-Cookie` dropped in Workers streaming response path | Unknown unknowns | M | H | Test login → dashboard → session persistence flow explicitly with `wrangler dev` (not `astro dev`) before launch. |
-| Workers Builds GitHub integration requires manual dashboard setup | Unknown unknowns | H | L | One-time manual step: configure via Cloudflare dashboard before expecting auto-deploy on merge. |
-| Compatibility date bump breaking middleware silently | Pre-mortem | M | H | Pin `compatibility_date` deliberately; bump only after testing in a staging deployment; follow `@astrojs/cloudflare` adapter changelog. |
-| Platform coupling through `cloudflare:workers` direct imports | Devil's advocate | L | M | Minimize direct `cloudflare:workers` usage; access bindings through Astro locals where the adapter provides an abstraction. |
-| Wrangler local dev not reproducing production bugs | Unknown unknowns | M | M | Use `wrangler dev` (not `astro dev`) for any test involving auth, cookies, or binding-dependent code paths. |
+| Risk                                                                                                                        | Source                              | Likelihood | Impact | Mitigation                                                                                                                                                                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- | ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `disable_nodejs_process_v2` missing → middleware errors in production                                                       | Unknown unknowns                    | H          | H      | Add `"disable_nodejs_process_v2"` to `compatibility_flags` in `wrangler.jsonc` before first deploy.                                                                                                                                                           |
+| `tech-stack.md` says `cloudflare-pages` (dropped in Astro 6)                                                                | Research finding                    | H          | M      | Update `tech-stack.md` `deployment_target` field to `cloudflare-workers`.                                                                                                                                                                                     |
+| Free tier 10ms CPU limit hit during peak scheduling computation                                                             | Devil's advocate                    | M          | H      | Upgrade to paid Workers plan ($5/month) before first real-traffic deploy; set `cpu_ms: 30` in `wrangler.jsonc`.                                                                                                                                               |
+| CJS-only npm dependency throws at Workers runtime                                                                           | Devil's advocate                    | M          | H      | Run `npx wrangler deploy --dry-run` and inspect the bundle; audit date/time and utility packages for ESM support.                                                                                                                                             |
+| Supabase `Set-Cookie` dropped in Workers streaming response path                                                            | Unknown unknowns                    | M          | H      | Test login → dashboard → session persistence flow explicitly with `wrangler dev` (not `astro dev`) before launch.                                                                                                                                             |
+| Workers Builds GitHub integration requires manual dashboard setup                                                           | Unknown unknowns                    | H          | L      | One-time manual step: configure via Cloudflare dashboard before expecting auto-deploy on merge.                                                                                                                                                               |
+| Compatibility date bump breaking middleware silently                                                                        | Pre-mortem                          | M          | H      | Pin `compatibility_date` deliberately; bump only after testing in a staging deployment; follow `@astrojs/cloudflare` adapter changelog.                                                                                                                       |
+| Platform coupling through `cloudflare:workers` direct imports                                                               | Devil's advocate                    | L          | M      | Minimize direct `cloudflare:workers` usage; access bindings through Astro locals where the adapter provides an abstraction.                                                                                                                                   |
+| Wrangler local dev not reproducing production bugs                                                                          | Unknown unknowns                    | M          | M      | Use `wrangler dev` (not `astro dev`) for any test involving auth, cookies, or binding-dependent code paths.                                                                                                                                                   |
+| Supabase free-tier project pauses after ~1 week of inactivity → every authenticated path dies while the site still looks up | Observed in production (2026-09-11) | H          | H      | Keep the project warm (any weekly activity resets the clock) or move it to a paid tier, which does not pause. When it happens: _Restore project_ in the Supabase dashboard — no redeploy. Signature in `wrangler tail`: `AuthRetryableFetchError` status 530. |
 
 ## Getting Started
 
@@ -113,34 +129,40 @@ The project already has `@astrojs/cloudflare` v13.5.0 and `wrangler.jsonc` confi
 
    ```jsonc
    {
-     "name": "wulkanizator-go",              // rename from "10x-astro-starter"
-     "compatibility_flags": ["nodejs_compat", "disable_nodejs_process_v2"],  // add the second flag
+     "name": "wulkanizator-go", // rename from "10x-astro-starter"
+     "compatibility_flags": ["nodejs_compat", "disable_nodejs_process_v2"], // add the second flag
      // ... rest unchanged
    }
    ```
 
 2. **Authenticate with Cloudflare**:
+
    ```bash
    npx wrangler login
    ```
 
 3. **Set production secrets**:
+
    ```bash
    npx wrangler secret put SUPABASE_URL
    npx wrangler secret put SUPABASE_KEY
    ```
 
 4. **Build and deploy**:
+
    ```bash
    npm run build
    npx wrangler deploy
    ```
+
    First deploy creates the Worker at `https://wulkanizator-go.[your-subdomain].workers.dev`.
 
 5. **Verify and tail logs**:
+
    ```bash
    npx wrangler tail
    ```
+
    Open the Workers URL in a browser, sign up, sign in, and watch the log stream for any `async iterable body` errors (would confirm the flag gap) or auth cookie failures.
 
 6. **Wire auto-deploy from GitHub** (manual step): in the Cloudflare dashboard, go to Workers & Pages > Create > Import from Git, connect the `wulkanizator-go` repository, and configure the production branch. This cannot be scripted via `wrangler` alone.
@@ -148,6 +170,7 @@ The project already has `@astrojs/cloudflare` v13.5.0 and `wrangler.jsonc` confi
 ## Out of Scope
 
 The following were not evaluated in this research:
+
 - Docker image configuration
 - CI/CD pipeline setup (GitHub Actions workflow file)
 - Production-scale architecture (multi-region, HA, DR)

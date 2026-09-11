@@ -142,15 +142,15 @@ Users can then sign in immediately after sign-up without clicking a confirmation
 
 ### Auth routes
 
-| Route                 | Description                                                             |
-| --------------------- | ----------------------------------------------------------------------- |
-| `/auth/signin`        | Email/password sign-in form                                             |
-| `/auth/signup`        | Email/password sign-up form                                             |
-| `/auth/confirm-email` | Post-signup "check your inbox" page                                     |
+| Route                 | Description                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| `/auth/signin`        | Email/password sign-in form                                                                 |
+| `/auth/signup`        | Email/password sign-up form                                                                 |
+| `/auth/confirm-email` | Post-signup "check your inbox" page                                                         |
 | `/dashboard`          | Day plan — every appointment for a chosen day, with status filters (any authenticated role) |
-| `/ustawienia`         | Owner-only workshop configuration (bays, services, working hours)       |
-| `/wizyty/nowa`        | Owner-only: book an appointment with free-slot suggestions             |
-| `/wizyty/<id>`        | Appointment details (any authenticated role)                            |
+| `/ustawienia`         | Owner-only workshop configuration (bays, services, working hours)                           |
+| `/wizyty/nowa`        | Owner-only: book an appointment with free-slot suggestions                                  |
+| `/wizyty/<id>`        | Appointment details (any authenticated role)                                                |
 
 Route protection is handled in `src/middleware.ts`, which delegates to the route table in `src/lib/auth-guard.ts`. Add a `[pathPrefix, accessLevel]` entry there to require authentication (`"any"`) or a specific role (`"owner"` / `"worker"`) — longest matching prefix wins.
 
@@ -168,7 +168,7 @@ npm run db:types    # regenerate src/db/database.types.ts from the local schema
 npm run db:stop     # stop the local stack
 ```
 
-Run `npm run db:types` after every migration and commit the result — `npm run typecheck` checks application code against the *committed* types, not the live database, so a stale file is a silent gap. The pre-push hook (`.husky/pre-push`) regenerates and diffs the file before every push, and skips cleanly if the local stack isn't running.
+Run `npm run db:types` after every migration and commit the result — `npm run typecheck` checks application code against the _committed_ types, not the live database, so a stale file is a silent gap. The pre-push hook (`.husky/pre-push`) regenerates and diffs the file before every push, and skips cleanly if the local stack isn't running.
 
 ### Creating a worker account
 
@@ -195,6 +195,37 @@ drop trigger if exists on_auth_user_created on auth.users;
 This restores signup immediately and leaves existing workshops and profiles intact. Re-create the trigger (rerun its migration) once the underlying function is fixed.
 
 While the trigger is dropped, new signups get no `profiles` row **and** no default services/bays/working-hours — `handle_new_user()` also owns default seeding (`public.seed_workshop_defaults()`). Workshops created during the outage need manual provisioning once the trigger is restored.
+
+### Paused Supabase project
+
+Supabase pauses a free-tier project after about a week without activity. A paused project stops
+answering on its API hostname, so every call the Worker makes to it fails at the origin. **The site
+does not look broken**: anonymous pages need no backend call, so `/` still redirects to
+`/auth/signin` and the form renders — the guard simply treats everyone as signed out, exactly as it
+is designed to when it cannot resolve a user. What actually fails is sign-in and every request that
+carries a session.
+
+Recognise it by the signature in the Worker logs, which is the one piece of evidence that names the
+cause (the Cloudflare log view otherwise shows only a bare `supabase-js` stack):
+
+```bash
+npx wrangler tail wulkanizator-go
+# (error) { name: 'AuthRetryableFetchError', message: '{}', status: 530 }
+```
+
+Confirm and fix:
+
+```bash
+npx supabase projects list          # look for "status":"INACTIVE"
+curl -m 15 https://<project-ref>.supabase.co/auth/v1/health   # silence, not an HTTP error
+```
+
+Then open the project in the [Supabase dashboard](https://supabase.com/dashboard) and use **Restore
+project**. The CLI cannot do it — `supabase projects` has only `list`, `create`, `api-keys` and
+`delete`. Restoring keeps the same project ref, URL and API keys, so there is nothing to rotate and
+nothing to redeploy; sign in once afterwards to confirm.
+
+To avoid the next one: any activity within the week resets the timer, and paid tiers do not pause.
 
 ## Deployment
 
