@@ -1,7 +1,7 @@
 ---
 project: "Wulkanizator GO"
 version: 1
-status: draft
+status: reviewed
 created: 2026-06-03
 context_type: greenfield
 product_type: web-app
@@ -24,20 +24,25 @@ Istniejące systemy (ERP, CRM, kalendarze) są za skomplikowane dla warsztatu wu
 ## User & Persona
 
 ### Primary persona
+
 Właściciel małego warsztatu wulkanizacyjnego (1-5 stanowisk). Sam obsługuje klientów telefonicznie i osobiście, zarządza grafikiem, nadzoruje pracowników, przechowuje opony klientów. Sięga po system w momencie, gdy sezon się zaczyna i telefony nie przestają dzwonić — potrzebuje widzieć plan dnia bez Excela i kartek.
 
 ### Secondary persona
+
 Pracownik warsztatu (mechanik/wulkanizator). Konsumuje plan dnia — potrzebuje wiedzieć, co ma zrobić, w jakiej kolejności, i oznaczyć status: oczekuje, w trakcie, gotowe, nie przyjechał.
 
 ## Success Criteria
 
 ### Primary
+
 - Właściciel może skonfigurować warsztat (stanowiska, godziny, usługi), dodać wizytę w kilkanaście sekund z podpowiedzią wolnych terminów, i zobaczyć plan dnia ze statusami wszystkich wizyt — cały MVP flow działa end-to-end.
 
 ### Secondary
+
 - Przechowalnia opon: właściciel może przyjąć opony klienta i śledzić stan (kto ma opony, gdzie leżą).
 
 ### Guardrails
+
 - Wizyty nie mogą się nakładać — system blokuje slot na podstawie czasu trwania usługi i stanowiska. Dwie wizyty na tym samym stanowisku w tym samym czasie to regresja gorsza niż kartki.
 - Plan dnia musi być czytelny w 2 sekundy — jeden rzut oka i wiadomo co się dzieje. Jeśli trzeba szukać, to gorsze niż tablica.
 - Dane klientów (telefony, auta) nie mogą wyciec — podstawowa prywatność danych osobowych.
@@ -51,45 +56,90 @@ Pracownik warsztatu (mechanik/wulkanizator). Konsumuje plan dnia — potrzebuje 
 - **Then** system podpowiada najbliższe wolne terminy na podstawie czasu trwania usługi, właściciel wybiera slot, wizyta pojawia się na planie dnia ze statusem "oczekuje", slot jest automatycznie zablokowany na stanowisku
 
 #### Acceptance Criteria
+
 - Dodanie wizyty trwa max kilkanaście sekund
 - System podpowiada tylko wolne terminy (nie nakładające się z innymi wizytami na danym stanowisku)
 - Wizyta od razu widoczna na planie dnia z poprawnym statusem
 
-# TODO: additional user stories for remaining MVP flows (workshop setup, service configuration, status changes, day view) — see Open Questions
+### US-02: Właściciel konfiguruje warsztat przed pierwszą wizytą
+
+- **Given** zalogowany właściciel świeżo po rejestracji — warsztat, stanowiska, usługi i godziny pracy zostały założone z domyślnymi wartościami w momencie zakładania konta
+- **When** wchodzi w "Ustawienia" i poprawia dane warsztatu, listę stanowisk, listę usług z czasem trwania oraz godziny otwarcia dla każdego dnia tygodnia
+- **Then** zmiany są zapisane i od razu zasilają podpowiedzi wolnych terminów — usunięte stanowisko lub usługa znika z list wyboru, a dzień oznaczony jako zamknięty nie generuje żadnych slotów
+
+#### Acceptance Criteria
+
+- Droga od rejestracji do pierwszej wizyty mieści się w 30 minutach — konto startuje z domyślnym zestawem, który wystarczy poprawić, a nie zbudować od zera
+- Godzina otwarcia musi być wcześniejsza niż godzina zamknięcia; dzień wolny zaznacza się jednym przełącznikiem, bez podawania godzin
+- Usunięcie stanowiska lub usługi zdejmuje je z konfiguracji i z podpowiedzi, ale nie kasuje historycznych wizyt, które je referencują
+
+### US-03: Właściciel i pracownik widzą plan dnia w jednym widoku
+
+- **Given** zalogowany właściciel lub pracownik oraz wybrany dzień
+- **When** otwiera plan dnia
+- **Then** widzi wszystkie wizyty tego dnia w kolejności godzin — każda z godziną, imieniem klienta, usługą, stanowiskiem i kolorowym statusem — wraz z licznikami (wizyty / oczekuje / gotowe / nie przyjechał); kliknięcie wizyty otwiera jej szczegóły
+
+#### Acceptance Criteria
+
+- Plan dnia jest czytelny w 2 sekundy — jeden rzut oka wystarczy, żeby wiedzieć, co się dzieje (guardrail)
+- Filtry statusów zawężają listę bez przeładowania strony, a "Wszystkie" wraca do pełnego widoku
+- Wizyta bez kompletu powiązań (klient / usługa / stanowisko) jest pomijana, a nie wywraca całego widoku
+
+### US-04: Pracownik zmienia status wizyty przy stanowisku
+
+- **Given** zalogowany pracownik i wizyta ze statusem "oczekuje"
+- **When** dotyka przycisku statusu na kafelku planu dnia albo na stronie wizyty
+- **Then** status przesuwa się ścieżką oczekuje → w trakcie → gotowe (lub w bok na "nie przyjechał"), kafelek zmienia kolor natychmiast, a zmiana jest utrwalona w bazie
+
+#### Acceptance Criteria
+
+- Gdy zapis się nie powiedzie, kafelek wraca do stanu, który naprawdę jest w bazie, i pracownik dostaje komunikat o błędzie — plan dnia nigdy nie pokazuje statusu, którego baza nie ma (Ryzyko #1 w `context/foundation/test-plan.md`)
+- Przejście na "nie przyjechał" zwalnia slot w grafiku, ale wizyta zostaje w historii dnia
+- Przyciski są na tyle duże, żeby pracownik trafił w nie jedną ręką, bez odkładania narzędzi
 
 ## Functional Requirements
 
 ### Konfiguracja warsztatu
+
 - FR-001: Właściciel can zakłada konto warsztatu (nazwa, dane kontaktowe). Priority: must-have
+
   > Socrates: Counter-argument: "rejestracja wymaga za dużo danych i odstrasz przed startem." Resolution: kept; rejestracja musi być minimalna (nazwa, email, hasło), reszta danych w konfiguracji — nie blokować startu.
 
 - FR-002: Właściciel can konfiguruje stanowiska i godziny pracy warsztatu. Priority: must-have
+
   > Socrates: Counter-argument: "konfiguracja jest za trudna i blokuje start." Resolution: kept; konfiguracja musi być prosta i szybka — obietnica "start w 30 min" jest obowiązująca.
 
 - FR-003: Właściciel can dodaje usługi z czasem trwania (np. wymiana kół 30min, naprawa 20min). Priority: must-have
   > Socrates: Counter-argument: "stały czas trwania nie odzwierciedla rzeczywistości (SUV vs małe auto)." Resolution: kept; na MVP stały czas per usługa jest wystarczający, elastyczny czas (per typ auta) to ewentualnie v2.
 
 ### Plan dnia i wizyty
+
 - FR-004: Właściciel can dodaje wizytę — wybiera usługę, podaje dane klienta, system podpowiada wolne terminy. Priority: must-have
+
   > Socrates: Counter-argument: "podpowiadanie terminów spowalnia dodawanie wizyty — klient czeka na telefonie." Resolution: kept; podpowiedzi muszą być natychmiastowe i nie mogą blokować flow. Rozważyć opcję "dodaj teraz" dla walk-in klientów.
 
 - FR-005: System can automatycznie blokuje slot na stanowisku na podstawie czasu trwania wybranej usługi. Priority: must-have
+
   > Socrates: Counter-argument: "zbyt sztywne blokowanie — rzeczywistość jest elastyczna, usługa kończy się wcześniej lub później." Resolution: kept; automatyczne blokowanie jest core guardrail (zapobiega nakładaniu). Ręczny override do rozważenia w przyszłości.
 
 - FR-006: Właściciel/Pracownik can widzi plan dnia ze wszystkimi wizytami i ich statusami w jednym widoku. Priority: must-have
+
   > Socrates: Counter-argument: "pracownik nie potrzebuje widzieć wszystkich stanowisk — chce widzieć SWOJE zadania." Resolution: kept; jeden widok jest default, filtrowanie per stanowisko do rozważenia, ale nie blokuje MVP.
 
 - FR-007: Pracownik can zmienia status wizyty (oczekuje → w trakcie → gotowe / nie przyjechał). Priority: must-have
+
   > Socrates: Counter-argument: "pracownik zapomina zmieniać statusy (brudne ręce, nie sięga po telefon)." Resolution: kept; duże przyciski i prosty interface minimalizują barierę. Jeśli pracownik nie zmienia statusów, system traci wartość — ale to problem adopcji, nie FR.
 
 - FR-008: Właściciel can widzi szczegóły wizyty po wejściu w konkretną wizytę. Priority: must-have
   > Socrates: Counter-argument: "za dużo szczegółów do wypełnienia zaprzecza 'minimum pól'." Resolution: kept; szczegóły wizyty = podgląd, nie formularz. Minimum pól przy dodawaniu, więcej informacji przy podglądzie.
 
 ### Klienci
+
 - FR-009: Właściciel can zarządza bazą klientów — dodawanie, wyszukiwanie, karta klienta z telefonem i autem. Priority: must-have
   > Socrates: Counter-argument: "wymuszanie karty klienta spowalnia dodawanie wizyty dla jednorazowych klientów." Resolution: kept; wizyta musi być możliwa BEZ karty klienta (walk-in). Karta klienta to opcja, nie wymóg. Stały klient = karta, jednorazowy = imię + telefon.
 
 ### Przechowalnia opon
+
 - FR-010: Właściciel can przyjmuje opony klienta do przechowalni i śledzi stan (kto, gdzie leżą). Priority: nice-to-have
   > Socrates: Counter-argument: "przechowalnia to osobny moduł, który komplikuje MVP i może przeciążyć 3-tygodniowy timeline." Resolution: kept as nice-to-have; ryzyko timeline'u uznane. Jeśli nie zmieści się w 3 tygodniach, zostaje na v2.
 
@@ -108,9 +158,12 @@ Reguła recommendation: na wejściu — wybrana usługa (z czasem trwania), dzie
 
 Reguła workflow: wizyta przechodzi przez stany: oczekuje → w trakcie → gotowe / nie przyjechał. Każda zmiana statusu jest widoczna na planie dnia jako kolorowy kafelek. Przejście "nie przyjechał" zwalnia slot, ale nie kasuje wizyty z historii.
 
+Wizyty nie są usuwane — anulowanie jest stanem terminalnym, nie kasowaniem. Raz zapisana wizyta zostaje w historii dnia niezależnie od tego, jak się skończyła; statusy "nie przyjechał" i "anulowane" zwalniają slot, ale rekord pozostaje, bo warsztat musi móc odtworzyć, co się danego dnia wydarzyło. Z tego samego powodu stanowiska i usługi wycofuje się z użycia (znikają z konfiguracji i z podpowiedzi terminów), a nie kasuje — wizyty historyczne nadal się do nich odwołują.
+
 ## Access Control
 
 Login email + hasło. Dwie role:
+
 - **Właściciel** — pełen dostęp: plan dnia, ustawienia warsztatu (stanowiska, godziny pracy, usługi, cennik), baza klientów, przechowalnia opon, przychody i prognoza.
 - **Pracownik** — ograniczony dostęp: plan dnia (wizyty przypisane do stanowiska), zmiana statusu wizyty, podgląd szczegółów wizyty. Brak dostępu do przychodów, cennika, ustawień warsztatu.
 
@@ -123,4 +176,8 @@ Login email + hasło. Dwie role:
 
 ## Open Questions
 
-1. **Brakujące user stories dla pozostałych przepływów MVP** — Tylko US-01 (dodawanie wizyty) ma formalną strukturę Given/When/Then. Przepływy takie jak rejestracja warsztatu, konfiguracja usług, zmiana statusu wizyty, widok planu dnia nie mają formalnych user stories. Owner: user. Block: no (FRs pokrywają te przepływy, ale formalne stories ułatwią testowanie).
+1. **Przechowalnia opon (FR-010) i pełna karta klienta (FR-009) — v2 czy wypadają?** — Oba są zaparkowane poza MVP jako slice'y S-05 i S-06 (`context/foundation/roadmap.md` §Parked); łańcuch zależności został zachowany, więc można je podjąć bez przepisywania. Owner: user. Block: no (MVP zamyka się bez nich).
+
+Rozstrzygnięte:
+
+- ~~**Brakujące user stories dla pozostałych przepływów MVP**~~ — zamknięte 2026-09-11: US-02, US-03 i US-04 dopisane wstecznie, po dostarczeniu tych przepływów (slice'y S-01, S-03 i S-04 w `roadmap.md`).
