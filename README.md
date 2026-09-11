@@ -1,8 +1,17 @@
-# 10x Astro Starter
+# Wulkanizator GO
 
-![](./public/template.png)
+Warsztaty wulkanizacyjne prowadzą dzień pracy na kartkach i w Excelu: w sezonie telefony nie
+przestają dzwonić, terminy się mylą, a nikt nie wie, na którym stanowisku stoi które auto.
+Istniejące kalendarze i systemy ERP są na to za ciężkie — wdrożenie trwa dłużej niż sezon.
 
-A modern, opinionated starter template for building fast, accessible web applications.
+Wulkanizator GO działa jak lista zadań na dziś. Właściciel konfiguruje warsztat (stanowiska,
+godziny pracy, usługi z czasem trwania), dodaje wizytę w kilkanaście sekund wybierając z
+podpowiedzianych wolnych terminów, a cały zespół widzi plan dnia ze statusami wizyt —
+oczekuje, w trakcie, gotowe, nie przyjechał. Dwie wizyty na tym samym stanowisku w tym samym
+czasie są niemożliwe: blokuje je zarówno wyliczanie slotów, jak i ograniczenie w bazie.
+
+Pełny opis problemu, person, kryteriów sukcesu i zakresu MVP: [`context/foundation/prd.md`](./context/foundation/prd.md).
+Sekwencja dostarczania i status poszczególnych slice'ów: [`context/foundation/roadmap.md`](./context/foundation/roadmap.md).
 
 ## Tech Stack
 
@@ -23,8 +32,8 @@ A modern, opinionated starter template for building fast, accessible web applica
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+git clone https://github.com/tomskoczewski/wulkanizator-go.git
+cd wulkanizator-go
 ```
 
 2. Install dependencies:
@@ -64,11 +73,18 @@ npm run dev
 ```md
 .
 ├── src/
+│ ├── pages/ # Astro pages (SSR)
+│ │ └── api/ # API endpoints (uppercase GET/POST/PATCH exports)
+│ ├── components/ # UI (Astro static + React islands, shadcn/ui in ui/)
 │ ├── layouts/ # Astro layouts
-│ ├── pages/ # Astro pages
-│ │ └── api/ # API endpoints
-│ ├── components/ # UI components (Astro & React)
-│ └── assets/ # Static assets
+│ ├── lib/ # services/ (business logic), schemas/ (zod), auth-guard, workshop-clock
+│ ├── db/ # database.types.ts — generated, see npm run db:types
+│ ├── styles/ # global styles
+│ ├── middleware.ts # session + route guard on every request
+│ └── types.ts # shared entity and DTO types
+├── supabase/ # migrations/, seed.sql, tests/ (pgTAP RLS suite)
+├── e2e/ # Playwright specs + support helpers
+├── context/ # foundation docs (PRD, roadmap, test plan) and change history
 ├── public/ # Public assets
 ├── wrangler.jsonc # Cloudflare Workers config
 ```
