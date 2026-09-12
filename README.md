@@ -15,7 +15,7 @@ Sekwencja dostarczania i status poszczególnych slice'ów: [`context/foundation/
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v6 - Modern web framework with server-first rendering
+- [Astro](https://astro.build/) v7 - Modern web framework with server-first rendering
 - [React](https://react.dev/) v19 - UI library for interactive components
 - [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
 - [Tailwind CSS](https://tailwindcss.com/) v4 - Utility-first CSS framework
@@ -50,7 +50,15 @@ npm install
 cp .env.example .dev.vars
 ```
 
-5. Run the development server:
+5. Install the git hooks (lint/format/typecheck/test on commit, types-drift check on push). `lefthook`
+   is a standalone binary, not an npm dependency, so a fresh clone has no hooks until you do this:
+
+```bash
+brew install lefthook   # or see github.com/evilmartians/lefthook for other platforms
+lefthook install
+```
+
+6. Run the development server:
 
 ```bash
 npm run dev
@@ -186,7 +194,7 @@ npm run db:types    # regenerate src/db/database.types.ts from the local schema
 npm run db:stop     # stop the local stack
 ```
 
-Run `npm run db:types` after every migration and commit the result — `npm run typecheck` checks application code against the _committed_ types, not the live database, so a stale file is a silent gap. The pre-push hook (`.husky/pre-push`) regenerates and diffs the file before every push, and skips cleanly if the local stack isn't running.
+Run `npm run db:types` after every migration and commit the result — `npm run typecheck` checks application code against the _committed_ types, not the live database, so a stale file is a silent gap. The lefthook `pre-push` job (`lefthook.yml`) regenerates and diffs the file before every push, and skips cleanly if the local stack isn't running.
 
 ### Creating a worker account
 

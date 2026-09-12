@@ -1,6 +1,6 @@
 # Repository Guidelines
 
-wulkanizator-go is an Astro 6 SSR app with React 19 islands, Tailwind 4, Supabase auth, and shadcn/ui deployed to Cloudflare Workers.
+wulkanizator-go is an Astro 7 SSR app with React 19 islands, Tailwind 4, Supabase auth, and shadcn/ui deployed to Cloudflare Workers.
 
 ## Hard Rules
 
@@ -8,7 +8,7 @@ wulkanizator-go is an Astro 6 SSR app with React 19 islands, Tailwind 4, Supabas
 - Use Astro components for static content; React only when client interactivity is required.
 - Use `cn()` from `@/lib/utils` for all Tailwind class merging — never concatenate class strings manually.
 - Never add Next.js directives (`"use client"`, etc.) to React components.
-- Every new Supabase table must enable RLS with per-operation, per-role policies. Tables that belong to a workshop carry a `workshop_id` column and scope every policy with `public.current_workshop_id()`; role checks use `public.current_user_role()`. Regenerate `src/db/database.types.ts` with `npm run db:types` after every migration — the pre-push hook (`.husky/pre-push`) catches drift when it does.
+- Every new Supabase table must enable RLS with per-operation, per-role policies. Tables that belong to a workshop carry a `workshop_id` column and scope every policy with `public.current_workshop_id()`; role checks use `public.current_user_role()`. Regenerate `src/db/database.types.ts` with `npm run db:types` after every migration — the lefthook `pre-push` job (`lefthook.yml`) catches drift when it does.
 - API route handlers must use uppercase exports (`GET`, `POST`) — Astro silently ignores lowercase-named exports.
 - Route access rules live in `src/lib/auth-guard.ts`'s route table — never gate a route ad hoc inside a page or API route. Protected `/api/` paths are declared in the same table like any other route; the middleware answers a failed guard on `/api/*` with `401`/`403` JSON (never a redirect), so a `fetch()` caller gets a parseable error instead of followed HTML.
 - Appointment and other domain times are naive workshop-local wall-clock (`timestamp`, not `timestamptz`) — `src/lib/workshop-clock.ts` is the only module permitted to convert between an instant and workshop-local parts. Reach for it (or extend it) rather than calling `Intl.DateTimeFormat`/`new Date()` local-field accessors elsewhere; on any naive `Date`, use the `getUTC*` accessors, never `getDate()`/`getHours()`/etc.
@@ -24,7 +24,7 @@ See @README.md for all available scripts.
 
 Unit tests use Vitest (`npm test` / `npm run test:watch`), colocated as `*.test.ts` next to the module under test. Pure business logic in `src/lib/services/` is expected to carry them — see `src/lib/services/slot-suggestions.ts` / `.test.ts` for the pattern. React island components carry colocated `*.test.tsx` tests instead, opted into the `happy-dom` environment per file via a `// @vitest-environment happy-dom` docblock — see `src/components/appointments/DayPlanBoard.test.tsx` and `context/foundation/test-plan.md` §6.4 for the full recipe.
 
-Pre-commit: lint-staged runs `eslint --fix` on `*.{ts,tsx,astro}` and `prettier --write` on `*.{json,css,md}`.
+Pre-commit (lefthook, `lefthook.yml`): `eslint --fix` on staged `*.{ts,tsx,astro}`, `prettier --write` on staged `*.{json,css,md}`, plus `npm run typecheck` and `vitest related` on the staged files. Hooks come from a locally installed `lefthook` binary — run `lefthook install` once per clone, or the hooks are simply absent.
 
 ## Coding Style & Conventions
 
