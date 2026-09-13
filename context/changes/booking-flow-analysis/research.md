@@ -250,7 +250,7 @@ Nothing connects those four places — not the import graph, not the type system
 Drift fails **open** (a slot is offered that Postgres rejects — degraded to a mysterious "termin właśnie
 zajęty") or **closed and silent** (a legal slot is never offered; no error, no failing test) **[I]**.
 
-### TD-2 · Five rules exist only in an untested TypeScript preflight — [E]
+### TD-2 · Six rules exist only in an untested TypeScript preflight — [E]
 
 Per the enforcement table above, working hours, closed days, grid alignment, "not in the past", the
 14-day horizon and the duration↔`ends_at` relation have **no database backstop**. Their single point of
