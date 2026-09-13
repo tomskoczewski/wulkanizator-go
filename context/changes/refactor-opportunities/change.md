@@ -1,9 +1,9 @@
 ---
 change_id: refactor-opportunities
 title: Rank the booking flow's technical debt into refactor opportunities
-status: preparing
+status: plan_reviewed
 created: 2026-09-12
-updated: 2026-09-12
+updated: 2026-09-13
 archived_at: null
 ---
 
